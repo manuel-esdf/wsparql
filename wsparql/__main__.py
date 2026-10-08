@@ -3,7 +3,7 @@ import os
 import sys
 import urllib.error
 
-from wsparql import evaluate, ollaya
+from wsparql import evaluate, ollaya, pipeline
 from wsparql.profile import Profile
 from wsparql.store import Store
 
@@ -29,6 +29,8 @@ def main():
     s.add_argument("query_id", nargs="?")
     t = sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag)")
     t.add_argument("question")
+    c = sub.add_parser("candidates", help="detect tags, then rank catalog queries by tag overlap (top 3)")
+    c.add_argument("question")
     sub.add_parser("tags-test", help="detect tags for every tests/tag-questions.csv question, append rows to profile.db")
     args = p.parse_args()
     prof = Profile(args.profile)
@@ -42,6 +44,12 @@ def main():
     elif args.cmd == "tags":
         probs = call_ollaya(ollaya.detect_tags, args.question, prof.tags)
         print_table(["tag", "prob"], [[t, f"{v:.2f}"] for t, v in probs.items()])
+    elif args.cmd == "candidates":
+        probs = call_ollaya(ollaya.detect_tags, args.question, prof.tags)
+        print_table(["tag", "prob"], [[t, f"{v:.2f}"] for t, v in probs.items() if v >= 0.5])
+        print()
+        print_table(["candidate", "score", "description"],
+                    [[q, f"{s:.2f}", prof.catalog[q]["description"]] for q, s in pipeline.candidates(probs, prof.catalog)])
     elif args.cmd == "tags-test":
         store = Store(prof.db_path)
         run = call_ollaya(evaluate.run_tag_questions, prof, store, ollaya.MODEL)
