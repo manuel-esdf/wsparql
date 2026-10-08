@@ -51,9 +51,9 @@ def extract_period(text):
 
 
 def extract_params(question, names, acronyms, ask=ollaya.decide):
-    """Values for the named query parameters. Returns (found {name: value}, missing [name]).
-    acronym: one Ollaya choice over the ABOX acronyms plus none; from/to: extract_period."""
-    found = {}
+    """Values for the named query parameters. Returns (found {name: value}, how {name: one-line explanation});
+    a name absent from `found` is missing. acronym: one Ollaya choice over the ABOX acronyms plus none; from/to: extract_period."""
+    found, how = {}, {}
     if "acronym" in names:
         criteria = {a: f"The question is about the project {a}" for a in acronyms}
         criteria[NONE] = "The question names no specific project"
@@ -61,8 +61,13 @@ def extract_params(question, names, acronyms, ask=ollaya.decide):
                                        "criteria": criteria}})["acronym"]
         if a["choice"] != NONE and a["confidence"] >= MIN_CONFIDENCE:
             found["acronym"] = a["choice"]
+            how["acronym"] = f"Ollaya choice over {len(acronyms)} ABOX projects + none, confidence {a['confidence']:.2f}"
+        else:
+            how["acronym"] = f"Ollaya choice over {len(acronyms)} ABOX projects + none: {a['choice']} ({a['confidence']:.2f}, min {MIN_CONFIDENCE})"
     if {"from", "to"} & set(names):
         period = extract_period(question)
         if period:
             found["from"], found["to"] = period
-    return found, [n for n in names if n not in found]
+        note = "regex: quarter, month name or year in the question" if period else "regex: no quarter, month name or year in the question"
+        how.update({n: note for n in ("from", "to") if n in names})
+    return found, how

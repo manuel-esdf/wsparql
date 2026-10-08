@@ -65,10 +65,12 @@ class ParamsTest(unittest.TestCase):
         return lambda question, questions: {"acronym": {"choice": choice, "confidence": confidence, "probabilities": {}}}
 
     def test_found_and_missing(self):
-        self.assertEqual(extract_params("List LUMEN expenses for Q1 2026", self.NAMES, ["GRAPHIA", "LUMEN"], self.ask("LUMEN", 0.9)),
-                         ({"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"}, []))
-        self.assertEqual(extract_params("Spending overview please.", self.NAMES, ["LUMEN"], self.ask("none", 0.9)), ({}, self.NAMES))
-        self.assertEqual(extract_params("q", ["acronym"], ["LUMEN"], self.ask("LUMEN", 0.2)), ({}, ["acronym"]))
+        found, how = extract_params("List LUMEN expenses for Q1 2026", self.NAMES, ["GRAPHIA", "LUMEN"], self.ask("LUMEN", 0.9))
+        self.assertEqual(found, {"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"})
+        self.assertEqual(sorted(how), self.NAMES)  # one explanation per requested parameter
+        found, how = extract_params("Spending overview please.", self.NAMES, ["LUMEN"], self.ask("none", 0.9))
+        self.assertEqual((found, sorted(how)), ({}, self.NAMES))
+        self.assertEqual(extract_params("q", ["acronym"], ["LUMEN"], self.ask("LUMEN", 0.2))[0], {})
 
 
 class BindingsTest(unittest.TestCase):

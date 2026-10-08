@@ -35,7 +35,7 @@ candidates: profile-check ## rank top 3 queries for Q; tags from the last tags-c
 select: profile-check ## rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question
 	@$(RUN) select "$(Q)"
 
-params: profile-check ## extract query parameters from a question (acronym via Ollaya choice, dates via regex): make params Q="List LUMEN expenses for Q1 2026"
+params: profile-check ## extract the query parameters found in Q: acronym (Ollaya choice over ABOX projects + none), from/to (regex: quarter, month, year); shows every catalog parameter, how it was found and which queries need it
 	@$(RUN) params "$(Q)"
 
 eval: profile-check ## route every tests/test-questions.yaml question that has an expected_query, N/M, exit 1 on any mismatch (minutes on winnow)

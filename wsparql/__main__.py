@@ -22,11 +22,10 @@ def call_ollaya(fn, *args):
 
 
 def question_or_default(p, prof, question):
-    if question and question.strip():
-        return question
-    if not prof.test_questions:
-        p.error("no question supplied and profile tests/test-questions.yaml has no questions")
-    question = prof.test_questions[0]["question"]
+    if not question or not question.strip():
+        if not prof.test_questions:
+            p.error("no question supplied and profile tests/test-questions.yaml has no questions")
+        question = prof.test_questions[0]["question"]
     print(f"Q: {question}", flush=True)
     return question
 
@@ -54,7 +53,7 @@ def main():
     c.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
     sl = sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)")
     sl.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
-    pa = sub.add_parser("params", help="extract every catalog-declared query parameter from a question (acronym via Ollaya choice, dates via regex)")
+    pa = sub.add_parser("params", help="extract the query parameters found in a question: acronym (Ollaya choice over ABOX projects + none), from/to (regex); lists every catalog parameter and the queries needing it")
     pa.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
     sub.add_parser("eval", help="route every tests/test-questions.yaml question that has an expected_query; exit 1 on any mismatch")
     sub.add_parser("tags-cache", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
@@ -102,9 +101,11 @@ def main():
               else f"no suitable query (choice {best} {conf:.2f}, min confidence {pipeline.MIN_CONFIDENCE})")
     elif args.cmd == "params":
         question = question_or_default(p, prof, args.question)
-        names = sorted({n for q in prof.catalog.values() for n in q.get("params", {})})
-        found, _ = call_ollaya(pipeline.extract_params, question, names, prof.acronyms)
-        print_table(["param", "value"], [[n, found.get(n, "-")] for n in names])
+        needed_by = {n: [qid for qid, q in prof.catalog.items() if n in q.get("params", {})]
+                     for n in sorted({n for q in prof.catalog.values() for n in q.get("params", {})})}
+        found, how = call_ollaya(pipeline.extract_params, question, list(needed_by), prof.acronyms)
+        print_table(["param", "value", "how", "needed by"],
+                    [[n, found.get(n, "-"), how[n], ", ".join(qids)] for n, qids in needed_by.items()])
     elif args.cmd == "eval":
         labeled = [q for q in prof.test_questions if "expected_query" in q]
         ok = 0
