@@ -24,7 +24,7 @@ profile-check: ## mandatory profile files present in $(PROFILE); every catalog q
 	@echo "profile $(notdir $(PROFILE)) $$(cat $(PROFILE)/VERSION) OK"
 
 sparql: profile-check ## run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
-	@$(RUN) sparql $(Q) $(ARGS)
+	@$(RUN) sparql "$(Q)" $(ARGS)
 
 tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"; no Q = first tests/test-questions.yaml question
 	@$(RUN) tags "$(Q)"

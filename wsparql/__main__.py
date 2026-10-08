@@ -64,8 +64,15 @@ def main():
 
     if args.cmd == "sparql":
         if args.query_id:
+            if args.query_id not in prof.queries:
+                p.error(f"unknown query id {args.query_id!r}; one of: {', '.join(prof.queries)}")
+            declared = prof.catalog[args.query_id].get("params", {})
+            if bad := [b for b in args.bindings if "=" not in b]:
+                p.error(f"ARGS must be param=value pairs, got {' '.join(bad)!r}")
             given = dict(b.split("=", 1) for b in args.bindings)
-            params = {**prof.catalog[args.query_id].get("params", {}), **given}
+            if unknown := set(given) - set(declared):
+                p.error(f"{args.query_id} takes {', '.join(declared) or 'no parameters'}, not {', '.join(sorted(unknown))}")
+            params = {**declared, **given}
             if params:
                 print("params: " + " ".join(f"{k}={v}" for k, v in params.items()) + ("" if given else " (catalog example)"))
             print_table(*prof.run(args.query_id, params))
