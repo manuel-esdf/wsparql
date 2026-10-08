@@ -1,11 +1,23 @@
 OLLAYA_HOST  ?= 127.0.0.1:11435
 OLLAYA_MODEL ?= winnow
+PROFILE      ?= profile/eu-expense-poc
+export OLLAYA_HOST OLLAYA_MODEL PROFILE
+RUN = uv run python -m wsparql
 
 .DEFAULT_GOAL := help
-.PHONY: help ollaya-check ollaya-smoke-test
+.PHONY: help install sparql sparql-all ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
+
+install: ## uv sync (creates .venv with rdflib + pyyaml)
+	uv sync
+
+sparql: ## run one catalog query on the ABOX: make sparql Q=q01-total-expenses-by-project
+	@$(RUN) sparql $(Q)
+
+sparql-all: ## run all catalog queries, print row counts
+	@$(RUN) sparql
 
 ollaya-check: ## prerequisites: uv, ollaya binary, server up, model pulled
 	@command -v uv >/dev/null     || { echo "MISSING uv -> https://docs.astral.sh/uv/"; exit 1; }
