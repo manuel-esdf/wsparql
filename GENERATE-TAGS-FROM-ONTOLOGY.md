@@ -27,6 +27,7 @@ names are free to differ from the old ones.
 | Query tags | `make query-tags` | Ollaya `noul` per tag on each catalog query `description` | table `query_tags` |
 | Question tags | `make tags-cache`, `make ask` | Ollaya `noul` per tag on the question | table `tag_cache` |
 | Candidates | `make candidates` | unchanged: mean question-tag probability over the query's tags, top 3 | |
+| Baseline without tags | `make eval-direct` | one Ollaya `choice` over the raw SPARQL text of all 10 queries + `none`, then parameters and run | printed only |
 
 A query's tag list is the set of tags with probability ≥ 0.5 in `query_tags`; the probabilities are kept, so the
 threshold can change without calling Ollaya again. `select`, `params` and `sparql` read descriptions and the ABOX, not tags,
@@ -125,6 +126,21 @@ misses were at the selection stage, on questions naming a project, and went away
 `pipeline.select` said that the queries are templates whose parameters are filled in afterwards (details in the README).
 Ollaya's `noul` answers are reproducible: the nine untouched descriptions got identical probabilities in every
 `make query-tags` run.
+
+`make eval-direct`, the baseline without tags (one `choice` over the raw `.rq` text of all 10 queries plus `none`, no
+dictionary, no query tags, no candidates): also **35/40**, with other misses.
+
+| method | misses (q_id) | the other method on them |
+|---|---|---|
+| tags → 3 candidates → choice over descriptions | 2, 5, 6, 16, 19, all answered `none` | direct gets 2, 6, 16, 19 right |
+| direct choice over the raw SPARQL | 5, 21, 23, 26, 54, all answered `none` | tags get 21, 23, 26, 54 right |
+
+Only q_id 5, "What did OPENSCIENCE spend on equipment?", fails in both. The 7 off-topic questions get `none` in both.
+So on this set a fallback, direct choice whenever the tag pipeline answers `none`, would score 39/40: the fallback
+triggers on the 5 tag misses (all `none`) and on the 7 off-topic questions, and the direct method answers those 12 as
+the labels expect. It is one extra `choice` per `none` answer, and it only helps while the tag misses are `none` rather
+than a wrong query. The tag stage therefore buys no accuracy here; it buys explainability (tag and candidate tables) and a
+choice over 3 short descriptions instead of 10 full queries, which matters once the catalog outgrows one `choice`.
 
 ## Storage
 
