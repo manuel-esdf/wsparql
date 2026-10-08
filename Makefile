@@ -5,7 +5,7 @@ export OLLAYA_HOST OLLAYA_MODEL PROFILE
 RUN = uv run python -m wsparql
 
 .DEFAULT_GOAL := help
-.PHONY: help install sparql ollaya-check ollaya-smoke-test
+.PHONY: help install sparql tags ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -15,6 +15,9 @@ install: ## uv sync (creates .venv with rdflib + pyyaml)
 
 sparql: ## run a catalog query on the ABOX (make sparql Q=q01-total-expenses-by-project); no Q = all queries, row counts only
 	@$(RUN) sparql $(Q)
+
+tags: ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"
+	@$(RUN) tags "$(Q)"
 
 ollaya-check: ## prerequisites: uv, ollaya binary, server up, model pulled
 	@command -v uv >/dev/null     || { echo "MISSING uv -> https://docs.astral.sh/uv/"; exit 1; }
