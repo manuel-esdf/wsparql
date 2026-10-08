@@ -1,0 +1,8 @@
+PREFIX ex: <https://example.org/eu-expense#>
+SELECT ?employee ?employeeName (SUM(?amount) AS ?total)
+WHERE {
+  ?expense a ex:Expense ; ex:employee ?employee ; ex:amount ?amount .
+  ?employee ex:name ?employeeName .
+}
+GROUP BY ?employee ?employeeName
+ORDER BY DESC(?total)

@@ -1,0 +1,13 @@
+PREFIX ex: <https://example.org/eu-expense#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT ?expense ?description ?date ?amount
+WHERE {
+  ?expense a ex:Expense ;
+           ex:chargedToProject ?project ;
+           ex:description ?description ;
+           ex:expenseDate ?date ;
+           ex:amount ?amount .
+  ?project ex:acronym "LUMEN" .
+  FILTER(?date >= "2026-01-01"^^xsd:date && ?date <= "2026-03-31"^^xsd:date)
+}
+ORDER BY ?date

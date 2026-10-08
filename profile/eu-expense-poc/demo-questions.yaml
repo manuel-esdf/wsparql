@@ -1,0 +1,21 @@
+questions:
+  - question: "Which European project has spent the most money?"
+    expected_query: q01-total-expenses-by-project
+  - question: "How are LUMEN expenses distributed by cost category?"
+    expected_query: q02-project-expense-breakdown
+  - question: "How much did we spend on travel for each project?"
+    expected_query: q03-travel-expenses-by-project
+  - question: "What is the spending by work package?"
+    expected_query: q04-expenses-by-work-package
+  - question: "How much budget remains on each project?"
+    expected_query: q05-budget-vs-spent
+  - question: "Show me the ineligible expenses"
+    expected_query: q06-ineligible-expenses
+  - question: "Which employee has the highest expenses?"
+    expected_query: q07-expenses-by-employee
+  - question: "Which suppliers cost us the most?"
+    expected_query: q08-expenses-by-supplier
+  - question: "How have our expenses evolved month by month?"
+    expected_query: q09-monthly-expenses
+  - question: "List LUMEN expenses for Q1 2026"
+    expected_query: q10-project-expenses-in-period

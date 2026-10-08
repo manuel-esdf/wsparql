@@ -1,0 +1,7 @@
+PREFIX ex: <https://example.org/eu-expense#>
+SELECT ?expense ?description ?amount ?acronym
+WHERE {
+  ?expense a ex:Expense ; ex:eligible false ; ex:description ?description ; ex:amount ?amount ; ex:chargedToProject ?project .
+  ?project ex:acronym ?acronym .
+}
+ORDER BY DESC(?amount)

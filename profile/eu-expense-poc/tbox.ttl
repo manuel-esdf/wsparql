@@ -1,0 +1,73 @@
+@prefix ex: <https://example.org/eu-expense#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:EuExpenseOntology a owl:Ontology .
+
+# Core classes
+ex:Company a owl:Class ; rdfs:label "Company" .
+ex:EuropeanProject a owl:Class ; rdfs:label "European project" .
+ex:WorkPackage a owl:Class ; rdfs:label "Work package" .
+ex:Employee a owl:Class ; rdfs:label "Employee" .
+ex:Supplier a owl:Class ; rdfs:label "Supplier" .
+ex:Expense a owl:Class ; rdfs:label "Expense" .
+ex:ExpenseCategory a owl:Class ; rdfs:label "Expense category" .
+
+# Object properties
+ex:participatesIn a owl:ObjectProperty ;
+  rdfs:domain ex:Company ; rdfs:range ex:EuropeanProject ;
+  rdfs:label "participates in" .
+
+ex:hasWorkPackage a owl:ObjectProperty ;
+  rdfs:domain ex:EuropeanProject ; rdfs:range ex:WorkPackage ;
+  rdfs:label "has work package" .
+
+ex:belongsToProject a owl:ObjectProperty ;
+  rdfs:domain ex:WorkPackage ; rdfs:range ex:EuropeanProject ;
+  rdfs:label "belongs to project" .
+
+ex:incurredBy a owl:ObjectProperty ;
+  rdfs:domain ex:Expense ; rdfs:range ex:Company ;
+  rdfs:label "incurred by" .
+
+ex:chargedToProject a owl:ObjectProperty ;
+  rdfs:domain ex:Expense ; rdfs:range ex:EuropeanProject ;
+  rdfs:label "charged to project" .
+
+ex:chargedToWorkPackage a owl:ObjectProperty ;
+  rdfs:domain ex:Expense ; rdfs:range ex:WorkPackage ;
+  rdfs:label "charged to work package" .
+
+ex:category a owl:ObjectProperty ;
+  rdfs:domain ex:Expense ; rdfs:range ex:ExpenseCategory ;
+  rdfs:label "expense category" .
+
+ex:employee a owl:ObjectProperty ;
+  rdfs:domain ex:Expense ; rdfs:range ex:Employee ;
+  rdfs:label "related employee" .
+
+ex:supplier a owl:ObjectProperty ;
+  rdfs:domain ex:Expense ; rdfs:range ex:Supplier ;
+  rdfs:label "supplier" .
+
+# Datatype properties
+ex:name a owl:DatatypeProperty ; rdfs:range xsd:string .
+ex:acronym a owl:DatatypeProperty ; rdfs:range xsd:string .
+ex:grantAgreement a owl:DatatypeProperty ; rdfs:range xsd:string .
+ex:startDate a owl:DatatypeProperty ; rdfs:range xsd:date .
+ex:endDate a owl:DatatypeProperty ; rdfs:range xsd:date .
+ex:budget a owl:DatatypeProperty ; rdfs:range xsd:decimal .
+ex:amount a owl:DatatypeProperty ; rdfs:range xsd:decimal .
+ex:expenseDate a owl:DatatypeProperty ; rdfs:range xsd:date .
+ex:description a owl:DatatypeProperty ; rdfs:range xsd:string .
+ex:eligible a owl:DatatypeProperty ; rdfs:range xsd:boolean .
+ex:country a owl:DatatypeProperty ; rdfs:range xsd:string .
+
+# Expense category individuals
+ex:Personnel a ex:ExpenseCategory ; ex:name "Personnel" .
+ex:Travel a ex:ExpenseCategory ; ex:name "Travel" .
+ex:Equipment a ex:ExpenseCategory ; ex:name "Equipment" .
+ex:Subcontracting a ex:ExpenseCategory ; ex:name "Subcontracting" .
+ex:OtherGoodsServices a ex:ExpenseCategory ; ex:name "Other goods and services" .

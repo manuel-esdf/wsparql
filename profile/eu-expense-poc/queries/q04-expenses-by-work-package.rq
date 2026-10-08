@@ -1,0 +1,8 @@
+PREFIX ex: <https://example.org/eu-expense#>
+SELECT ?wp ?wpName (SUM(?amount) AS ?total)
+WHERE {
+  ?expense a ex:Expense ; ex:chargedToWorkPackage ?wp ; ex:amount ?amount .
+  ?wp ex:name ?wpName .
+}
+GROUP BY ?wp ?wpName
+ORDER BY DESC(?total)

@@ -1,0 +1,9 @@
+PREFIX ex: <https://example.org/eu-expense#>
+SELECT ?year ?month (SUM(?amount) AS ?total)
+WHERE {
+  ?expense a ex:Expense ; ex:expenseDate ?date ; ex:amount ?amount .
+  BIND(YEAR(?date) AS ?year)
+  BIND(MONTH(?date) AS ?month)
+}
+GROUP BY ?year ?month
+ORDER BY ?year ?month
