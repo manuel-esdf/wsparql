@@ -1,4 +1,4 @@
-"""Decision pipeline: detected tags -> ranked candidate queries -> Ollaya selects one or none -> query parameters."""
+"""Decision pipeline: detected tags -> ranked candidate queries -> Ollaya selects one or none -> query parameters -> result."""
 import calendar
 import re
 
@@ -71,3 +71,21 @@ def extract_params(question, names, acronyms, ask=ollaya.decide):
         note = "regex: quarter, month name or year in the question" if period else "regex: no quarter, month name or year in the question"
         how.update({n: note for n in ("from", "to") if n in names})
     return found, how
+
+
+def answer(question, tag_probs, prof, ask=ollaya.decide):
+    """Rank, select, extract the selected query's parameters, run it. Returns the demo blocks:
+    {question, tags, candidates, selected, confidence, probabilities, params, how, missing, result};
+    selected None = no suitable query; missing = declared params not found (query not run); result = (cols, rows) or None."""
+    ranked = candidates(tag_probs, prof.catalog)
+    qid, conf, prob = select(question, ranked, prof.catalog, ask)
+    out = dict(question=question, tags=tag_probs, candidates=ranked, selected=qid, confidence=conf,
+               probabilities=prob, params={}, how={}, missing=[], result=None)
+    if qid:
+        names = list(prof.catalog[qid].get("params", {}))
+        if names:
+            out["params"], out["how"] = extract_params(question, names, prof.acronyms, ask)
+        out["missing"] = [n for n in names if n not in out["params"]]
+        if not out["missing"]:
+            out["result"] = prof.run(qid, out["params"])
+    return out

@@ -2,7 +2,7 @@
 import os
 import unittest
 
-from wsparql.pipeline import candidates, extract_params, extract_period, select
+from wsparql.pipeline import answer, candidates, extract_params, extract_period, select
 from wsparql.profile import Profile
 
 CATALOG = {
@@ -80,3 +80,23 @@ class BindingsTest(unittest.TestCase):
         self.assertEqual(prof.acronyms, ["GRAPHIA", "LUMEN", "OPENSCIENCE"])
         self.assertEqual(len(prof.run(q, {"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"})[1]), 6)  # the old hard-coded query
         self.assertEqual(len(prof.run(q, {"acronym": "GRAPHIA", "from": "2026-01-01", "to": "2026-06-30"})[1]), 3)
+
+
+class AnswerTest(unittest.TestCase):
+    Q10 = "q10-project-expenses-in-period"
+    PROBS = {t: 1.0 for t in ["expense", "project", "time", "date-range", "list"]}
+
+    def ask(self, choice, acronym="LUMEN"):
+        """Stub for ollaya.decide answering whichever choice question is asked."""
+        answers = {"select": choice, "acronym": acronym}
+        return lambda question, questions: {k: {"choice": answers[k], "confidence": 0.9, "probabilities": {}} for k in questions}
+
+    def test_select_params_run(self):
+        prof = Profile(os.environ["PROFILE"])
+        out = answer("List LUMEN expenses for Q1 2026", self.PROBS, prof, self.ask(self.Q10))
+        self.assertEqual((out["selected"], out["params"], out["missing"]), (self.Q10, {"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"}, []))
+        self.assertEqual(len(out["result"][1]), 6)
+        out = answer("List LUMEN expenses", self.PROBS, prof, self.ask(self.Q10))
+        self.assertEqual((out["missing"], out["result"]), (["from", "to"], None))
+        out = answer("What is the weather in Brussels?", self.PROBS, prof, self.ask("none"))
+        self.assertEqual((out["selected"], out["params"], out["result"]), (None, {}, None))

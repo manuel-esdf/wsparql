@@ -6,7 +6,7 @@ RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml tests/test-questions.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help install test profile-check sparql tags candidates select params eval tags-cache ollaya-check ollaya-smoke-test
+.PHONY: help install test profile-check sparql tags candidates select params ask demo eval tags-cache ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -38,7 +38,13 @@ select: profile-check ## rank candidates, then Ollaya picks the best query or no
 params: profile-check ## extract the query parameters found in Q (acronym: Ollaya choice over ABOX projects + none; from/to: regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
 	@$(RUN) params "$(Q)"
 
-eval: profile-check ## route every tests/test-questions.yaml question that has an expected_query, N/M, exit 1 on any mismatch (minutes on winnow)
+ask: profile-check ## answer Q end to end: tags, candidates, selected query, parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
+	@$(RUN) ask "$(Q)"
+
+demo: profile-check ## make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
+	@$(RUN) demo
+
+eval: profile-check ## full chain on every tests/test-questions.yaml question that has an expected_query: expected query selected and returns rows, none answers "no suitable query"; N/M, exit 1 on any mismatch (minutes on winnow)
 	@$(RUN) eval
 
 tags-cache: profile-check ## detect tags for every tests/test-questions.yaml question with Ollaya, store in profile/profile.db (new run_id)

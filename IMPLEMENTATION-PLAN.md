@@ -140,14 +140,18 @@ Goal: the "Expected demo" section of the README, in one command. Prints the six
 blocks: question, tags + scores, candidates, selected query (+ confidence),
 parameters, result rows (or the "no suitable query" message).
 
-Files: `pipeline.py` (`ask(question) -> dict` chaining steps 2–5), `__main__.py`:
-`ask "<question>"`, `demo` (the labeled test questions, including the off-topic ones),
-`eval` extended to run the full chain and check the result is non-empty.
+Files: `pipeline.py` (`answer(question, tag_probs, prof) -> dict` chaining steps 3–5 and the
+execution; tags come from the cache or Ollaya as in `candidates`), `__main__.py`:
+`ask "<question>"`, `demo` (every `tests/test-questions.yaml` question with an `expected_query`,
+off-topic ones included), `eval` extended to the full chain: the expected query must be selected
+and return rows, `none` questions must answer "no suitable query" (a selected query with a
+missing parameter counts as "no suitable query (missing parameter X)").
 Makefile: `ask Q="..."`, `demo`.
 
 Manual test:
 
     make ask Q="Which European project has spent the most money?"
+    make ask Q="How are expenses distributed by cost category?"   # q02 selected, "no suitable query (missing parameter acronym)"
     make demo
     make eval      # POC success criterion: M/M routed, `none` questions answered "no suitable query"
 
