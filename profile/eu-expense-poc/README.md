@@ -11,6 +11,7 @@ Synthetic RDF dataset designed to demonstrate natural-language routing to predef
 - `query-catalog.yaml`: query descriptions and routing tags
 - `tags.yaml`: controlled tag dictionary
 - `demo-questions.yaml`: example natural-language questions with expected query IDs
+- `tests/tag-questions.txt`: 50 synthetic questions, one per line, for manual tag-detection evaluation
 
 ## Scenario
 
