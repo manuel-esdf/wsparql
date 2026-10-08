@@ -25,12 +25,12 @@ Commit e81241f.
 ## Step 1 — uv project + run catalog queries on the ABOX
 
 Goal: prove the data layer. Load `tbox.ttl` + `abox.ttl` into an rdflib graph,
-load `tags.yaml`, `query-catalog.yaml`, `demo-questions.yaml`, `queries/*.rq`.
+load `tags.yaml`, `query-catalog.yaml`, `tests/test-questions.yaml`, `queries/*.rq`.
 
 Files:
 - `pyproject.toml` (deps: rdflib, pyyaml), `.gitignore` (`.venv`, `__pycache__`; `uv.lock` kept)
 - `wsparql/__init__.py`, `wsparql/profile.py` (`load(profile_dir)` → one object with
-  `graph`, `tags`, `catalog`, `queries`, `demo_questions`; `run(query_id, **bindings)` → rows)
+  `graph`, `tags`, `catalog`, `queries`, `test_questions`; `run(query_id, **bindings)` → rows)
 - `wsparql/__main__.py` (argparse: `sparql <query-id>`)
 - Makefile: `install` (`uv sync`), `sparql Q=<id>` (no Q = all, row counts), `PROFILE ?= profile/eu-expense-poc`
 - `profile/<name>/VERSION` (semver) and Makefile `profile-check` (mandatory files + one `.rq` per catalog entry); `sparql`/`tags` depend on it
@@ -53,7 +53,7 @@ Files:
   (one `noul` question per tag, 19 tags in one call, sorted by prob desc)
 - `__main__.py`: `tags "<question>"` prints `tag  prob` table
 - Makefile: `tags Q="..."`
-- `tags-cache` (added later): detects tags for every `tests/tag-questions.csv` question and
+- `tags-cache` (added later): detects tags for every `tests/test-questions.yaml` question and
   caches them in `profile/profile.db` (git-ignored, shared by all profiles; `wsparql/cache.py`,
   sqlite3 table `tag_cache`, one `run_id` per `make tags-cache`)
 
@@ -95,15 +95,15 @@ or confidence < `MIN_CONFIDENCE` (0.4, module constant) → no suitable query.
 Files:
 - `pipeline.py`: `select(question, candidates, catalog) -> (qid | None, confidence, probabilities)`;
   tags come from the cache when the question is cached (as in `candidates`)
-- `__main__.py`: `select "<question>"`, and `eval` (runs all demo questions:
-  expected vs selected, prints a table and `N/10`, exit 1 if any mismatch)
+- `__main__.py`: `select "<question>"`, and `eval` (runs every `tests/test-questions.yaml`
+  question that has an `expected_query`, catalog id or `none`: expected vs selected, `N/M`, exit 1 if any mismatch)
 - Makefile: `select Q="..."`, `eval`
 
 Manual test:
 
     make select Q="Show me the ineligible expenses"      # q06, confidence shown
     make select Q="What is the weather in Paris?"        # "no suitable query"
-    make eval                                            # target 10/10 (≈ 20 Ollaya calls, minutes on winnow)
+    make eval                                            # target M/M (one choice call per labeled question, tags from the cache)
 
 Commit: "Select the best query with an Ollaya choice question"
 
@@ -139,7 +139,7 @@ blocks: question, tags + scores, candidates, selected query (+ confidence),
 parameters, result rows (or the "no suitable query" message).
 
 Files: `pipeline.py` (`ask(question) -> dict` chaining steps 2–5), `__main__.py`:
-`ask "<question>"`, `demo` (all demo questions + one off-topic question),
+`ask "<question>"`, `demo` (the labeled test questions, including the off-topic ones),
 `eval` extended to run the full chain and check the result is non-empty.
 Makefile: `ask Q="..."`, `demo`.
 
@@ -147,7 +147,7 @@ Manual test:
 
     make ask Q="Which European project has spent the most money?"
     make demo
-    make eval      # POC success criterion: 10/10 routed, 0 false positives on off-topic
+    make eval      # POC success criterion: M/M routed, `none` questions answered "no suitable query"
 
 Commit: "End-to-end ask command and demo"
 

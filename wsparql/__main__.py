@@ -24,10 +24,11 @@ def call_ollaya(fn, *args):
 def question_or_default(p, prof, question):
     if question and question.strip():
         return question
-    if not prof.tag_questions:
-        p.error("no question supplied and profile tests/tag-questions.csv has no questions")
-    print(f"Q: {prof.tag_questions[0][1]}", flush=True)
-    return prof.tag_questions[0][1]
+    if not prof.test_questions:
+        p.error("no question supplied and profile tests/test-questions.yaml has no questions")
+    question = prof.test_questions[0]["question"]
+    print(f"Q: {question}", flush=True)
+    return question
 
 
 def detect(prof, cache, question, log=print):
@@ -49,11 +50,11 @@ def main():
     t = sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag)")
     t.add_argument("question")
     c = sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 3); tags from the cache when the question is cached, else Ollaya")
-    c.add_argument("question", nargs="?", help="defaults to the first profile tests/tag-questions.csv question")
+    c.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
     sl = sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)")
-    sl.add_argument("question", nargs="?", help="defaults to the first profile tests/tag-questions.csv question")
-    sub.add_parser("eval", help="route every demo-questions.yaml question; expected vs selected, exit 1 on any mismatch")
-    sub.add_parser("tags-cache", help="detect tags for every tests/tag-questions.csv question, store them in profile/profile.db (new run_id)")
+    sl.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
+    sub.add_parser("eval", help="route every tests/test-questions.yaml question that has an expected_query; exit 1 on any mismatch")
+    sub.add_parser("tags-cache", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
     args = p.parse_args()
     prof = Profile(args.profile)
     cache = TagCache(prof.db_path)
@@ -86,18 +87,20 @@ def main():
         print(f"selected: {qid} (confidence {conf:.2f})" if qid
               else f"no suitable query (choice {best} {conf:.2f}, min confidence {pipeline.MIN_CONFIDENCE})")
     elif args.cmd == "eval":
+        labeled = [q for q in prof.test_questions if "expected_query" in q]
         ok = 0
-        for d in prof.demo_questions:
+        for d in labeled:
             q, expected = d["question"], d["expected_query"]
             probs, _ = detect(prof, cache, q, log=lambda *_: None)
             qid, conf, _ = call_ollaya(pipeline.select, q, pipeline.candidates(probs, prof.catalog), prof.catalog)
-            ok += qid == expected
-            print(f"{'ok  ' if qid == expected else 'FAIL'} {expected:<32} {qid or 'no suitable query':<32} {conf:.2f} | {q}", flush=True)
-        print(f"{ok}/{len(prof.demo_questions)}")
-        sys.exit(0 if ok == len(prof.demo_questions) else 1)
+            hit = (qid or pipeline.NONE) == expected
+            ok += hit
+            print(f"{'ok  ' if hit else 'FAIL'} [{d['q_id']:>2}] {expected:<32} {qid or pipeline.NONE:<32} {conf:.2f} | {q}", flush=True)
+        print(f"{ok}/{len(labeled)} (skipped {len(prof.test_questions) - len(labeled)} questions without expected_query)")
+        sys.exit(0 if ok == len(labeled) else 1)
     elif args.cmd == "tags-cache":
         run_id = call_ollaya(fill, prof, cache, ollaya.MODEL)
-        print(f"cached {len(prof.tag_questions)} questions in {prof.db_path} (run_id {run_id}, total rows {cache.count()})")
+        print(f"cached {len(prof.test_questions)} questions in {prof.db_path} (run_id {run_id}, total rows {cache.count()})")
 
 
 if __name__ == "__main__":

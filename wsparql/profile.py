@@ -1,5 +1,4 @@
-"""Load a POC profile directory: ontology + data graph, tags, catalog, queries, demo questions."""
-import csv
+"""Load a POC profile directory: ontology + data graph, tags, catalog, queries, test questions."""
 from pathlib import Path
 
 import yaml
@@ -16,10 +15,9 @@ class Profile:
         self.graph.parse(path / "abox.ttl")
         self.tags = yaml.safe_load((path / "tags.yaml").read_text())["tags"]
         self.catalog = yaml.safe_load((path / "query-catalog.yaml").read_text())["queries"]
-        self.demo_questions = yaml.safe_load((path / "demo-questions.yaml").read_text())["questions"]
         self.queries = {p.stem: p.read_text() for p in sorted((path / "queries").glob("*.rq"))}
-        with open(path / "tests/tag-questions.csv", newline="") as f:
-            self.tag_questions = [(int(r["q_id"]), r["question"]) for r in csv.DictReader(f)]
+        # [{q_id, question, expected_query?}]; expected_query = catalog id or "none", absent = not evaluated
+        self.test_questions = yaml.safe_load((path / "tests/test-questions.yaml").read_text())["questions"]
         self.db_path = path.parent / "profile.db"  # shared tag cache, one folder up, git-ignored
 
     def run(self, query_id):

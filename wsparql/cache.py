@@ -48,11 +48,11 @@ class TagCache:
 
 
 def fill(profile, cache, model, log=print):
-    """Detect tags for every tests/tag-questions.csv question and cache them; one row per question. Returns the run_id."""
+    """Detect tags for every tests/test-questions.yaml question and cache them; one row per question. Returns the run_id."""
     run_id = cache.next_run_id()  # same value on every row of this fill
     date = datetime.now().isoformat(timespec="seconds")
-    n = len(profile.tag_questions)
-    for q_id, question in profile.tag_questions:
+    n = len(profile.test_questions)
+    for q_id, question in ((q["q_id"], q["question"]) for q in profile.test_questions):
         probs = ollaya.detect_tags(question, profile.tags)
         cache.put(profile.name, q_id, question, probs, model, profile.version, date, run_id)
         top = "  ".join(f"{p:.2f} {t}" for t, p in list(probs.items())[:3])
