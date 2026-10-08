@@ -20,7 +20,7 @@ class Profile:
         self.queries = {p.stem: p.read_text() for p in sorted((path / "queries").glob("*.rq"))}
         with open(path / "tests/tag-questions.csv", newline="") as f:
             self.tag_questions = [(int(r["q_id"]), r["question"]) for r in csv.DictReader(f)]
-        self.db_path = path / "profile.db"
+        self.db_path = path.parent / "profile.db"  # shared tag cache, one folder up, git-ignored
 
     def run(self, query_id):
         """Run one catalog query; returns (column names, rows of display strings)."""

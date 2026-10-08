@@ -53,8 +53,9 @@ Files:
   (one `noul` question per tag, 19 tags in one call, sorted by prob desc)
 - `__main__.py`: `tags "<question>"` prints `tag  prob` table
 - Makefile: `tags Q="..."`
-- `tags-test` (added later): runs `tests/tag-questions.csv`, appends rows to `profile.db`
-  (`wsparql/store.py` sqlite3, `wsparql/evaluate.py` orchestration)
+- `tags-cache` (added later): detects tags for every `tests/tag-questions.csv` question and
+  caches them in `profile/profile.db` (git-ignored, shared by all profiles; `wsparql/cache.py`,
+  sqlite3 table `tag_cache`, one `run` number per `make tags-cache`)
 
 Manual test:
 
@@ -71,7 +72,8 @@ return top 3. Deterministic and explainable.
 
 Files:
 - `wsparql/pipeline.py`: `candidates(tag_probs, catalog, k=3) -> [(qid, score)]`
-- `__main__.py`: `candidates "<question>"` prints tags then ranked candidates
+- `__main__.py`: `candidates "<question>"` prints tags then ranked candidates; tags come from
+  the last `tags-cache` run when the question is cached (same profile, VERSION, model), else Ollaya
 - `tests/test_offline.py` (unittest, no Ollaya): hand-made tag_probs → expected ranking
 - Makefile: `candidates Q="..."`, `test` (`uv run python -m unittest`)
 

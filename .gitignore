@@ -1,4 +1,4 @@
 .venv/
 __pycache__/
-profile/*/profile.db
+profile/profile.db
 .env

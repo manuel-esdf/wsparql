@@ -3,9 +3,9 @@ import os
 import sys
 import urllib.error
 
-from wsparql import evaluate, ollaya, pipeline
+from wsparql import ollaya, pipeline
+from wsparql.cache import TagCache, fill
 from wsparql.profile import Profile
-from wsparql.store import Store
 
 
 def print_table(cols, rows):
@@ -29,9 +29,9 @@ def main():
     s.add_argument("query_id", nargs="?")
     t = sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag)")
     t.add_argument("question")
-    c = sub.add_parser("candidates", help="detect tags, then rank catalog queries by tag overlap (top 3)")
-    c.add_argument("question")
-    sub.add_parser("tags-test", help="detect tags for every tests/tag-questions.csv question, append rows to profile.db")
+    c = sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 3); tags from the cache when the question is cached, else Ollaya")
+    c.add_argument("question", nargs="?", help="defaults to the first profile tests/tag-questions.csv question")
+    sub.add_parser("tags-cache", help="detect tags for every tests/tag-questions.csv question, store them in profile/profile.db (new run)")
     args = p.parse_args()
     prof = Profile(args.profile)
 
@@ -45,15 +45,27 @@ def main():
         probs = call_ollaya(ollaya.detect_tags, args.question, prof.tags)
         print_table(["tag", "prob"], [[t, f"{v:.2f}"] for t, v in probs.items()])
     elif args.cmd == "candidates":
-        probs = call_ollaya(ollaya.detect_tags, args.question, prof.tags)
+        question = args.question
+        if not question or not question.strip():
+            if not prof.tag_questions:
+                p.error("no question supplied and profile tests/tag-questions.csv has no questions")
+            question = prof.tag_questions[0][1]
+        print(f"Q: {question}", flush=True)
+        hit = TagCache(prof.db_path).get(prof.name, question, ollaya.MODEL, prof.version)
+        if hit:
+            probs, run = hit
+            print(f"tags: cache run {run}")
+        else:
+            print("tags: Ollaya (not cached)", flush=True)
+            probs = call_ollaya(ollaya.detect_tags, question, prof.tags)
         print_table(["tag", "prob"], [[t, f"{v:.2f}"] for t, v in probs.items() if v >= 0.5])
         print()
         print_table(["candidate", "score", "description"],
                     [[q, f"{s:.2f}", prof.catalog[q]["description"]] for q, s in pipeline.candidates(probs, prof.catalog)])
-    elif args.cmd == "tags-test":
-        store = Store(prof.db_path)
-        run = call_ollaya(evaluate.run_tag_questions, prof, store, ollaya.MODEL)
-        print(f"saved {len(prof.tag_questions)} rows to {prof.db_path} (tags_test {run}, total rows {store.count()})")
+    elif args.cmd == "tags-cache":
+        cache = TagCache(prof.db_path)
+        run = call_ollaya(fill, prof, cache, ollaya.MODEL)
+        print(f"cached {len(prof.tag_questions)} questions in {prof.db_path} (run {run}, total rows {cache.count()})")
 
 
 if __name__ == "__main__":
