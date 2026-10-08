@@ -31,6 +31,7 @@ each query are detected by Ollaya from the query description. Both live in `prof
 | Detect relevant tags with Ollaya | `make tags` | one `noul` question per tag in a single `/v1/systemone` call, probability per tag |
 | Identify the most relevant SPARQL queries | `make candidates` | pure Python: mean detected probability over each query's tags, top 3 |
 | Ollaya selects the best candidate | `make select` | one `choice` question over the 3 candidate descriptions plus `none`; `none` or confidence below 0.4 = no suitable query |
+| Fallback when that answer is `none` | `make ask` | one more `choice` over the raw SPARQL text of all 10 queries plus `none`; its answer is final |
 | Extract query parameters | `make params` | `acronym`: `choice` over the ABOX project acronyms plus `none`; `from`/`to`: regex on quarter, month name or year |
 | Execute SPARQL on the ABOX | `make sparql` | rdflib in memory, parameters bound with `initBindings` (no templating) |
 | Return the result | `make ask` | the six demo blocks below, or "no suitable query" / "no suitable query (missing parameter X)" |
@@ -69,9 +70,9 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     candidates           rank top 3 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
     select               rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question
     params               extract the query parameters found in Q (acronym: Ollaya choice over ABOX projects + none; from/to: regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
-    ask                  answer Q end to end: tags, candidates, selected query, parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
+    ask                  answer Q end to end: tags, candidates, selected query (fallback: direct choice over the raw SPARQL when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
     demo                 make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
-    eval                 full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M, exit 1 on any mismatch (minutes on winnow)
+    eval                 full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M with the direct fallback and for the tag route alone, exit 1 on any mismatch (minutes on winnow)
     eval-direct          baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the raw SPARQL of all 10 queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
     tags-cache           detect tags for every tests/test-questions.yaml question with Ollaya (needs make tags-gen), store in profile/profile.db (new run_id)
     ollaya-check         prerequisites: uv, ollaya binary, server up, model pulled
@@ -121,8 +122,9 @@ It reads the tags of one `run_id` only (never Ollaya) and stores one row per (pr
 `eval_result`, replaced on each run, so an eval is reproducible for a given `run_id` and the summary line says
 whether it matches the previous one.
 
-Current score on `profile/eu-expense-poc` with `winnow`, query tags run_id 5, question tags run_id 3: **35/40**
-(19 ambiguous questions are unlabeled and skipped; the hand-written tags scored 34/40).
+Current score on `profile/eu-expense-poc` with `winnow`, query tags run_id 9, question tags run_id 3: **39/40** with the
+direct fallback, **35/40** for the tag route alone, both printed by `make eval` (19 ambiguous questions are unlabeled
+and skipped; the hand-written tags scored 34/40).
 All 7 off-topic questions are answered "no suitable query" and every correctly selected query returns rows, including the
 parameterised ones. Two wordings got there:
 
@@ -134,25 +136,19 @@ parameterised ones. Two wordings got there:
   whose project, employee, supplier and dates are filled in afterwards, and that `none` is for off-topic questions or
   answers no query computes. Before, 5 questions naming a project got `none` with high confidence (33/40).
 
-The 5 misses:
-
-- 3 questions where the expected query is a candidate but the `choice` still picks `none`: "What is the total amount spent
-  on LUMEN so far?" against "Compare total expenses across European projects", "Compare travel costs between LUMEN and
-  GRAPHIA.", "What is the budget of each European project?" against "Compare project budget, spent amount and remaining
-  budget". The description promises a comparison, the question asks for one figure. Rewording the three descriptions was
-  tried: "Total expenses of each European project" scores 32/40 (the `list` tag appears, the comparison questions are
-  lost), "Compare ... across European projects (one total per project)" scores 35/40 with other misses (the two "one
-  figure" questions pass, two budget questions and a breakdown question fail). The score is a plateau of this 40-question
-  set; the next gain is more test questions, or one catalog query per intent (a single-project total next to the comparison).
-- 2 questions whose expected query is not among the 3 candidates ("What did OPENSCIENCE spend on equipment?", q02 no
-  longer carries `equipment`; "Which work package of GRAPHIA is the most expensive?", q04). Lever: those descriptions.
+The 5 misses of the tag route are all `none` answers, so the fallback takes them: the direct choice over the raw SPARQL
+gets 4 of them right and the 7 off-topic questions still get `none` (the closest call is "Write a SPARQL query to list all
+suppliers.", `none` at 0.49). The one remaining miss, "What did OPENSCIENCE spend on equipment?", gets `none` from both
+routes: q02 no longer carries `equipment` and the raw SPARQL does not mention it either. The `via` column of `make eval`
+says which route answered each question.
 
 `make eval-direct` is the baseline without tags: for each labeled question, one `choice` over the raw SPARQL text of all
-10 queries plus `none`, then the same parameter extraction and run. It also scores **35/40**, with other misses: 4 of its
-5 are "one figure" questions on q05 and q06 ("How much budget remains on each project?", "How much ineligible spending do
-we have in total?"). On this catalog the tag stage does not buy accuracy. It buys explainability (the tag and candidate
-tables) and a choice over 3 short descriptions instead of 10 full queries, which is what matters once the catalog grows
-past what one `choice` can hold.
+10 queries plus `none`, then the same parameter extraction and run. It scores **35/40** on its own, with other misses than
+the tag route (4 of its 5 are "one figure" questions on q05 and q06, "How much budget remains on each project?", "How much
+ineligible spending do we have in total?"); only the equipment question fails in both, which is why the two routes
+combined reach 39/40. On this catalog the tag stage does not buy accuracy by itself. It buys explainability (the tag and
+candidate tables) and a choice over 3 short descriptions instead of 10 full queries, which is what matters once the
+catalog grows past what one `choice` can hold.
 
 ## Role of the Ontology
 

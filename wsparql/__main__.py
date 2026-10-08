@@ -34,7 +34,12 @@ def print_answer(prof, out):
     """The README demo blocks after the question: tags, candidates + selection, parameters, result."""
     print_tags(out["tags"], 0.5)
     print()
-    print_selection(prof, out["candidates"], out["selected"], out["confidence"], out["probabilities"])
+    if out["via"] == "fallback":
+        print_selection(prof, out["candidates"], None, *out["tag_route"])
+        print(f"fallback: direct choice over the raw SPARQL of {len(prof.catalog)} queries -> "
+              + (f"{out['selected']} (confidence {out['confidence']:.2f})" if out["selected"] else f"no suitable query ({out['confidence']:.2f})"))
+    else:
+        print_selection(prof, out["candidates"], out["selected"], out["confidence"], out["probabilities"])
     if not out["selected"]:
         return
     print()
@@ -58,7 +63,7 @@ def eval_line(d, out):
     n = len(out["result"][1]) if out["result"] else None
     hit = expected == (got if n else pipeline.NONE)
     shown = f"{n} rows" if n is not None else f"missing {', '.join(out['missing'])}" if out["missing"] else "-"
-    print(f"{'ok  ' if hit else 'FAIL'} [{d['q_id']:>2}] {expected:<32} {got:<32} {out['confidence']:.2f} {shown:<10} | {d['question']}", flush=True)
+    print(f"{'ok  ' if hit else 'FAIL'} [{d['q_id']:>2}] {expected:<32} {got:<32} {out['confidence']:.2f} {shown:<10} {out['via']:<8} | {d['question']}", flush=True)
     return got, n, hit
 
 
@@ -122,7 +127,7 @@ def main():
     sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)").add_argument("question", nargs="?", help=default_q)
     pa = sub.add_parser("params", help="extract the query parameters found in a question: acronym (Ollaya choice over ABOX projects + none), from/to (regex); lists every catalog parameter and the queries needing it")
     pa.add_argument("question", nargs="?", help="no question = run on every test question whose expected query takes parameters")
-    sub.add_parser("ask", help="answer a question end to end: tags, candidates, selected query, parameters, result rows or no suitable query").add_argument("question", nargs="?", help=default_q)
+    sub.add_parser("ask", help="answer a question end to end: tags, candidates, selected query (direct choice over the raw SPARQL as fallback when the tag route says none), parameters, result rows or no suitable query").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("demo", help="ask every tests/test-questions.yaml question that has an expected_query, off-topic ones included")
     sub.add_parser("eval", help="full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-cache run_id: expected query selected and returns rows, none answers no suitable query; rows stored in profile/profile.db eval_result; exit 1 on any mismatch")
     sub.add_parser("eval-direct", help="baseline without tags: for each tests/test-questions.yaml question that has an expected_query, one Ollaya choice over the raw SPARQL of all catalog queries + none, then parameters and run; exit 1 on any mismatch")
@@ -198,15 +203,17 @@ def main():
             sys.exit(f"q_id {', '.join(map(str, absent))} not in tag cache run_id {run_id} -> make tags-cache")
         print(f"tags: query tags run_id {qt_run}, question tags cache run_id {run_id}", flush=True)
         prev = db.prev_eval(prof.name, ollaya.MODEL, prof.version, run_id)
-        date, rows = datetime.now().isoformat(timespec="seconds"), []
+        date, rows, tags_only = datetime.now().isoformat(timespec="seconds"), [], 0
         for d in labeled:
             out = call_ollaya(pipeline.answer, d["question"], tags[d["q_id"]][0], prof)
             got, n, hit = eval_line(d, out)
+            tags_only += hit if out["via"] == "tags" else d["expected_query"] == pipeline.NONE  # fallback ran = the tag route said none
             rows.append((prof.name, d["q_id"], d["question"], d["expected_query"], got, out["confidence"], json.dumps(out["params"]),
                          ", ".join(out["missing"]), n, int(hit), ollaya.MODEL, prof.version, run_id, date))
         db.put_evals(rows)
         ok = sum(r[9] for r in rows)
-        print(f"{ok}/{len(labeled)} (skipped {len(prof.test_questions) - len(labeled)} questions without expected_query)")
+        print(f"{ok}/{len(labeled)} with the direct fallback, {tags_only}/{len(labeled)} tag route alone "
+              f"(skipped {len(prof.test_questions) - len(labeled)} questions without expected_query)")
         now = {r[1]: (r[4], round(r[5], 2), r[8], r[9]) for r in rows}
         diff = [i for i in now if prev and now[i] != prev[1].get(i)]
         print(f"stored {len(rows)} rows in {prof.db_path} eval_result (run_id {run_id}, {date}); "

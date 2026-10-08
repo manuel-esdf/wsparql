@@ -104,7 +104,19 @@ class AnswerTest(unittest.TestCase):
         out = answer("List LUMEN expenses", self.PROBS, prof, self.ask(self.Q10))
         self.assertEqual((out["missing"], out["result"]), (["from", "to"], None))
         out = answer("What is the weather in Brussels?", self.PROBS, prof, self.ask("none"))
-        self.assertEqual((out["selected"], out["params"], out["result"]), (None, {}, None))
+        self.assertEqual((out["selected"], out["params"], out["result"], out["via"]), (None, {}, None, "fallback"))
+
+    def test_fallback_when_the_tag_route_says_none(self):
+        prof = Profile(os.environ["PROFILE"])
+        for q in prof.catalog.values():
+            q["tags"] = ["expense"]
+        def ask(question, questions):  # none over descriptions, Q10 over the raw SPARQL
+            if "select" in questions:
+                raw = any(v.startswith("PREFIX") for v in questions["select"]["criteria"].values())
+                return {"select": {"choice": self.Q10 if raw else "none", "confidence": 0.9, "probabilities": {}}}
+            return {"acronym": {"choice": "LUMEN", "confidence": 0.9, "probabilities": {}}}
+        out = answer("List LUMEN expenses for Q1 2026", self.PROBS, prof, ask)
+        self.assertEqual((out["via"], out["tag_route"], out["selected"], len(out["result"][1])), ("fallback", (0.9, {}), self.Q10, 6))
 
 
     def test_direct_baseline(self):
@@ -115,7 +127,7 @@ class AnswerTest(unittest.TestCase):
         out = answer("List LUMEN expenses for Q1 2026", {}, prof, ask, direct=True)
         self.assertEqual(list(seen["select"]["criteria"]), [*prof.catalog, "none"])
         self.assertTrue(seen["select"]["criteria"][self.Q10].startswith("PREFIX"))  # the raw .rq text
-        self.assertEqual(([q for q, _ in out["candidates"]], out["selected"], len(out["result"][1])), (list(prof.catalog), self.Q10, 6))
+        self.assertEqual(([q for q, _ in out["candidates"]], out["selected"], out["via"], len(out["result"][1])), (list(prof.catalog), self.Q10, "direct", 6))
 
 
 class TagsGenTest(unittest.TestCase):

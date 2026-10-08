@@ -94,17 +94,22 @@ def extract_params(question, names, acronyms, ask=ollaya.decide):
 
 def answer(question, tag_probs, prof, ask=ollaya.decide, direct=False):
     """Rank, select, extract the selected query's parameters, run it. Returns the demo blocks:
-    {question, tags, candidates, selected, confidence, probabilities, params, how, missing, result};
+    {question, tags, candidates, selected, confidence, probabilities, via, tag_route, params, how, missing, result};
     selected None = no suitable query; missing = declared params not found (query not run); result = (cols, rows) or None.
-    direct: no tags, no ranking, select_direct over every query (baseline)."""
+    via: "tags" (ranked candidates, choice over descriptions), "fallback" (that choice answered none, then select_direct;
+    tag_route keeps the (confidence, probabilities) of the none answer) or "direct" (select_direct only, the baseline)."""
+    via, tag_route = "tags", None
     if direct:
-        ranked = [(qid, 0.0) for qid in prof.catalog]
+        ranked, via = [(qid, 0.0) for qid in prof.catalog], "direct"
         qid, conf, prob = select_direct(question, prof, ask)
     else:
         ranked = candidates(tag_probs, prof.catalog)
         qid, conf, prob = select(question, ranked, prof.catalog, ask)
-    out = dict(question=question, tags=tag_probs, candidates=ranked, selected=qid, confidence=conf,
-               probabilities=prob, params={}, how={}, missing=[], result=None)
+        if not qid:  # ponytail: one more choice over the raw SPARQL; the tag route's misses are all `none` answers
+            via, tag_route = "fallback", (conf, prob)
+            qid, conf, prob = select_direct(question, prof, ask)
+    out = dict(question=question, tags=tag_probs, candidates=ranked, selected=qid, confidence=conf, probabilities=prob,
+               via=via, tag_route=tag_route, params={}, how={}, missing=[], result=None)
     if qid:
         names = list(prof.catalog[qid].get("params", {}))
         if names:
