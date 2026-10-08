@@ -5,6 +5,9 @@ import re
 from wsparql import ollaya
 
 
+TAG_THRESHOLD = 0.5  # ponytail: a query's tags = those Ollaya detected at >= 0.5 on its description; the probabilities stay in query_tags
+
+
 def candidates(tag_probs, catalog, k=3):
     """Rank catalog queries by the mean detected probability of their tags; returns the top k as [(qid, score)]."""
     # ponytail: plain mean; weight rare tags higher (IDF) if ubiquitous tags like "expense" blur the ranking

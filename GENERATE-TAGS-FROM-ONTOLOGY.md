@@ -98,7 +98,27 @@ Compared with the old `tags.yaml`: renamed `project` → `european-project`, `ca
 `eligibility` → `eligible`; added `personnel`, `equipment`, `subcontracting`, `other-goods-services`, `amount`;
 dropped `remaining`. Each question now costs 23 `noul` questions instead of 19.
 
-`make query-tags` output (tags ≥ 0.5 per query, as detected by Ollaya on the descriptions) is in the README.
+`make query-tags` with `winnow` (tags ≥ 0.5 per query, detected by Ollaya on the descriptions):
+
+    [ 1/10] q01-total-expenses-by-project    expense, european-project, comparison, amount, total, expense-category
+    [ 2/10] q02-project-expense-breakdown    expense, breakdown, expense-category, budget, equipment, travel, comparison, work-package, subcontracting, personnel, amount
+    [ 3/10] q03-travel-expenses-by-project   travel, comparison, expense, amount, expense-category, other-goods-services
+    [ 4/10] q04-expenses-by-work-package     work-package, amount, expense, total, breakdown, comparison
+    [ 5/10] q05-budget-vs-spent              comparison, expense, budget, amount
+    [ 6/10] q06-ineligible-expenses          expense, eligible, list, expense-category, budget
+    [ 7/10] q07-expenses-by-employee         employee, personnel, expense, total, amount, breakdown, other-goods-services
+    [ 8/10] q08-expenses-by-supplier         expense, supplier, breakdown, total, amount, comparison, other-goods-services
+    [ 9/10] q09-monthly-expenses             time, month, date-range, total, expense, amount, trend, expense-category
+    [10/10] q10-project-expenses-in-period   time, date-range, expense, list, other-goods-services, work-package, budget
+
+The detected lists are wider than the hand-written ones (`amount` and `expense-category` almost everywhere, q02 gets
+every category plus `budget` at 0.97) and `european-project` is missed where the description says "project" while the
+comment says "European projects": the wording of the comments and of the descriptions is now the tuning surface,
+checked by `make eval`.
+
+`make eval` with these tags: **33/40** against 34/40 with the hand-written ones. Two old misses pass, three breakdown
+questions fail because q02's 11 tags dilute its mean score in `candidates` and it drops out of the top 3 (details in
+the README). Next lever: weight rare tags higher (IDF) in `pipeline.candidates`, or tighten the q02 description.
 
 ## Storage
 
@@ -106,14 +126,14 @@ dropped `remaining`. Each question now costs 23 `noul` questions instead of 19.
 
 | table | row | written by |
 |---|---|---|
-| `tags` | profile, tag, description, source, version, date, run_id | `make tags-gen` |
+| `tags` | profile, tag, description, source, version, date; deterministic, so no run_id: the rows of the profile version are replaced | `make tags-gen` |
 | `query_tags` | profile, q_id (1-based catalog position), q_label (catalog id), description, tags (JSON `{tag: probability}`), model, version, date, run_id | `make query-tags` |
 | `tag_cache` | profile, q_id, question, tags (JSON), model, version, date, run_id | `make tags-cache` |
 | `eval_result` | one row per (profile, q_id, run_id), replaced on each eval | `make eval` |
 
-`run_id` is one counter over the three tag tables, so a run number identifies one command invocation anywhere in
-the file. Every reader takes the latest run for the profile `VERSION` (and model, when Ollaya was involved);
-`make eval` prints the three run_ids it used. Bump `VERSION` when `tbox.ttl`, `abox.ttl` or the catalog change:
+`run_id` is one counter over the two Ollaya tables, so a run number identifies one command invocation anywhere in
+the file. Every reader takes the latest run for the profile `VERSION` and model; `make eval` prints the two run_ids it
+used. Bump `VERSION` when `tbox.ttl`, `abox.ttl` or the catalog change:
 rows of the old version are then ignored, never mixed with the new vocabulary.
 
 ## Workflow

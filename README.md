@@ -14,17 +14,22 @@ Everything the system knows lives in one profile directory (`PROFILE` in `.env`,
 
 - a TBOX ontology describing the domain (`tbox.ttl`);
 - an ABOX dataset containing the actual data (`abox.ttl`);
-- a catalog of predefined SPARQL queries (`query-catalog.yaml`: description, tags, parameters with example values; `queries/*.rq`);
-- a controlled dictionary of tags describing concepts and user intentions (`tags.yaml`);
+- a catalog of predefined SPARQL queries (`query-catalog.yaml`: description, parameters with example values; `queries/*.rq`);
 - test questions with the expected query (`tests/test-questions.yaml`).
+
+The tag dictionary (concepts and user intentions) is not written by hand: it is derived from the ontology, and the tags of
+each query are detected by Ollaya from the query description. Both live in `profile/profile.db`, see
+[GENERATE-TAGS-FROM-ONTOLOGY.md](GENERATE-TAGS-FROM-ONTOLOGY.md).
 
 ## Decision process
 
 | Stage | Command | How |
 |---|---|---|
+| Tag dictionary (once per profile version) | `make tags-gen` | rules on `tbox.ttl` + `abox.ttl`: classes with data, TBOX individuals, boolean/numeric/date properties, fixed intents; description = `rdfs:comment`; no Ollaya |
+| Query tags (once per profile version) | `make query-tags` | one `noul` question per tag on each catalog query description; a query's tags = probability ≥ 0.5 |
 | Natural language question | `make ask Q="..."` | |
 | Detect relevant tags with Ollaya | `make tags` | one `noul` question per tag in a single `/v1/systemone` call, probability per tag |
-| Identify the most relevant SPARQL queries | `make candidates` | pure Python: mean detected probability over each query's catalog tags, top 3 |
+| Identify the most relevant SPARQL queries | `make candidates` | pure Python: mean detected probability over each query's tags, top 3 |
 | Ollaya selects the best candidate | `make select` | one `choice` question over the 3 candidate descriptions plus `none`; `none` or confidence below 0.4 = no suitable query |
 | Extract query parameters | `make params` | `acronym`: `choice` over the ABOX project acronyms plus `none`; `from`/`to`: regex on quarter, month name or year |
 | Execute SPARQL on the ABOX | `make sparql` | rdflib in memory, parameters bound with `initBindings` (no templating) |
@@ -45,6 +50,9 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     make ollaya-check        # uv, ollaya binary, server up, model pulled
     make ollaya-smoke-test   # one tag-detection call
     make test                # offline unit tests, no Ollaya
+    make tags-gen            # tag dictionary from the ontology -> profile/profile.db
+    make query-tags          # Ollaya tags the 10 catalog descriptions (seconds each)
+    make tags-cache          # Ollaya tags the 59 test questions (minutes), optional: ask/demo call Ollaya for uncached questions
 
 ## Usage
 
@@ -55,35 +63,37 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     test                 offline unit tests (no Ollaya)
     profile-check        mandatory profile files present in $(PROFILE); every catalog query has its .rq
     sparql               run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
+    tags-gen             derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (new run_id); no Ollaya, instant. See GENERATE-TAGS-FROM-ONTOLOGY.md
+    query-tags           Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5 (seconds per query on winnow)
     tags                 detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"; no Q = first tests/test-questions.yaml question
-    candidates           rank top 3 queries for Q; tags from the last tags-cache run when Q is cached, else Ollaya. No Q = first tests/test-questions.yaml question
+    candidates           rank top 3 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
     select               rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question
     params               extract the query parameters found in Q (acronym: Ollaya choice over ABOX projects + none; from/to: regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
     ask                  answer Q end to end: tags, candidates, selected query, parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
     demo                 make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
-    eval                 full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-cache run_id (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M, exit 1 on any mismatch (minutes on winnow)
-    tags-cache           detect tags for every tests/test-questions.yaml question with Ollaya, store in profile/profile.db (new run_id)
+    eval                 full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M, exit 1 on any mismatch (minutes on winnow)
+    tags-cache           detect tags for every tests/test-questions.yaml question with Ollaya (needs make tags-gen), store in profile/profile.db (new run_id)
     ollaya-check         prerequisites: uv, ollaya binary, server up, model pulled
     ollaya-smoke-test    one tag-detection query on /v1/systemone; fails if "expense" tag < 0.5
 
 Example, `make ask Q="List LUMEN expenses for Q1 2026"`:
 
     Q: List LUMEN expenses for Q1 2026
-    tags: cache run_id 1
-    tag         prob
-    time        1.00
-    date-range  1.00
-    expense     1.00
-    category    0.94
-    list        0.92
-    budget      0.81
+    tags: cache run_id 3
+    tag               prob
+    time              1.00
+    date-range        1.00
+    expense           1.00
+    expense-category  0.94
+    list              0.92
+    budget            0.81
 
     candidate                       score  prob  description
-    q10-project-expenses-in-period  0.80   0.94  List project expenses within a date range
-    q06-ineligible-expenses         0.70   0.00  List expenses marked as ineligible
-    q02-project-expense-breakdown   0.53   0.00  Break down a project's expenses by cost category
-    none                                   0.05  no suitable query
-    selected: q10-project-expenses-in-period (confidence 0.93)
+    q06-ineligible-expenses         0.77   0.00  List expenses marked as ineligible
+    q10-project-expenses-in-period  0.75   0.96  List project expenses within a date range
+    q09-monthly-expenses            0.52   0.00  Show monthly expense totals
+    none                                   0.04  no suitable query
+    selected: q10-project-expenses-in-period (confidence 0.94)
 
     param    value       how
     acronym  LUMEN       Ollaya choice over 3 ABOX projects + none, confidence 0.99
@@ -99,7 +109,7 @@ Each stage has its own command (`tags`, `candidates`, `select`, `params`, `sparq
 
 ## Tag cache and evaluation
 
-Tag detection is the slow call (19 `noul` questions, seconds to tens of seconds per question on `winnow`), so
+Tag detection is the slow call (23 `noul` questions, seconds to tens of seconds per question on `winnow`), so
 `make tags-cache` detects the tags of every test question once and stores them in `profile/profile.db`
 (SQLite, gitignored, table `tag_cache`, one `run_id` per run, keyed by profile, question, model and profile `VERSION`).
 `candidates`, `select`, `ask` and `demo` use the last cached run when the question is cached, Ollaya otherwise.
@@ -110,12 +120,19 @@ It reads the tags of one `run_id` only (never Ollaya) and stores one row per (pr
 `eval_result`, replaced on each run, so an eval is reproducible for a given `run_id` and the summary line says
 whether it matches the previous one.
 
-Current score on `profile/eu-expense-poc` with `winnow`, run_id 1: **34/40** (19 ambiguous questions are unlabeled and skipped).
+Current score on `profile/eu-expense-poc` with `winnow`, query tags run_id 2, question tags run_id 3: **33/40**
+(19 ambiguous questions are unlabeled and skipped; the hand-written tags scored 34/40).
 All 7 off-topic questions are answered "no suitable query" and every correctly selected query returns rows, including the
-parameterised ones. The 6 misses are in-domain questions where the selection `choice` picks `none` with high confidence
-(for example "Compare travel costs between LUMEN and GRAPHIA.", "What is the budget of each European project?"): the question
-names an entity while the catalog descriptions are generic. Next lever: the wording of the `none` criterion and of the
-selection instructions in `wsparql/pipeline.py`.
+parameterised ones. The 7 misses:
+
+- 4 in-domain questions where the selection `choice` picks `none` with high confidence (for example "Compare travel costs
+  between LUMEN and GRAPHIA.", "What is the budget of each European project?"): the question names an entity while the
+  catalog descriptions are generic. Lever: the wording of the `none` criterion and of the selection instructions in
+  `wsparql/pipeline.py`.
+- 3 breakdown questions (for example "Give me a breakdown of GRAPHIA costs by expense category.") whose expected query
+  `q02-project-expense-breakdown` no longer reaches the top 3: Ollaya detects 11 tags on its description (every category,
+  `budget` at 0.97, `work-package`...) and the plain mean of `pipeline.candidates` dilutes its score. Levers: the description
+  wording, or weighting rare tags higher (IDF) in `candidates`.
 
 ## Role of the Ontology
 
@@ -123,7 +140,9 @@ The TBOX provides additional semantic knowledge.
 
 For example, if Researcher is a subclass of Person, the system can use this relationship during query selection without asking the AI model to rediscover it.
 
-Not exercised yet: the current TBOX has no subclass hierarchy, so there is nothing to expand before ranking (see IMPLEMENTATION-PLAN.md, optional steps).
+Exercised for the tag dictionary: classes, TBOX individuals and datatype properties become tags, their `rdfs:comment` is the
+instruction Ollaya reads (`make tags-gen`). Not exercised for ranking: the current TBOX has no subclass hierarchy, so there is
+nothing to expand before ranking.
 
 ## Expected Demo
 
@@ -145,9 +164,9 @@ The POC is successful if it demonstrates that natural-language questions can be 
 ## Repository layout
 
 - `Makefile`, `.env.example`, `pyproject.toml`, `uv.lock`
-- `wsparql/`: `ollaya.py` (HTTP client, `decide`, `detect_tags`), `profile.py` (profile loader, `run` with bindings), `pipeline.py` (`candidates`, `select`, `extract_period`, `extract_params`, `answer`), `db.py` (`tag_cache`, `eval_result`), `__main__.py` (CLI behind the Makefile)
+- `wsparql/`: `ollaya.py` (HTTP client, `decide`, `detect_tags`), `profile.py` (profile loader, `run` with bindings), `tags.py` (tag dictionary from the ontology), `pipeline.py` (`candidates`, `select`, `extract_period`, `extract_params`, `answer`), `db.py` (`tags`, `query_tags`, `tag_cache`, `eval_result`), `__main__.py` (CLI behind the Makefile)
 - `profile/eu-expense-poc/`: the profile (see its README); `profile/profile.db`: local cache, gitignored
 - `tests/test_offline.py`: unit tests without Ollaya (`make test`)
-- `IMPLEMENTATION-PLAN.md`: the 7 steps, one commit each
+- `GENERATE-TAGS-FROM-ONTOLOGY.md`: how the tags are derived from the ontology and the query tags from the descriptions
 
 Deliberately skipped: external triple store, web UI, text generation, HTTP server, config framework.

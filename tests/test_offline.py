@@ -95,6 +95,9 @@ class AnswerTest(unittest.TestCase):
 
     def test_select_params_run(self):
         prof = Profile(os.environ["PROFILE"])
+        for q in prof.catalog.values():  # query tags come from profile.db query_tags (make query-tags), not the catalog file
+            q["tags"] = ["expense"]
+        prof.catalog[self.Q10]["tags"] = list(self.PROBS)
         out = answer("List LUMEN expenses for Q1 2026", self.PROBS, prof, self.ask(self.Q10))
         self.assertEqual((out["selected"], out["params"], out["missing"]), (self.Q10, {"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"}, []))
         self.assertEqual(len(out["result"][1]), 6)
@@ -120,14 +123,17 @@ class TagsGenTest(unittest.TestCase):
 class DbTest(unittest.TestCase):
     KEY = ("p", "winnow", "1.0.0")
 
-    def test_tags_runs_share_the_counter(self):
+    def test_tags_replaced_and_ollaya_runs_share_the_counter(self):
         db = ProfileDb(":memory:")
         self.assertIsNone(db.tags("p", "1.0.0"))
-        db.put_tags("p", "1.0.0", "d1", db.next_run_id(), [("a", "A", "intent")])
-        db.put("p", 1, "q?", {"a": 0.1}, "winnow", "1.0.0", "d1", db.next_run_id())
-        db.put_tags("p", "1.0.0", "d2", db.next_run_id(), [("a", "A2", "intent"), ("b", "B", "class ex:B")])
-        self.assertEqual(db.tags("p", "1.0.0"), ({"a": "A2", "b": "B"}, 3))
+        db.put_tags("p", "1.0.0", "d1", [("a", "A", "intent"), ("c", "C", "intent")])
+        db.put_tags("p", "1.0.0", "d2", [("a", "A2", "intent"), ("b", "B", "class ex:B")])  # deterministic: replaced, no run_id
+        self.assertEqual(db.tags("p", "1.0.0"), {"a": "A2", "b": "B"})
         self.assertIsNone(db.tags("p", "2.0.0"))
+        db.put("p", 1, "q?", {"a": 0.1}, "winnow", "1.0.0", "d1", db.next_run_id())
+        db.put_query_tags("p", "winnow", "1.0.0", "d3", db.next_run_id(), [(1, "q01", "desc", {"a": 0.9})])
+        self.assertEqual(db.query_tags("p", "winnow", "1.0.0"), ({"q01": {"a": 0.9}}, 2))  # one counter over query_tags + tag_cache
+        self.assertIsNone(db.query_tags("p", "other", "1.0.0"))
 
     def test_tag_runs_and_eval_rows(self):
         db = ProfileDb(":memory:")

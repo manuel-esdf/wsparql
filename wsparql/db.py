@@ -1,6 +1,9 @@
 """profile/profile.db (SQLite, stdlib, git-ignored, shared by all profiles). Created on first use.
 
-tags:        the tag dictionary derived from the ontology by `make tags-gen` (one run_id per invocation), read by every command.
+tags:        the tag dictionary derived from the ontology by `make tags-gen`: deterministic, so no run_id, the rows of the
+             profile/version are replaced on each run; read by every command.
+query_tags:  Ollaya tag probabilities per catalog query description, filled by `make query-tags` (one run_id per invocation);
+             a query's tags = those >= pipeline.TAG_THRESHOLD in the latest run (replaces hand-written catalog tags).
 tag_cache:   Ollaya tag probabilities per question, filled by `make tags-cache` (one run_id per invocation),
              read by `make candidates` / `select` / `ask` / `demo` (latest run) and `make eval` (one fixed run).
 eval_result: one row per (profile, q_id, run_id), replaced by each `make eval`; run_id = the tag_cache run the tags came from.
@@ -17,6 +20,15 @@ CREATE TABLE IF NOT EXISTS tags (
     tag         TEXT NOT NULL,
     description TEXT NOT NULL,
     source      TEXT NOT NULL,
+    version     TEXT NOT NULL,
+    date        TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS query_tags (
+    profile     TEXT NOT NULL,
+    q_id        INTEGER NOT NULL,
+    q_label     TEXT NOT NULL,
+    description TEXT NOT NULL,
+    tags        TEXT NOT NULL,
+    model       TEXT NOT NULL,
     version     TEXT NOT NULL,
     date        TEXT NOT NULL,
     run_id      INTEGER NOT NULL);
@@ -47,12 +59,13 @@ CREATE TABLE IF NOT EXISTS eval_result (
 CREATE UNIQUE INDEX IF NOT EXISTS eval_key ON eval_result (profile, q_id, run_id);
 """
 # tags:        description = the noul instruction sent to Ollaya; source = "class ex:Expense" / "individual ex:Travel" / "property ex:budget" / "intent"
+# query_tags:  q_id = 1-based catalog position, q_label = catalog id (q01-total-expenses-by-project), tags = JSON {tag: probability}
 # tag_cache:   tags = JSON {tag: probability}
-# run_id:      one counter over the tag tables (RUN_TABLES): 1, 2, ... per `make tags-gen` / `tags-cache` invocation
+# run_id:      one counter over the Ollaya tables (RUN_TABLES): 1, 2, ... per `make query-tags` / `tags-cache` invocation
 # eval_result: selected = catalog id or "none"; params = JSON of the bound values; missing = "acronym, from" or "";
 #              row_count NULL when no query ran; date = the `make eval` that wrote the row (one value per eval)
 
-RUN_TABLES = ["tags", "tag_cache"]
+RUN_TABLES = ["query_tags", "tag_cache"]
 EVAL_COLS = "profile, q_id, question, expected, selected, confidence, params, missing, row_count, ok, model, version, run_id, date"
 
 
@@ -68,23 +81,37 @@ class ProfileDb:
         return self.conn.execute(f"SELECT COALESCE(MAX(run_id), 0) + 1 FROM ({union})").fetchone()[0]
 
     # tags
-    def put_tags(self, profile, version, date, run_id, rows):
-        """Store one `make tags-gen`: rows = [(tag, description, source)]; one transaction."""
+    def put_tags(self, profile, version, date, rows):
+        """Store one `make tags-gen`: rows = [(tag, description, source)] replace the profile/version rows; one transaction."""
         with self.conn:
-            self.conn.executemany("INSERT INTO tags (profile, tag, description, source, version, date, run_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                                  [(profile, t, d, s, version, date, run_id) for t, d, s in rows])
+            self.conn.execute("DELETE FROM tags WHERE profile = ? AND version = ?", (profile, version))
+            self.conn.executemany("INSERT INTO tags (profile, tag, description, source, version, date) VALUES (?, ?, ?, ?, ?, ?)",
+                                  [(profile, t, d, s, version, date) for t, d, s in rows])
 
     def tags(self, profile, version):
-        """({tag: description} of the latest tags-gen run for this profile/version, run_id), or None."""
-        run_id = self.conn.execute("SELECT MAX(run_id) FROM tags WHERE profile = ? AND version = ?", (profile, version)).fetchone()[0]
+        """{tag: description} for this profile/version, or None before `make tags-gen`."""
+        rows = self.conn.execute("SELECT tag, description FROM tags WHERE profile = ? AND version = ? ORDER BY rowid", (profile, version))
+        return dict(rows) or None
+
+    # query_tags
+    def put_query_tags(self, profile, model, version, date, run_id, rows):
+        """Store one `make query-tags`: rows = [(q_id, q_label, description, probs)]; one transaction."""
+        with self.conn:
+            self.conn.executemany(
+                "INSERT INTO query_tags (profile, q_id, q_label, description, tags, model, version, date, run_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [(profile, i, label, desc, json.dumps(probs), model, version, date, run_id) for i, label, desc, probs in rows])
+
+    def query_tags(self, profile, model, version):
+        """({q_label: {tag: probability}} of the latest query-tags run for this profile/model/version, run_id), or None."""
+        run_id = self.conn.execute("SELECT MAX(run_id) FROM query_tags WHERE profile = ? AND model = ? AND version = ?",
+                                   (profile, model, version)).fetchone()[0]
         if not run_id:
             return None
-        rows = self.conn.execute("SELECT tag, description FROM tags WHERE profile = ? AND version = ? AND run_id = ? ORDER BY rowid",
-                                 (profile, version, run_id))
-        return dict(rows), run_id
+        rows = self.conn.execute("SELECT q_label, tags FROM query_tags WHERE profile = ? AND model = ? AND version = ? AND run_id = ? ORDER BY q_id",
+                                 (profile, model, version, run_id))
+        return {label: json.loads(t) for label, t in rows}, run_id
 
     # tag_cache
-
     def last_run_id(self, profile, model, version):
         """Latest run_id holding tags for this profile/model/version, or None."""
         return self.conn.execute("SELECT MAX(run_id) FROM tag_cache WHERE profile = ? AND model = ? AND version = ?",

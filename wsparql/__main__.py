@@ -76,13 +76,23 @@ def detect(prof, db, question, log=print):
     return call_ollaya(ollaya.detect_tags, question, prof.tags), None
 
 
-def load_tags(prof, db):
-    """prof.tags = the latest tags-gen run for this profile version; exits with the fix when there is none. Returns the run_id."""
-    hit = db.tags(prof.name, prof.version)
-    if not hit:
+NEED_QUERY_TAGS = {"candidates", "select", "ask", "demo", "eval"}
+
+
+def load_tags(prof, db, with_query_tags=False):
+    """prof.tags = the tag dictionary of this profile version; with_query_tags: each catalog query's tags = those detected
+    at >= TAG_THRESHOLD in the latest query-tags run. Exits with the fix when something is missing. Returns the query_tags run_id."""
+    prof.tags = db.tags(prof.name, prof.version)
+    if not prof.tags:
         sys.exit(f"no tags for {prof.name} {prof.version} -> make tags-gen")
-    prof.tags = hit[0]
-    return hit[1]
+    if not with_query_tags:
+        return None
+    qt = db.query_tags(prof.name, ollaya.MODEL, prof.version)
+    if missing := [q for q in prof.catalog if not qt or q not in qt[0]]:
+        sys.exit(f"no query tags for {', '.join(missing)} ({prof.name} {prof.version} {ollaya.MODEL}) -> make query-tags")
+    for qid in prof.catalog:
+        prof.catalog[qid]["tags"] = [t for t, p in qt[0][qid].items() if p >= pipeline.TAG_THRESHOLD]
+    return qt[1]
 
 
 def main():
@@ -93,9 +103,10 @@ def main():
     s = sub.add_parser("sparql", help="run one catalog query; without an id, run all and print row counts")
     s.add_argument("query_id", nargs="?")
     s.add_argument("bindings", nargs="*", help="param=value, e.g. acronym=GRAPHIA from=2026-01-01 to=2026-06-30; missing = catalog example")
-    sub.add_parser("tags-gen", help="derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (new run_id); no Ollaya")
+    sub.add_parser("tags-gen", help="derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya")
+    sub.add_parser("query-tags", help="Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5")
     sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag of the dictionary)").add_argument("question", nargs="?", help=default_q)
-    sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 3); tags from the cache when the question is cached, else Ollaya").add_argument("question", nargs="?", help=default_q)
+    sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 3); question tags from the cache when the question is cached, else Ollaya; query tags from the latest query-tags run").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)").add_argument("question", nargs="?", help=default_q)
     pa = sub.add_parser("params", help="extract the query parameters found in a question: acronym (Ollaya choice over ABOX projects + none), from/to (regex); lists every catalog parameter and the queries needing it")
     pa.add_argument("question", nargs="?", help="no question = run on every test question whose expected query takes parameters")
@@ -107,8 +118,7 @@ def main():
     prof = Profile(args.profile)
     db = ProfileDb(prof.db_path)
     labeled = [q for q in prof.test_questions if "expected_query" in q]
-    if args.cmd not in ("sparql", "tags-gen"):
-        load_tags(prof, db)
+    qt_run = load_tags(prof, db, args.cmd in NEED_QUERY_TAGS) if args.cmd not in ("sparql", "tags-gen") else None
 
     if args.cmd == "sparql":
         if args.query_id:
@@ -134,8 +144,8 @@ def main():
         probs, _ = detect(prof, db, question)
         print_tags(probs, 0.5)
         print()
-        print_table(["candidate", "score", "description"],
-                    [[q, f"{s:.2f}", prof.catalog[q]["description"]] for q, s in pipeline.candidates(probs, prof.catalog)])
+        print_table(["candidate", "score", "description", "query tags"],
+                    [[q, f"{s:.2f}", prof.catalog[q]["description"], ", ".join(prof.catalog[q]["tags"])] for q, s in pipeline.candidates(probs, prof.catalog)])
     elif args.cmd == "select":
         question = question_or_default(p, prof, args.question)
         probs, _ = detect(prof, db, question)
@@ -173,7 +183,7 @@ def main():
         tags = {d["q_id"]: db.get(prof.name, d["question"], ollaya.MODEL, prof.version, run_id) for d in labeled}
         if absent := [i for i, t in tags.items() if not t]:
             sys.exit(f"q_id {', '.join(map(str, absent))} not in tag cache run_id {run_id} -> make tags-cache")
-        print(f"tags: cache run_id {run_id}", flush=True)
+        print(f"tags: query tags run_id {qt_run}, question tags cache run_id {run_id}", flush=True)
         prev = db.prev_eval(prof.name, ollaya.MODEL, prof.version, run_id)
         date, rows = datetime.now().isoformat(timespec="seconds"), []
         for d in labeled:
@@ -197,10 +207,17 @@ def main():
         sys.exit(0 if ok == len(labeled) else 1)
     elif args.cmd == "tags-gen":
         rows = generate(args.profile)
-        run_id = db.next_run_id()
-        db.put_tags(prof.name, prof.version, datetime.now().isoformat(timespec="seconds"), run_id, rows)
+        db.put_tags(prof.name, prof.version, datetime.now().isoformat(timespec="seconds"), rows)
         print_table(["tag", "source", "description"], [[t, s, d] for t, d, s in rows])
-        print(f"\nstored {len(rows)} tags in {prof.db_path} tags (run_id {run_id})")
+        print(f"\nstored {len(rows)} tags in {prof.db_path} tags ({prof.name} {prof.version}, replaced)")
+    elif args.cmd == "query-tags":
+        run_id, date, rows = db.next_run_id(), datetime.now().isoformat(timespec="seconds"), []
+        for i, (qid, q) in enumerate(prof.catalog.items(), 1):  # ponytail: q_id = catalog position, equals the qNN prefix here
+            probs = call_ollaya(ollaya.detect_tags, q["description"], prof.tags)
+            rows.append((i, qid, q["description"], probs))
+            print(f"[{i:>2}/{len(prof.catalog)}] {qid:<32} {', '.join(t for t, p in probs.items() if p >= pipeline.TAG_THRESHOLD)}", flush=True)
+        db.put_query_tags(prof.name, ollaya.MODEL, prof.version, date, run_id, rows)
+        print(f"stored {len(rows)} rows in {prof.db_path} query_tags (run_id {run_id})")
     elif args.cmd == "tags-cache":
         run_id = call_ollaya(fill, prof, db, ollaya.MODEL)
         print(f"cached {len(prof.test_questions)} questions in {prof.db_path} (run_id {run_id}, total rows {db.count()})")

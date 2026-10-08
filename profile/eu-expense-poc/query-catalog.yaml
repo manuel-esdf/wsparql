@@ -1,33 +1,23 @@
 queries:
   q01-total-expenses-by-project:
     description: "Compare total expenses across European projects"
-    tags: [expense, project, total, comparison]
   q02-project-expense-breakdown:
     description: "Break down a project's expenses by cost category"
-    tags: [expense, project, category, breakdown]
     params: {acronym: LUMEN}
   q03-travel-expenses-by-project:
     description: "Compare travel expenses across projects"
-    tags: [expense, project, travel, total, comparison]
   q04-expenses-by-work-package:
     description: "Show total expenses by work package"
-    tags: [expense, work-package, total, breakdown]
   q05-budget-vs-spent:
     description: "Compare project budget, spent amount and remaining budget"
-    tags: [project, budget, expense, remaining, comparison]
   q06-ineligible-expenses:
     description: "List expenses marked as ineligible"
-    tags: [expense, eligibility, list]
   q07-expenses-by-employee:
     description: "Show total expenses associated with each employee"
-    tags: [expense, employee, total, ranking]
   q08-expenses-by-supplier:
     description: "Show total expenses by supplier"
-    tags: [expense, supplier, total, ranking]
   q09-monthly-expenses:
     description: "Show monthly expense totals"
-    tags: [expense, time, month, trend]
   q10-project-expenses-in-period:
     description: "List project expenses within a date range"
-    tags: [expense, project, time, date-range, list]
     params: {acronym: LUMEN, from: "2026-01-01", to: "2026-03-31"}
