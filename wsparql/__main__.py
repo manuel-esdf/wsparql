@@ -44,8 +44,8 @@ def main():
         print_table(["tag", "prob"], [[t, f"{v:.2f}"] for t, v in probs.items()])
     elif args.cmd == "tags-test":
         store = Store(prof.db_path)
-        date = call_ollaya(evaluate.run_tag_questions, prof, store, ollaya.MODEL)
-        print(f"saved {len(prof.tag_questions)} rows to {prof.db_path} (run {date}, total rows {store.count()})")
+        run = call_ollaya(evaluate.run_tag_questions, prof, store, ollaya.MODEL)
+        print(f"saved {len(prof.tag_questions)} rows to {prof.db_path} (tags_test {run}, total rows {store.count()})")
 
 
 if __name__ == "__main__":
