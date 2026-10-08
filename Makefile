@@ -3,7 +3,7 @@ OLLAYA_MODEL ?= winnow
 PROFILE      ?= profile/eu-expense-poc
 export OLLAYA_HOST OLLAYA_MODEL PROFILE
 RUN = uv run python -m wsparql
-PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml demo-questions.yaml tests/tag-questions.txt
+PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml demo-questions.yaml tests/tag-questions.csv
 
 .DEFAULT_GOAL := help
 .PHONY: help install profile-check sparql tags tags-test ollaya-check ollaya-smoke-test
@@ -26,7 +26,7 @@ sparql: profile-check ## run a catalog query on the ABOX (make sparql Q=q01-tota
 tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"
 	@$(RUN) tags "$(Q)"
 
-tags-test: profile-check ## run every tests/tag-questions.txt question, append results to $(PROFILE)/profile.db
+tags-test: profile-check ## run every tests/tag-questions.csv question, append results to $(PROFILE)/profile.db
 	@$(RUN) tags-test
 
 ollaya-check: ## prerequisites: uv, ollaya binary, server up, model pulled

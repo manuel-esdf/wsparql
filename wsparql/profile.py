@@ -1,4 +1,5 @@
 """Load a POC profile directory: ontology + data graph, tags, catalog, queries, demo questions."""
+import csv
 from pathlib import Path
 
 import yaml
@@ -17,7 +18,8 @@ class Profile:
         self.catalog = yaml.safe_load((path / "query-catalog.yaml").read_text())["queries"]
         self.demo_questions = yaml.safe_load((path / "demo-questions.yaml").read_text())["questions"]
         self.queries = {p.stem: p.read_text() for p in sorted((path / "queries").glob("*.rq"))}
-        self.tag_questions = [q.strip() for q in (path / "tests/tag-questions.txt").read_text().splitlines() if q.strip()]
+        with open(path / "tests/tag-questions.csv", newline="") as f:
+            self.tag_questions = [(int(r["q_id"]), r["question"]) for r in csv.DictReader(f)]
         self.db_path = path / "profile.db"
 
     def run(self, query_id):

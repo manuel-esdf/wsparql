@@ -29,7 +29,7 @@ def main():
     s.add_argument("query_id", nargs="?")
     t = sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag)")
     t.add_argument("question")
-    sub.add_parser("tags-test", help="detect tags for every tests/tag-questions.txt question, append rows to profile.db")
+    sub.add_parser("tags-test", help="detect tags for every tests/tag-questions.csv question, append rows to profile.db")
     args = p.parse_args()
     prof = Profile(args.profile)
 
