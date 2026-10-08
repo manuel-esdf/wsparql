@@ -55,7 +55,7 @@ Files:
 - Makefile: `tags Q="..."`
 - `tags-cache` (added later): detects tags for every `tests/tag-questions.csv` question and
   caches them in `profile/profile.db` (git-ignored, shared by all profiles; `wsparql/cache.py`,
-  sqlite3 table `tag_cache`, one `run` number per `make tags-cache`)
+  sqlite3 table `tag_cache`, one `run_id` per `make tags-cache`)
 
 Manual test:
 

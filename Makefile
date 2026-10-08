@@ -32,7 +32,7 @@ tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Whic
 candidates: profile-check ## rank top 3 queries for Q; tags from the last tags-cache run when Q is cached, else Ollaya. No Q = first tests/tag-questions.csv question
 	@$(RUN) candidates "$(Q)"
 
-tags-cache: profile-check ## detect tags for every tests/tag-questions.csv question with Ollaya, store in profile/profile.db (new run number)
+tags-cache: profile-check ## detect tags for every tests/tag-questions.csv question with Ollaya, store in profile/profile.db (new run_id)
 	@$(RUN) tags-cache
 
 ollaya-check: ## prerequisites: uv, ollaya binary, server up, model pulled

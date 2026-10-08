@@ -31,7 +31,7 @@ def main():
     t.add_argument("question")
     c = sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 3); tags from the cache when the question is cached, else Ollaya")
     c.add_argument("question", nargs="?", help="defaults to the first profile tests/tag-questions.csv question")
-    sub.add_parser("tags-cache", help="detect tags for every tests/tag-questions.csv question, store them in profile/profile.db (new run)")
+    sub.add_parser("tags-cache", help="detect tags for every tests/tag-questions.csv question, store them in profile/profile.db (new run_id)")
     args = p.parse_args()
     prof = Profile(args.profile)
 
@@ -53,8 +53,8 @@ def main():
         print(f"Q: {question}", flush=True)
         hit = TagCache(prof.db_path).get(prof.name, question, ollaya.MODEL, prof.version)
         if hit:
-            probs, run = hit
-            print(f"tags: cache run {run}")
+            probs, run_id = hit
+            print(f"tags: cache run_id {run_id}")
         else:
             print("tags: Ollaya (not cached)", flush=True)
             probs = call_ollaya(ollaya.detect_tags, question, prof.tags)
@@ -64,8 +64,8 @@ def main():
                     [[q, f"{s:.2f}", prof.catalog[q]["description"]] for q, s in pipeline.candidates(probs, prof.catalog)])
     elif args.cmd == "tags-cache":
         cache = TagCache(prof.db_path)
-        run = call_ollaya(fill, prof, cache, ollaya.MODEL)
-        print(f"cached {len(prof.tag_questions)} questions in {prof.db_path} (run {run}, total rows {cache.count()})")
+        run_id = call_ollaya(fill, prof, cache, ollaya.MODEL)
+        print(f"cached {len(prof.tag_questions)} questions in {prof.db_path} (run_id {run_id}, total rows {cache.count()})")
 
 
 if __name__ == "__main__":
