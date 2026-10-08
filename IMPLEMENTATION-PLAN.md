@@ -93,7 +93,8 @@ plus `none: "None of these queries answers the question"`. Result = `none`,
 or confidence < `MIN_CONFIDENCE` (0.4, module constant) → no suitable query.
 
 Files:
-- `pipeline.py`: `select(question, candidates, catalog) -> (qid | None, confidence, probabilities)`
+- `pipeline.py`: `select(question, candidates, catalog) -> (qid | None, confidence, probabilities)`;
+  tags come from the cache when the question is cached (as in `candidates`)
 - `__main__.py`: `select "<question>"`, and `eval` (runs all demo questions:
   expected vs selected, prints a table and `N/10`, exit 1 if any mismatch)
 - Makefile: `select Q="..."`, `eval`

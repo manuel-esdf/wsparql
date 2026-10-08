@@ -1,12 +1,12 @@
 """Offline checks (no Ollaya): run with `make test`."""
 import unittest
 
-from wsparql.pipeline import candidates
+from wsparql.pipeline import candidates, select
 
 CATALOG = {
-    "q01-total-expenses-by-project": {"tags": ["expense", "project", "total", "comparison"]},
-    "q05-budget-vs-spent": {"tags": ["project", "budget", "expense", "remaining", "comparison"]},
-    "q06-ineligible-expenses": {"tags": ["expense", "eligibility", "list"]},
+    "q01-total-expenses-by-project": {"description": "d", "tags": ["expense", "project", "total", "comparison"]},
+    "q05-budget-vs-spent": {"description": "d", "tags": ["project", "budget", "expense", "remaining", "comparison"]},
+    "q06-ineligible-expenses": {"description": "d", "tags": ["expense", "eligibility", "list"]},
 }
 
 
@@ -24,3 +24,23 @@ class CandidatesTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SelectTest(unittest.TestCase):
+    RANKED = [("q06-ineligible-expenses", 0.9), ("q01-total-expenses-by-project", 0.5)]
+
+    def ask(self, choice, confidence):
+        """Stub for ollaya.decide: records the criteria sent, answers with a fixed choice."""
+        def _ask(question, questions):
+            self.criteria = questions["select"]["criteria"]
+            return {"select": {"choice": choice, "confidence": confidence, "probabilities": {}}}
+        return _ask
+
+    def test_criteria_are_candidates_plus_none(self):
+        select("q", self.RANKED, CATALOG, self.ask("none", 0.9))
+        self.assertEqual(list(self.criteria), ["q06-ineligible-expenses", "q01-total-expenses-by-project", "none"])
+
+    def test_none_or_low_confidence_means_no_query(self):
+        self.assertEqual(select("q", self.RANKED, CATALOG, self.ask("q06-ineligible-expenses", 0.9))[0], "q06-ineligible-expenses")
+        self.assertIsNone(select("q", self.RANKED, CATALOG, self.ask("none", 0.9))[0])
+        self.assertIsNone(select("q", self.RANKED, CATALOG, self.ask("q06-ineligible-expenses", 0.3))[0])

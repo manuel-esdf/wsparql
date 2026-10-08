@@ -6,7 +6,7 @@ RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml demo-questions.yaml tests/tag-questions.csv
 
 .DEFAULT_GOAL := help
-.PHONY: help install test profile-check sparql tags candidates tags-cache ollaya-check ollaya-smoke-test
+.PHONY: help install test profile-check sparql tags candidates select eval tags-cache ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -31,6 +31,12 @@ tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Whic
 
 candidates: profile-check ## rank top 3 queries for Q; tags from the last tags-cache run when Q is cached, else Ollaya. No Q = first tests/tag-questions.csv question
 	@$(RUN) candidates "$(Q)"
+
+select: profile-check ## rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/tag-questions.csv question
+	@$(RUN) select "$(Q)"
+
+eval: profile-check ## route every demo-questions.yaml question, expected vs selected, N/10, exit 1 on any mismatch (minutes on winnow)
+	@$(RUN) eval
 
 tags-cache: profile-check ## detect tags for every tests/tag-questions.csv question with Ollaya, store in profile/profile.db (new run_id)
 	@$(RUN) tags-cache
