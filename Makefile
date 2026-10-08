@@ -6,7 +6,7 @@ RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml demo-questions.yaml tests/tag-questions.txt
 
 .DEFAULT_GOAL := help
-.PHONY: help install profile-check sparql tags ollaya-check ollaya-smoke-test
+.PHONY: help install profile-check sparql tags tags-test ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -25,6 +25,9 @@ sparql: profile-check ## run a catalog query on the ABOX (make sparql Q=q01-tota
 
 tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"
 	@$(RUN) tags "$(Q)"
+
+tags-test: profile-check ## run every tests/tag-questions.txt question, append results to $(PROFILE)/profile.db
+	@$(RUN) tags-test
 
 ollaya-check: ## prerequisites: uv, ollaya binary, server up, model pulled
 	@command -v uv >/dev/null     || { echo "MISSING uv -> https://docs.astral.sh/uv/"; exit 1; }

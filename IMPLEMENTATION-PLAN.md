@@ -53,6 +53,8 @@ Files:
   (one `noul` question per tag, 19 tags in one call, sorted by prob desc)
 - `__main__.py`: `tags "<question>"` prints `tag  prob` table
 - Makefile: `tags Q="..."`
+- `tags-test` (added later): runs `tests/tag-questions.txt`, appends rows to `profile.db`
+  (`wsparql/store.py` sqlite3, `wsparql/evaluate.py` orchestration)
 
 Manual test:
 
