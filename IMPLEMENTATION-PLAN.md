@@ -54,7 +54,7 @@ Files:
 - `__main__.py`: `tags "<question>"` prints `tag  prob` table
 - Makefile: `tags Q="..."`
 - `tags-cache` (added later): detects tags for every `tests/test-questions.yaml` question and
-  caches them in `profile/profile.db` (git-ignored, shared by all profiles; `wsparql/cache.py`,
+  caches them in `profile/profile.db` (git-ignored, shared by all profiles; `wsparql/db.py`,
   sqlite3 table `tag_cache`, one `run_id` per `make tags-cache`)
 
 Manual test:
@@ -145,7 +145,11 @@ execution; tags come from the cache or Ollaya as in `candidates`), `__main__.py`
 `ask "<question>"`, `demo` (every `tests/test-questions.yaml` question with an `expected_query`,
 off-topic ones included), `eval` extended to the full chain: the expected query must be selected
 and return rows, `none` questions must answer "no suitable query" (a selected query with a
-missing parameter counts as "no suitable query (missing parameter X)").
+missing parameter counts as "no suitable query (missing parameter X)"). `eval` takes the tags
+from the latest `tags-cache` run_id only (fails if a question is not cached, never calls Ollaya
+for tags), stores one row per question in `profile/profile.db` table `eval_result` with that
+run_id, and reports whether the rows equal the previous eval of the same run_id (deterministic
+while the run_id is stable).
 Makefile: `ask Q="..."`, `demo`.
 
 Manual test:
@@ -172,7 +176,3 @@ Update `README.md` with the Makefile usage (`make help` output) and the final
 - **Tag threshold / calibration**: if step 4 misroutes, tune `MIN_CONFIDENCE`
   or k; keep the numbers as module constants, no config file.
 
-## Deliberately skipped
-
-No external triple store (rdflib in memory is enough for 128 lines of ABOX),
-no web UI, no text generation, no HTTP server, no config framework.

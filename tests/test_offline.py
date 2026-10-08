@@ -2,6 +2,7 @@
 import os
 import unittest
 
+from wsparql.db import ProfileDb
 from wsparql.pipeline import answer, candidates, extract_params, extract_period, select
 from wsparql.profile import Profile
 
@@ -100,3 +101,21 @@ class AnswerTest(unittest.TestCase):
         self.assertEqual((out["missing"], out["result"]), (["from", "to"], None))
         out = answer("What is the weather in Brussels?", self.PROBS, prof, self.ask("none"))
         self.assertEqual((out["selected"], out["params"], out["result"]), (None, {}, None))
+
+
+class DbTest(unittest.TestCase):
+    KEY = ("p", "winnow", "1.0.0")
+
+    def test_tag_runs_and_eval_rows(self):
+        db = ProfileDb(":memory:")
+        self.assertIsNone(db.last_run_id(*self.KEY))
+        db.put("p", 1, "q?", {"a": 0.1}, "winnow", "1.0.0", "d1", 1)
+        db.put("p", 1, "q?", {"a": 0.9}, "winnow", "1.0.0", "d2", 2)
+        self.assertEqual(db.get("p", "q?", "winnow", "1.0.0"), ({"a": 0.9}, 2))
+        self.assertEqual(db.get("p", "q?", "winnow", "1.0.0", run_id=1), ({"a": 0.1}, 1))
+        self.assertIsNone(db.get("p", "q?", "winnow", "1.0.0", run_id=3))
+        self.assertEqual((db.last_run_id(*self.KEY), db.last_run_id("p", "other", "1.0.0")), (2, None))
+        self.assertIsNone(db.prev_eval(*self.KEY, 2))
+        row = ("p", 1, "q?", "q01", "q01", 0.987, '{"acronym": "LUMEN"}', "", 3, 1, "winnow", "1.0.0", 2, "e1")
+        db.put_evals([row, ("p", 2, "w?", "none", "none", 1.0, "{}", "", None, 1, "winnow", "1.0.0", 2, "e1")])
+        self.assertEqual(db.prev_eval(*self.KEY, 2), ("e1", {1: ("q01", 0.99, 3, 1), 2: ("none", 1.0, None, 1)}))

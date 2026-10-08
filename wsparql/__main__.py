@@ -1,10 +1,12 @@
 import argparse
+import json
 import os
 import sys
 import urllib.error
+from datetime import datetime
 
 from wsparql import ollaya, pipeline
-from wsparql.cache import TagCache, fill
+from wsparql.db import ProfileDb, fill
 from wsparql.profile import Profile
 
 
@@ -63,9 +65,9 @@ def question_or_default(p, prof, question):
     return question
 
 
-def detect(prof, cache, question, log=print):
+def detect(prof, db, question, log=print):
     """Tag probabilities: last cached run_id when available, else Ollaya. Returns (probs, run_id or None)."""
-    hit = cache.get(prof.name, question, ollaya.MODEL, prof.version)
+    hit = db.get(prof.name, question, ollaya.MODEL, prof.version)
     if hit:
         log(f"tags: cache run_id {hit[1]}")
         return hit
@@ -88,11 +90,11 @@ def main():
     pa.add_argument("question", nargs="?", help="no question = run on every test question whose expected query takes parameters")
     sub.add_parser("ask", help="answer a question end to end: tags, candidates, selected query, parameters, result rows or no suitable query").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("demo", help="ask every tests/test-questions.yaml question that has an expected_query, off-topic ones included")
-    sub.add_parser("eval", help="full chain on every tests/test-questions.yaml question that has an expected_query: expected query selected and returns rows, none answers no suitable query; exit 1 on any mismatch")
+    sub.add_parser("eval", help="full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-cache run_id: expected query selected and returns rows, none answers no suitable query; rows stored in profile/profile.db eval_result; exit 1 on any mismatch")
     sub.add_parser("tags-cache", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
     args = p.parse_args()
     prof = Profile(args.profile)
-    cache = TagCache(prof.db_path)
+    db = ProfileDb(prof.db_path)
     labeled = [q for q in prof.test_questions if "expected_query" in q]
 
     if args.cmd == "sparql":
@@ -116,14 +118,14 @@ def main():
         print_tags(call_ollaya(ollaya.detect_tags, question_or_default(p, prof, args.question), prof.tags))
     elif args.cmd == "candidates":
         question = question_or_default(p, prof, args.question)
-        probs, _ = detect(prof, cache, question)
+        probs, _ = detect(prof, db, question)
         print_tags(probs, 0.5)
         print()
         print_table(["candidate", "score", "description"],
                     [[q, f"{s:.2f}", prof.catalog[q]["description"]] for q, s in pipeline.candidates(probs, prof.catalog)])
     elif args.cmd == "select":
         question = question_or_default(p, prof, args.question)
-        probs, _ = detect(prof, cache, question)
+        probs, _ = detect(prof, db, question)
         ranked = pipeline.candidates(probs, prof.catalog)
         print_selection(prof, ranked, *call_ollaya(pipeline.select, question, ranked, prof.catalog))
     elif args.cmd == "params":
@@ -144,29 +146,45 @@ def main():
             print_table(["q_id", "question", "expected_query", *names], rows)
     elif args.cmd == "ask":
         question = question_or_default(p, prof, args.question)
-        probs, _ = detect(prof, cache, question)
+        probs, _ = detect(prof, db, question)
         print_answer(prof, call_ollaya(pipeline.answer, question, probs, prof))
     elif args.cmd == "demo":
         for d in labeled:
             print(f"\n--- [{d['q_id']}] expected {d['expected_query']}\nQ: {d['question']}", flush=True)
-            probs, _ = detect(prof, cache, d["question"])
+            probs, _ = detect(prof, db, d["question"])
             print_answer(prof, call_ollaya(pipeline.answer, d["question"], probs, prof))
     elif args.cmd == "eval":
-        ok = 0
+        run_id = db.last_run_id(prof.name, ollaya.MODEL, prof.version)
+        if not run_id:
+            sys.exit(f"no tags cached for {prof.name} {prof.version} {ollaya.MODEL} -> make tags-cache")
+        tags = {d["q_id"]: db.get(prof.name, d["question"], ollaya.MODEL, prof.version, run_id) for d in labeled}
+        if absent := [i for i, t in tags.items() if not t]:
+            sys.exit(f"q_id {', '.join(map(str, absent))} not in tag cache run_id {run_id} -> make tags-cache")
+        print(f"tags: cache run_id {run_id}", flush=True)
+        prev = db.prev_eval(prof.name, ollaya.MODEL, prof.version, run_id)
+        date, rows = datetime.now().isoformat(timespec="seconds"), []
         for d in labeled:
             q, expected = d["question"], d["expected_query"]
-            probs, _ = detect(prof, cache, q, log=lambda *_: None)
-            out = call_ollaya(pipeline.answer, q, probs, prof)
+            out = call_ollaya(pipeline.answer, q, tags[d["q_id"]][0], prof)
             got = out["selected"] or pipeline.NONE
-            rows = f"{len(out['result'][1])} rows" if out["result"] else f"missing {', '.join(out['missing'])}" if out["missing"] else "-"
-            hit = expected == (got if out["result"] and out["result"][1] else pipeline.NONE)
-            ok += hit
-            print(f"{'ok  ' if hit else 'FAIL'} [{d['q_id']:>2}] {expected:<32} {got:<32} {out['confidence']:.2f} {rows:<10} | {q}", flush=True)
+            n = len(out["result"][1]) if out["result"] else None
+            hit = expected == (got if n else pipeline.NONE)
+            rows.append((prof.name, d["q_id"], q, expected, got, out["confidence"], json.dumps(out["params"]),
+                         ", ".join(out["missing"]), n, int(hit), ollaya.MODEL, prof.version, run_id, date))
+            shown = f"{n} rows" if n is not None else f"missing {', '.join(out['missing'])}" if out["missing"] else "-"
+            print(f"{'ok  ' if hit else 'FAIL'} [{d['q_id']:>2}] {expected:<32} {got:<32} {out['confidence']:.2f} {shown:<10} | {q}", flush=True)
+        db.put_evals(rows)
+        ok = sum(r[9] for r in rows)
         print(f"{ok}/{len(labeled)} (skipped {len(prof.test_questions) - len(labeled)} questions without expected_query)")
+        now = {r[1]: (r[4], round(r[5], 2), r[8], r[9]) for r in rows}
+        diff = [i for i in now if prev and now[i] != prev[1].get(i)]
+        print(f"stored {len(rows)} rows in {prof.db_path} eval_result (run_id {run_id}, {date}); "
+              + ("first eval of this run_id" if not prev else f"same as eval {prev[0]}" if not diff
+                 else f"differs from eval {prev[0]} on q_id {', '.join(map(str, diff))}"))
         sys.exit(0 if ok == len(labeled) else 1)
     elif args.cmd == "tags-cache":
-        run_id = call_ollaya(fill, prof, cache, ollaya.MODEL)
-        print(f"cached {len(prof.test_questions)} questions in {prof.db_path} (run_id {run_id}, total rows {cache.count()})")
+        run_id = call_ollaya(fill, prof, db, ollaya.MODEL)
+        print(f"cached {len(prof.test_questions)} questions in {prof.db_path} (run_id {run_id}, total rows {db.count()})")
 
 
 if __name__ == "__main__":

@@ -44,7 +44,7 @@ ask: profile-check ## answer Q end to end: tags, candidates, selected query, par
 demo: profile-check ## make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
 	@$(RUN) demo
 
-eval: profile-check ## full chain on every tests/test-questions.yaml question that has an expected_query: expected query selected and returns rows, none answers "no suitable query"; N/M, exit 1 on any mismatch (minutes on winnow)
+eval: profile-check ## full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-cache run_id (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M, exit 1 on any mismatch (minutes on winnow)
 	@$(RUN) eval
 
 tags-cache: profile-check ## detect tags for every tests/test-questions.yaml question with Ollaya, store in profile/profile.db (new run_id)
