@@ -54,7 +54,7 @@ def main():
     sl = sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)")
     sl.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
     pa = sub.add_parser("params", help="extract the query parameters found in a question: acronym (Ollaya choice over ABOX projects + none), from/to (regex); lists every catalog parameter and the queries needing it")
-    pa.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
+    pa.add_argument("question", nargs="?", help="no question = run on every test question whose expected query takes parameters")
     sub.add_parser("eval", help="route every tests/test-questions.yaml question that has an expected_query; exit 1 on any mismatch")
     sub.add_parser("tags-cache", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
     args = p.parse_args()
@@ -100,12 +100,21 @@ def main():
         print(f"selected: {qid} (confidence {conf:.2f})" if qid
               else f"no suitable query (choice {best} {conf:.2f}, min confidence {pipeline.MIN_CONFIDENCE})")
     elif args.cmd == "params":
-        question = question_or_default(p, prof, args.question)
         needed_by = {n: [qid for qid, q in prof.catalog.items() if n in q.get("params", {})]
                      for n in sorted({n for q in prof.catalog.values() for n in q.get("params", {})})}
-        found, how = call_ollaya(pipeline.extract_params, question, list(needed_by), prof.acronyms)
-        print_table(["param", "value", "how", "needed by"],
-                    [[n, found.get(n, "-"), how[n], ", ".join(qids)] for n, qids in needed_by.items()])
+        names = list(needed_by)
+        if args.question and args.question.strip():
+            print(f"Q: {args.question}", flush=True)
+            found, how = call_ollaya(pipeline.extract_params, args.question, names, prof.acronyms)
+            print_table(["param", "value", "how", "needed by"],
+                        [[n, found.get(n, "-"), how[n], ", ".join(qids)] for n, qids in needed_by.items()])
+        else:  # working examples: every test question whose expected query takes parameters
+            examples = [q for q in prof.test_questions if prof.catalog.get(q.get("expected_query"), {}).get("params")]
+            rows = []
+            for q in examples:
+                found, _ = call_ollaya(pipeline.extract_params, q["question"], names, prof.acronyms)
+                rows.append([str(q["q_id"]), q["question"], q["expected_query"], *[found.get(n, "-") for n in names]])
+            print_table(["q_id", "question", "expected_query", *names], rows)
     elif args.cmd == "eval":
         labeled = [q for q in prof.test_questions if "expected_query" in q]
         ok = 0

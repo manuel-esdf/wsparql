@@ -123,7 +123,7 @@ Goal: README stage "extract query parameters". Only q02 and q10 take parameters.
 
 Files: `pipeline.py` (`extract_period`, `extract_params`), `tests/test_offline.py` (date regex cases,
 `initBindings` run on q10), `__main__.py`: `params "<question>"` (extracts every catalog-declared
-parameter in isolation; step 6's `ask` extracts the selected query's ones), Makefile: `params Q="..."`, `sparql ... ARGS="k=v ..."`
+parameter in isolation, no question = the test questions whose expected query takes parameters; step 6's `ask` extracts the selected query's ones), Makefile: `params Q="..."`, `sparql ... ARGS="k=v ..."`
 
 Manual test:
 
