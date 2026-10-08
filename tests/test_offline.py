@@ -1,7 +1,9 @@
 """Offline checks (no Ollaya): run with `make test`."""
+import os
 import unittest
 
-from wsparql.pipeline import candidates, select
+from wsparql.pipeline import candidates, extract_params, extract_period, select
+from wsparql.profile import Profile
 
 CATALOG = {
     "q01-total-expenses-by-project": {"description": "d", "tags": ["expense", "project", "total", "comparison"]},
@@ -44,3 +46,35 @@ class SelectTest(unittest.TestCase):
         self.assertEqual(select("q", self.RANKED, CATALOG, self.ask("q06-ineligible-expenses", 0.9))[0], "q06-ineligible-expenses")
         self.assertIsNone(select("q", self.RANKED, CATALOG, self.ask("none", 0.9))[0])
         self.assertIsNone(select("q", self.RANKED, CATALOG, self.ask("q06-ineligible-expenses", 0.3))[0])
+
+
+class PeriodTest(unittest.TestCase):
+    def test_quarter_months_year(self):
+        self.assertEqual(extract_period("List LUMEN expenses for Q1 2026"), ("2026-01-01", "2026-03-31"))
+        self.assertEqual(extract_period("What did we spend during the second quarter of 2026?"), ("2026-04-01", "2026-06-30"))
+        self.assertEqual(extract_period("List LUMEN expenses between January and March 2026."), ("2026-01-01", "2026-03-31"))
+        self.assertEqual(extract_period("What are Claire Roux's expenses in March 2026?"), ("2026-03-01", "2026-03-31"))
+        self.assertEqual(extract_period("costs lumen 2026"), ("2026-01-01", "2026-12-31"))
+        self.assertIsNone(extract_period("Show the expenses of the last six months."))
+
+
+class ParamsTest(unittest.TestCase):
+    NAMES = ["acronym", "from", "to"]
+
+    def ask(self, choice, confidence):
+        return lambda question, questions: {"acronym": {"choice": choice, "confidence": confidence, "probabilities": {}}}
+
+    def test_found_and_missing(self):
+        self.assertEqual(extract_params("List LUMEN expenses for Q1 2026", self.NAMES, ["GRAPHIA", "LUMEN"], self.ask("LUMEN", 0.9)),
+                         ({"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"}, []))
+        self.assertEqual(extract_params("Spending overview please.", self.NAMES, ["LUMEN"], self.ask("none", 0.9)), ({}, self.NAMES))
+        self.assertEqual(extract_params("q", ["acronym"], ["LUMEN"], self.ask("LUMEN", 0.2)), ({}, ["acronym"]))
+
+
+class BindingsTest(unittest.TestCase):
+    def test_q10_runs_with_bound_params(self):
+        prof = Profile(os.environ["PROFILE"])
+        q = "q10-project-expenses-in-period"
+        self.assertEqual(prof.acronyms, ["GRAPHIA", "LUMEN", "OPENSCIENCE"])
+        self.assertEqual(len(prof.run(q, {"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"})[1]), 6)  # the old hard-coded query
+        self.assertEqual(len(prof.run(q, {"acronym": "GRAPHIA", "from": "2026-01-01", "to": "2026-06-30"})[1]), 3)

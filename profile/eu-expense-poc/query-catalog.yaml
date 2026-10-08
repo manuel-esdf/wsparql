@@ -5,6 +5,7 @@ queries:
   q02-project-expense-breakdown:
     description: "Break down a project's expenses by cost category"
     tags: [expense, project, category, breakdown]
+    params: {acronym: LUMEN}
   q03-travel-expenses-by-project:
     description: "Compare travel expenses across projects"
     tags: [expense, project, travel, total, comparison]
@@ -29,3 +30,4 @@ queries:
   q10-project-expenses-in-period:
     description: "List project expenses within a date range"
     tags: [expense, project, time, date-range, list]
+    params: {acronym: LUMEN, from: "2026-01-01", to: "2026-03-31"}

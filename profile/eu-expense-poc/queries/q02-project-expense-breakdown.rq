@@ -5,7 +5,7 @@ WHERE {
            ex:chargedToProject ?project ;
            ex:category ?category ;
            ex:amount ?amount .
-  ?project ex:acronym "LUMEN" .
+  ?project ex:acronym ?acronym .
   ?category ex:name ?categoryName .
 }
 GROUP BY ?categoryName

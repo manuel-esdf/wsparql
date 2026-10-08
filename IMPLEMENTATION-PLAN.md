@@ -113,22 +113,24 @@ Goal: README stage "extract query parameters". Only q02 and q10 take parameters.
 
 - Rewrite `q02` and `q10`: replace literal `"LUMEN"` by `?acronym`, dates by
   `?from` / `?to`; values are injected with rdflib `initBindings` (no templating).
-- `query-catalog.yaml`: add `params: [acronym]` (q02) and `params: [acronym, from, to]` (q10).
+- `query-catalog.yaml`: `params: {acronym: LUMEN}` (q02), `params: {acronym: LUMEN, from: ..., to: ...}` (q10);
+  the example values are what the queries used to hard-code, `make sparql` without `ARGS` uses them.
 - Extraction:
   - `acronym`: Ollaya `choice` over `SELECT DISTINCT ?acronym` from the ABOX + `none`.
   - `from`/`to`: regex for `Q[1-4] YYYY`, `YYYY-MM`, `YYYY`, month names
     (`# ponytail: regex; switch to an Ollaya choice over quarters/years if phrasing varies`).
   - A required param not found → "no suitable query (missing parameter X)".
 
-Files: `pipeline.py` (`extract_params`), `tests/test_offline.py` (date regex cases,
-`initBindings` run on q10), `__main__.py`: `params "<question>"`, Makefile: `params Q="..."`
+Files: `pipeline.py` (`extract_period`, `extract_params`), `tests/test_offline.py` (date regex cases,
+`initBindings` run on q10), `__main__.py`: `params "<question>"` (extracts every catalog-declared
+parameter in isolation; step 6's `ask` extracts the selected query's ones), Makefile: `params Q="..."`, `sparql ... ARGS="k=v ..."`
 
 Manual test:
 
     make test
     make params Q="List LUMEN expenses for Q1 2026"   # acronym=LUMEN from=2026-01-01 to=2026-03-31
-    make params Q="How are GRAPHIA expenses distributed by cost category?"  # acronym=GRAPHIA
-    make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2025-01-01 to=2025-12-31"
+    make params Q="How are GRAPHIA expenses distributed by cost category?"  # acronym=GRAPHIA, from/to -
+    make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"   # 3 rows
 
 Commit: "Extract query parameters and bind them at execution"
 

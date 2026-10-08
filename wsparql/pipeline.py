@@ -1,4 +1,7 @@
-"""Decision pipeline: detected tags -> ranked candidate queries -> Ollaya selects one or none (-> params in step 5)."""
+"""Decision pipeline: detected tags -> ranked candidate queries -> Ollaya selects one or none -> query parameters."""
+import calendar
+import re
+
 from wsparql import ollaya
 
 
@@ -22,3 +25,44 @@ def select(question, ranked, catalog, ask=ollaya.decide):
     a = ask(question, {"select": {"type": "choice", "instructions": SELECT_INSTRUCTIONS, "criteria": criteria}})["select"]
     qid = None if a["choice"] == NONE or a["confidence"] < MIN_CONFIDENCE else a["choice"]
     return qid, a["confidence"], a["probabilities"]
+
+
+MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
+QUARTERS = {"first": 1, "second": 2, "third": 3, "fourth": 4}
+
+
+def extract_period(text):
+    """(from, to) ISO dates: 'Q1 2026' / 'first quarter of 2026' -> quarter; month names -> first..last named month
+    of that year ('between January and March 2026', 'March 2026'); a year alone -> whole year; no year -> None."""
+    # ponytail: regex; switch to an Ollaya choice over quarters/years if phrasing varies ("last six months" -> None)
+    t = text.lower()
+    year = re.search(r"\b(20\d\d)\b", t)
+    if not year:
+        return None
+    y = int(year.group(1))
+    q = re.search(r"\bq([1-4])\b", t) or re.search(r"\b(first|second|third|fourth) quarter\b", t)
+    if q:
+        n = int(q.group(1)) if q.group(1).isdigit() else QUARTERS[q.group(1)]
+        a, b = 3 * n - 2, 3 * n
+    else:
+        months = [MONTHS[m] for m in re.findall(r"\b(" + "|".join(MONTHS) + r")\b", t)]
+        a, b = (min(months), max(months)) if months else (1, 12)
+    return f"{y}-{a:02d}-01", f"{y}-{b:02d}-{calendar.monthrange(y, b)[1]}"
+
+
+def extract_params(question, names, acronyms, ask=ollaya.decide):
+    """Values for the named query parameters. Returns (found {name: value}, missing [name]).
+    acronym: one Ollaya choice over the ABOX acronyms plus none; from/to: extract_period."""
+    found = {}
+    if "acronym" in names:
+        criteria = {a: f"The question is about the project {a}" for a in acronyms}
+        criteria[NONE] = "The question names no specific project"
+        a = ask(question, {"acronym": {"type": "choice", "instructions": "Which European project is the question about?",
+                                       "criteria": criteria}})["acronym"]
+        if a["choice"] != NONE and a["confidence"] >= MIN_CONFIDENCE:
+            found["acronym"] = a["choice"]
+    if {"from", "to"} & set(names):
+        period = extract_period(question)
+        if period:
+            found["from"], found["to"] = period
+    return found, [n for n in names if n not in found]

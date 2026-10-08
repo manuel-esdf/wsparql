@@ -6,7 +6,7 @@ RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml tests/test-questions.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help install test profile-check sparql tags candidates select eval tags-cache ollaya-check ollaya-smoke-test
+.PHONY: help install test profile-check sparql tags candidates select params eval tags-cache ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -23,8 +23,8 @@ profile-check: ## mandatory profile files present in $(PROFILE); every catalog q
 	  test -f $(PROFILE)/queries/$$q.rq || { echo "MISSING $(PROFILE)/queries/$$q.rq (listed in query-catalog.yaml)"; exit 1; }; done
 	@echo "profile $(notdir $(PROFILE)) $$(cat $(PROFILE)/VERSION) OK"
 
-sparql: profile-check ## run a catalog query on the ABOX (make sparql Q=q01-total-expenses-by-project); no Q = all queries, row counts only
-	@$(RUN) sparql $(Q)
+sparql: profile-check ## run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
+	@$(RUN) sparql $(Q) $(ARGS)
 
 tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"; no Q = first tests/test-questions.yaml question
 	@$(RUN) tags "$(Q)"
@@ -34,6 +34,9 @@ candidates: profile-check ## rank top 3 queries for Q; tags from the last tags-c
 
 select: profile-check ## rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question
 	@$(RUN) select "$(Q)"
+
+params: profile-check ## extract query parameters from a question (acronym via Ollaya choice, dates via regex): make params Q="List LUMEN expenses for Q1 2026"
+	@$(RUN) params "$(Q)"
 
 eval: profile-check ## route every tests/test-questions.yaml question that has an expected_query, N/M, exit 1 on any mismatch (minutes on winnow)
 	@$(RUN) eval

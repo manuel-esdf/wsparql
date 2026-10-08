@@ -47,12 +47,15 @@ def main():
     sub = p.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("sparql", help="run one catalog query; without an id, run all and print row counts")
     s.add_argument("query_id", nargs="?")
+    s.add_argument("bindings", nargs="*", help="param=value, e.g. acronym=GRAPHIA from=2026-01-01 to=2026-06-30; missing = catalog example")
     t = sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag)")
     t.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
     c = sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 3); tags from the cache when the question is cached, else Ollaya")
     c.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
     sl = sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)")
     sl.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
+    pa = sub.add_parser("params", help="extract every catalog-declared query parameter from a question (acronym via Ollaya choice, dates via regex)")
+    pa.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
     sub.add_parser("eval", help="route every tests/test-questions.yaml question that has an expected_query; exit 1 on any mismatch")
     sub.add_parser("tags-cache", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
     args = p.parse_args()
@@ -61,10 +64,14 @@ def main():
 
     if args.cmd == "sparql":
         if args.query_id:
-            print_table(*prof.run(args.query_id))
+            given = dict(b.split("=", 1) for b in args.bindings)
+            params = {**prof.catalog[args.query_id].get("params", {}), **given}
+            if params:
+                print("params: " + " ".join(f"{k}={v}" for k, v in params.items()) + ("" if given else " (catalog example)"))
+            print_table(*prof.run(args.query_id, params))
         else:
             for qid in prof.queries:
-                print(f"{qid:<36} {len(prof.run(qid)[1]):>3} rows")
+                print(f"{qid:<36} {len(prof.run(qid, prof.catalog[qid].get('params'))[1]):>3} rows")
     elif args.cmd == "tags":
         probs = call_ollaya(ollaya.detect_tags, question_or_default(p, prof, args.question), prof.tags)
         print_table(["tag", "prob"], [[t, f"{v:.2f}"] for t, v in probs.items()])
@@ -86,6 +93,11 @@ def main():
         best = max(prob, key=prob.get)
         print(f"selected: {qid} (confidence {conf:.2f})" if qid
               else f"no suitable query (choice {best} {conf:.2f}, min confidence {pipeline.MIN_CONFIDENCE})")
+    elif args.cmd == "params":
+        question = question_or_default(p, prof, args.question)
+        names = sorted({n for q in prof.catalog.values() for n in q.get("params", {})})
+        found, _ = call_ollaya(pipeline.extract_params, question, names, prof.acronyms)
+        print_table(["param", "value"], [[n, found.get(n, "-")] for n in names])
     elif args.cmd == "eval":
         labeled = [q for q in prof.test_questions if "expected_query" in q]
         ok = 0
