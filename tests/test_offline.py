@@ -119,3 +119,5 @@ class DbTest(unittest.TestCase):
         row = ("p", 1, "q?", "q01", "q01", 0.987, '{"acronym": "LUMEN"}', "", 3, 1, "winnow", "1.0.0", 2, "e1")
         db.put_evals([row, ("p", 2, "w?", "none", "none", 1.0, "{}", "", None, 1, "winnow", "1.0.0", 2, "e1")])
         self.assertEqual(db.prev_eval(*self.KEY, 2), ("e1", {1: ("q01", 0.99, 3, 1), 2: ("none", 1.0, None, 1)}))
+        db.put_evals([row[:-1] + ("e2",)])  # same (profile, q_id, run_id): replaced, not added
+        self.assertEqual(db.conn.execute("SELECT COUNT(*), MAX(date) FROM eval_result").fetchone(), (2, "e2"))

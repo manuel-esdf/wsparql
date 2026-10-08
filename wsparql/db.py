@@ -2,7 +2,7 @@
 
 tag_cache:   Ollaya tag probabilities per question, filled by `make tags-cache` (one run_id per invocation),
              read by `make candidates` / `select` / `ask` / `demo` (latest run) and `make eval` (one fixed run).
-eval_result: one row per `make eval` question, with the tag_cache run_id the tags came from.
+eval_result: one row per (profile, q_id, run_id), replaced by each `make eval`; run_id = the tag_cache run the tags came from.
 """
 import json
 import sqlite3
@@ -35,10 +35,11 @@ CREATE TABLE IF NOT EXISTS eval_result (
     version    TEXT NOT NULL,
     run_id     INTEGER NOT NULL,
     date       TEXT NOT NULL);
+CREATE UNIQUE INDEX IF NOT EXISTS eval_key ON eval_result (profile, q_id, run_id);
 """
 # tag_cache:   tags = JSON {tag: probability}; run_id = 1, 2, ... per `make tags-cache`
 # eval_result: selected = catalog id or "none"; params = JSON of the bound values; missing = "acronym, from" or "";
-#              row_count NULL when no query ran; run_id = the tag_cache run used; date = one value per `make eval`
+#              row_count NULL when no query ran; date = the `make eval` that wrote the row (one value per eval)
 
 EVAL_COLS = "profile, q_id, question, expected, selected, confidence, params, missing, row_count, ok, model, version, run_id, date"
 
@@ -79,12 +80,13 @@ class ProfileDb:
 
     # eval_result
     def put_evals(self, rows):
-        """Store one eval: rows in EVAL_COLS order, one transaction (an interrupted eval stores nothing)."""
+        """Store one eval: rows in EVAL_COLS order, replacing the row of the same (profile, q_id, run_id);
+        one transaction (an interrupted eval stores nothing)."""
         with self.conn:
-            self.conn.executemany(f"INSERT INTO eval_result ({EVAL_COLS}) VALUES ({', '.join('?' * 14)})", rows)
+            self.conn.executemany(f"INSERT OR REPLACE INTO eval_result ({EVAL_COLS}) VALUES ({', '.join('?' * 14)})", rows)
 
     def prev_eval(self, profile, model, version, run_id):
-        """Most recent stored eval for this profile/model/version/run_id: (date, {q_id: (selected, confidence, row_count, ok)}),
+        """Last stored eval for this profile/model/version/run_id: (date, {q_id: (selected, confidence, row_count, ok)}),
         or None. confidence rounded to 2 decimals (what `make eval` prints)."""
         key = (profile, model, version, run_id)
         date = self.conn.execute("SELECT MAX(date) FROM eval_result WHERE profile = ? AND model = ? AND version = ? AND run_id = ?",

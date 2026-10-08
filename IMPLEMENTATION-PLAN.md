@@ -147,8 +147,8 @@ off-topic ones included), `eval` extended to the full chain: the expected query 
 and return rows, `none` questions must answer "no suitable query" (a selected query with a
 missing parameter counts as "no suitable query (missing parameter X)"). `eval` takes the tags
 from the latest `tags-cache` run_id only (fails if a question is not cached, never calls Ollaya
-for tags), stores one row per question in `profile/profile.db` table `eval_result` with that
-run_id, and reports whether the rows equal the previous eval of the same run_id (deterministic
+for tags), stores one row per (profile, q_id, run_id) in `profile/profile.db` table `eval_result`
+(replaced on each eval), and reports whether the rows equal the previous eval of the same run_id (deterministic
 while the run_id is stable).
 Makefile: `ask Q="..."`, `demo`.
 

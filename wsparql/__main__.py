@@ -179,8 +179,8 @@ def main():
         now = {r[1]: (r[4], round(r[5], 2), r[8], r[9]) for r in rows}
         diff = [i for i in now if prev and now[i] != prev[1].get(i)]
         print(f"stored {len(rows)} rows in {prof.db_path} eval_result (run_id {run_id}, {date}); "
-              + ("first eval of this run_id" if not prev else f"same as eval {prev[0]}" if not diff
-                 else f"differs from eval {prev[0]} on q_id {', '.join(map(str, diff))}"))
+              + ("first eval of this run_id" if not prev else f"same as previous eval {prev[0]}" if not diff
+                 else f"differs from previous eval {prev[0]} on q_id {', '.join(map(str, diff))}"))
         sys.exit(0 if ok == len(labeled) else 1)
     elif args.cmd == "tags-cache":
         run_id = call_ollaya(fill, prof, db, ollaya.MODEL)
