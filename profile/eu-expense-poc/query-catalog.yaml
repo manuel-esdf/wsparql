@@ -2,7 +2,7 @@ queries:
   q01-total-expenses-by-project:
     description: "Compare total expenses across European projects"
   q02-project-expense-breakdown:
-    description: "Break down a project's expenses by cost category"
+    description: "Breakdown of one European project's expenses by expense category"
     params: {acronym: LUMEN}
   q03-travel-expenses-by-project:
     description: "Compare travel expenses across projects"

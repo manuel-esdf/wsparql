@@ -10,7 +10,7 @@ TAG_THRESHOLD = 0.5  # ponytail: a query's tags = those Ollaya detected at >= 0.
 
 def candidates(tag_probs, catalog, k=3):
     """Rank catalog queries by the mean detected probability of their tags; returns the top k as [(qid, score)]."""
-    # ponytail: plain mean; weight rare tags higher (IDF) if ubiquitous tags like "expense" blur the ranking
+    # ponytail: plain mean; a query with a wide tag list is diluted: tighten its description (IDF weighting tested offline, no gain)
     scored = [(qid, sum(tag_probs.get(t, 0.0) for t in q["tags"]) / len(q["tags"])) for qid, q in catalog.items()]
     return sorted(scored, key=lambda x: -x[1])[:k]
 

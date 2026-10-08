@@ -4,7 +4,7 @@ Synthetic RDF dataset designed to demonstrate natural-language routing to predef
 
 ## Files
 
-- `VERSION`: profile version (semver), bump when tags, catalog, queries or data change
+- `VERSION`: profile version (semver), bump when `tbox.ttl`, `abox.ttl`, the queries or the test questions change (the cached tags are keyed by it); a catalog description change only needs `make query-tags`
 - `tbox.ttl`: domain ontology; its `rdfs:comment`s on classes, properties and category individuals are the tag descriptions (`make tags-gen` derives the tag dictionary from it, see [GENERATE-TAGS-FROM-ONTOLOGY.md](../../GENERATE-TAGS-FROM-ONTOLOGY.md))
 - `abox.ttl`: synthetic company, projects, work packages, employees, suppliers and expenses
 - `queries/`: 10 predefined SPARQL queries; q02 and q10 take `?acronym`, q10 also `?from`/`?to` (bound at execution, never templated)

@@ -101,7 +101,7 @@ dropped `remaining`. Each question now costs 23 `noul` questions instead of 19.
 `make query-tags` with `winnow` (tags ≥ 0.5 per query, detected by Ollaya on the descriptions):
 
     [ 1/10] q01-total-expenses-by-project    expense, european-project, comparison, amount, total, expense-category
-    [ 2/10] q02-project-expense-breakdown    expense, breakdown, expense-category, budget, equipment, travel, comparison, work-package, subcontracting, personnel, amount
+    [ 2/10] q02-project-expense-breakdown    european-project, expense, expense-category, breakdown, budget, comparison, amount
     [ 3/10] q03-travel-expenses-by-project   travel, comparison, expense, amount, expense-category, other-goods-services
     [ 4/10] q04-expenses-by-work-package     work-package, amount, expense, total, breakdown, comparison
     [ 5/10] q05-budget-vs-spent              comparison, expense, budget, amount
@@ -111,14 +111,17 @@ dropped `remaining`. Each question now costs 23 `noul` questions instead of 19.
     [ 9/10] q09-monthly-expenses             time, month, date-range, total, expense, amount, trend, expense-category
     [10/10] q10-project-expenses-in-period   time, date-range, expense, list, other-goods-services, work-package, budget
 
-The detected lists are wider than the hand-written ones (`amount` and `expense-category` almost everywhere, q02 gets
-every category plus `budget` at 0.97) and `european-project` is missed where the description says "project" while the
-comment says "European projects": the wording of the comments and of the descriptions is now the tuning surface,
-checked by `make eval`.
+The detected lists are wider than the hand-written ones (`amount` and `expense-category` almost everywhere) and
+`european-project` is missed where the description says "project" while the comment says "European projects": the wording
+of the comments and of the descriptions is now the tuning surface, checked by `make eval`. Example: the original q02
+description "Break down a project's expenses by cost category" got 11 tags (every category plus `budget` at 0.97) and
+three breakdown questions lost q02 from their top 3 candidates; "Breakdown of one European project's expenses by expense
+category" gets the 7 above and the expected query is among the candidates for 31 of the 33 in-domain questions.
+IDF weighting in `candidates` was tested offline on the same data and did not help: the rare extra tags weigh more.
 
-`make eval` with these tags: **33/40** against 34/40 with the hand-written ones. Two old misses pass, three breakdown
-questions fail because q02's 11 tags dilute its mean score in `candidates` and it drops out of the top 3 (details in
-the README). Next lever: weight rare tags higher (IDF) in `pipeline.candidates`, or tighten the q02 description.
+`make eval` with these tags: **33/40** against 34/40 with the hand-written ones; the remaining misses are at the
+selection stage, on questions naming a project (details in the README). Ollaya's `noul` answers are reproducible: the nine
+untouched descriptions got identical probabilities in every `make query-tags` run.
 
 ## Storage
 
