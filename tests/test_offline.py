@@ -107,6 +107,17 @@ class AnswerTest(unittest.TestCase):
         self.assertEqual((out["selected"], out["params"], out["result"]), (None, {}, None))
 
 
+    def test_direct_baseline(self):
+        prof, seen = Profile(os.environ["PROFILE"]), {}
+        def ask(question, questions):
+            seen.update(questions)
+            return {k: {"choice": {"select": self.Q10, "acronym": "LUMEN"}[k], "confidence": 0.9, "probabilities": {}} for k in questions}
+        out = answer("List LUMEN expenses for Q1 2026", {}, prof, ask, direct=True)
+        self.assertEqual(list(seen["select"]["criteria"]), [*prof.catalog, "none"])
+        self.assertTrue(seen["select"]["criteria"][self.Q10].startswith("PREFIX"))  # the raw .rq text
+        self.assertEqual(([q for q, _ in out["candidates"]], out["selected"], len(out["result"][1])), (list(prof.catalog), self.Q10, 6))
+
+
 class TagsGenTest(unittest.TestCase):
     def test_profile_dictionary(self):
         rows = generate(os.environ["PROFILE"])

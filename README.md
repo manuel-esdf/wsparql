@@ -63,7 +63,7 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     test                 offline unit tests (no Ollaya)
     profile-check        mandatory profile files present in $(PROFILE); every catalog query has its .rq
     sparql               run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
-    tags-gen             derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (new run_id); no Ollaya, instant. See GENERATE-TAGS-FROM-ONTOLOGY.md
+    tags-gen             derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya, instant. See GENERATE-TAGS-FROM-ONTOLOGY.md
     query-tags           Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5 (seconds per query on winnow)
     tags                 detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"; no Q = first tests/test-questions.yaml question
     candidates           rank top 3 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
@@ -72,6 +72,7 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     ask                  answer Q end to end: tags, candidates, selected query, parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
     demo                 make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
     eval                 full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M, exit 1 on any mismatch (minutes on winnow)
+    eval-direct          baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the raw SPARQL of all 10 queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
     tags-cache           detect tags for every tests/test-questions.yaml question with Ollaya (needs make tags-gen), store in profile/profile.db (new run_id)
     ollaya-check         prerequisites: uv, ollaya binary, server up, model pulled
     ollaya-smoke-test    one tag-detection query on /v1/systemone; fails if "expense" tag < 0.5
@@ -145,6 +146,13 @@ The 5 misses:
   set; the next gain is more test questions, or one catalog query per intent (a single-project total next to the comparison).
 - 2 questions whose expected query is not among the 3 candidates ("What did OPENSCIENCE spend on equipment?", q02 no
   longer carries `equipment`; "Which work package of GRAPHIA is the most expensive?", q04). Lever: those descriptions.
+
+`make eval-direct` is the baseline without tags: for each labeled question, one `choice` over the raw SPARQL text of all
+10 queries plus `none`, then the same parameter extraction and run. It also scores **35/40**, with other misses: 4 of its
+5 are "one figure" questions on q05 and q06 ("How much budget remains on each project?", "How much ineligible spending do
+we have in total?"). On this catalog the tag stage does not buy accuracy. It buys explainability (the tag and candidate
+tables) and a choice over 3 short descriptions instead of 10 full queries, which is what matters once the catalog grows
+past what one `choice` can hold.
 
 ## Role of the Ontology
 

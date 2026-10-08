@@ -6,7 +6,7 @@ RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl query-catalog.yaml tests/test-questions.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help install test profile-check sparql tags-gen query-tags tags candidates select params ask demo eval tags-cache ollaya-check ollaya-smoke-test
+.PHONY: help install test profile-check sparql tags-gen query-tags tags candidates select params ask demo eval eval-direct tags-cache ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -52,6 +52,9 @@ demo: profile-check ## make ask on every tests/test-questions.yaml question that
 
 eval: profile-check ## full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M, exit 1 on any mismatch (minutes on winnow)
 	@$(RUN) eval
+
+eval-direct: profile-check ## baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the raw SPARQL of all 10 queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
+	@$(RUN) eval-direct
 
 tags-cache: profile-check ## detect tags for every tests/test-questions.yaml question with Ollaya (needs make tags-gen), store in profile/profile.db (new run_id)
 	@$(RUN) tags-cache

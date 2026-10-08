@@ -22,14 +22,28 @@ SELECT_INSTRUCTIONS = ("The queries are templates: the project, employee, suppli
                        "query can compute.")
 
 
-def select(question, ranked, catalog, ask=ollaya.decide):
-    """One Ollaya choice question over the ranked candidates plus `none`.
+NONE_CRITERION = "Off-topic, or none of these queries computes the requested answer even with its parameters filled in"
+DIRECT_INSTRUCTIONS = ("Which SPARQL query computes the answer to the question? ?acronym, ?from and ?to are parameters filled in "
+                       "afterwards. Pick none only for an off-topic question or an answer no query computes.")
+
+
+def choose(question, instructions, criteria, ask):
+    """One Ollaya choice question over `criteria` plus `none`.
     Returns (qid or None for "no suitable query", confidence, {label: probability})."""
-    criteria = {qid: catalog[qid]["description"] for qid, _ in ranked}
-    criteria[NONE] = "Off-topic, or none of these queries computes the requested answer even with its parameters filled in"
-    a = ask(question, {"select": {"type": "choice", "instructions": SELECT_INSTRUCTIONS, "criteria": criteria}})["select"]
+    criteria[NONE] = NONE_CRITERION
+    a = ask(question, {"select": {"type": "choice", "instructions": instructions, "criteria": criteria}})["select"]
     qid = None if a["choice"] == NONE or a["confidence"] < MIN_CONFIDENCE else a["choice"]
     return qid, a["confidence"], a["probabilities"]
+
+
+def select(question, ranked, catalog, ask=ollaya.decide):
+    """The ranked candidates, described by their catalog description."""
+    return choose(question, SELECT_INSTRUCTIONS, {qid: catalog[qid]["description"] for qid, _ in ranked}, ask)
+
+
+def select_direct(question, prof, ask=ollaya.decide):
+    """Baseline without tags: every catalog query, described by its raw SPARQL text."""
+    return choose(question, DIRECT_INSTRUCTIONS, {qid: prof.queries[qid] for qid in prof.catalog}, ask)
 
 
 MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
@@ -78,12 +92,17 @@ def extract_params(question, names, acronyms, ask=ollaya.decide):
     return found, how
 
 
-def answer(question, tag_probs, prof, ask=ollaya.decide):
+def answer(question, tag_probs, prof, ask=ollaya.decide, direct=False):
     """Rank, select, extract the selected query's parameters, run it. Returns the demo blocks:
     {question, tags, candidates, selected, confidence, probabilities, params, how, missing, result};
-    selected None = no suitable query; missing = declared params not found (query not run); result = (cols, rows) or None."""
-    ranked = candidates(tag_probs, prof.catalog)
-    qid, conf, prob = select(question, ranked, prof.catalog, ask)
+    selected None = no suitable query; missing = declared params not found (query not run); result = (cols, rows) or None.
+    direct: no tags, no ranking, select_direct over every query (baseline)."""
+    if direct:
+        ranked = [(qid, 0.0) for qid in prof.catalog]
+        qid, conf, prob = select_direct(question, prof, ask)
+    else:
+        ranked = candidates(tag_probs, prof.catalog)
+        qid, conf, prob = select(question, ranked, prof.catalog, ask)
     out = dict(question=question, tags=tag_probs, candidates=ranked, selected=qid, confidence=conf,
                probabilities=prob, params={}, how={}, missing=[], result=None)
     if qid:

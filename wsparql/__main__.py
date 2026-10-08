@@ -50,6 +50,18 @@ def print_answer(prof, out):
         print_table(cols, rows)
 
 
+def eval_line(d, out):
+    """Print one eval line; returns (got, row count or None, hit): hit = the expected query was selected and returned rows,
+    or the expected `none` got no query."""
+    expected = d["expected_query"]
+    got = out["selected"] or pipeline.NONE
+    n = len(out["result"][1]) if out["result"] else None
+    hit = expected == (got if n else pipeline.NONE)
+    shown = f"{n} rows" if n is not None else f"missing {', '.join(out['missing'])}" if out["missing"] else "-"
+    print(f"{'ok  ' if hit else 'FAIL'} [{d['q_id']:>2}] {expected:<32} {got:<32} {out['confidence']:.2f} {shown:<10} | {d['question']}", flush=True)
+    return got, n, hit
+
+
 def call_ollaya(fn, *args):
     try:
         return fn(*args)
@@ -113,12 +125,13 @@ def main():
     sub.add_parser("ask", help="answer a question end to end: tags, candidates, selected query, parameters, result rows or no suitable query").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("demo", help="ask every tests/test-questions.yaml question that has an expected_query, off-topic ones included")
     sub.add_parser("eval", help="full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-cache run_id: expected query selected and returns rows, none answers no suitable query; rows stored in profile/profile.db eval_result; exit 1 on any mismatch")
+    sub.add_parser("eval-direct", help="baseline without tags: for each tests/test-questions.yaml question that has an expected_query, one Ollaya choice over the raw SPARQL of all catalog queries + none, then parameters and run; exit 1 on any mismatch")
     sub.add_parser("tags-cache", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
     args = p.parse_args()
     prof = Profile(args.profile)
     db = ProfileDb(prof.db_path)
     labeled = [q for q in prof.test_questions if "expected_query" in q]
-    qt_run = load_tags(prof, db, args.cmd in NEED_QUERY_TAGS) if args.cmd not in ("sparql", "tags-gen") else None
+    qt_run = load_tags(prof, db, args.cmd in NEED_QUERY_TAGS) if args.cmd not in ("sparql", "tags-gen", "eval-direct") else None
 
     if args.cmd == "sparql":
         if args.query_id:
@@ -187,15 +200,10 @@ def main():
         prev = db.prev_eval(prof.name, ollaya.MODEL, prof.version, run_id)
         date, rows = datetime.now().isoformat(timespec="seconds"), []
         for d in labeled:
-            q, expected = d["question"], d["expected_query"]
-            out = call_ollaya(pipeline.answer, q, tags[d["q_id"]][0], prof)
-            got = out["selected"] or pipeline.NONE
-            n = len(out["result"][1]) if out["result"] else None
-            hit = expected == (got if n else pipeline.NONE)
-            rows.append((prof.name, d["q_id"], q, expected, got, out["confidence"], json.dumps(out["params"]),
+            out = call_ollaya(pipeline.answer, d["question"], tags[d["q_id"]][0], prof)
+            got, n, hit = eval_line(d, out)
+            rows.append((prof.name, d["q_id"], d["question"], d["expected_query"], got, out["confidence"], json.dumps(out["params"]),
                          ", ".join(out["missing"]), n, int(hit), ollaya.MODEL, prof.version, run_id, date))
-            shown = f"{n} rows" if n is not None else f"missing {', '.join(out['missing'])}" if out["missing"] else "-"
-            print(f"{'ok  ' if hit else 'FAIL'} [{d['q_id']:>2}] {expected:<32} {got:<32} {out['confidence']:.2f} {shown:<10} | {q}", flush=True)
         db.put_evals(rows)
         ok = sum(r[9] for r in rows)
         print(f"{ok}/{len(labeled)} (skipped {len(prof.test_questions) - len(labeled)} questions without expected_query)")
@@ -218,6 +226,10 @@ def main():
             print(f"[{i:>2}/{len(prof.catalog)}] {qid:<32} {', '.join(t for t, p in probs.items() if p >= pipeline.TAG_THRESHOLD)}", flush=True)
         db.put_query_tags(prof.name, ollaya.MODEL, prof.version, date, run_id, rows)
         print(f"stored {len(rows)} rows in {prof.db_path} query_tags (run_id {run_id})")
+    elif args.cmd == "eval-direct":  # ponytail: printed only; store in eval_result with a mode column if it becomes a tracked baseline
+        hits = [eval_line(d, call_ollaya(pipeline.answer, d["question"], {}, prof, ollaya.decide, True))[2] for d in labeled]
+        print(f"{sum(hits)}/{len(labeled)} direct: one choice over the raw SPARQL of {len(prof.catalog)} queries + none, no tags")
+        sys.exit(0 if all(hits) else 1)
     elif args.cmd == "tags-cache":
         run_id = call_ollaya(fill, prof, db, ollaya.MODEL)
         print(f"cached {len(prof.test_questions)} questions in {prof.db_path} (run_id {run_id}, total rows {db.count()})")
