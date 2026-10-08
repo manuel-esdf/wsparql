@@ -122,11 +122,11 @@ It reads the tags of one `run_id` only (never Ollaya) and stores one row per (pr
 `eval_result`, replaced on each run, so an eval is reproducible for a given `run_id` and the summary line says
 whether it matches the previous one.
 
-Current score on `profile/eu-expense-poc` with `winnow`, query tags run_id 9, question tags run_id 3: **39/40** with the
+Current score on `profile/eu-expense-poc` with `winnow`, query tags run_id 9, question tags run_id 3: **40/40** with the
 direct fallback, **35/40** for the tag route alone, both printed by `make eval` (19 ambiguous questions are unlabeled
 and skipped; the hand-written tags scored 34/40).
 All 7 off-topic questions are answered "no suitable query" and every correctly selected query returns rows, including the
-parameterised ones. Two wordings got there:
+parameterised ones. Three wordings got there:
 
 - the q02 description: "Break down a project's expenses by cost category" made Ollaya tag it with every category plus
   `budget`, 11 tags, and the plain mean of `pipeline.candidates` diluted it out of the top 3 (IDF weighting was tested
@@ -134,19 +134,21 @@ parameterised ones. Two wordings got there:
   category" gets 7 tags; the expected query is now among the 3 candidates for 31 of the 33 in-domain questions;
 - the selection instructions and the `none` criterion in `pipeline.select`: they now say that the queries are templates
   whose project, employee, supplier and dates are filled in afterwards, and that `none` is for off-topic questions or
-  answers no query computes. Before, 5 questions naming a project got `none` with high confidence (33/40).
+  answers no query computes. Before, 5 questions naming a project got `none` with high confidence (33/40);
+- the fallback instruction in `pipeline.select_direct`: `none` is for an answer no query "computes or contains among its
+  rows". Without it Ollaya read the q02 breakdown as not computing a one-category figure ("What did OPENSCIENCE spend on
+  equipment?": `none` 0.73 against q02 0.25, and a SPARQL comment listing the categories made it worse); with it q02 wins
+  at 0.73 and the closest off-topic call moves from `none` 0.49 to 0.63 (39/40 before).
 
 The 5 misses of the tag route are all `none` answers, so the fallback takes them: the direct choice over the raw SPARQL
-gets 4 of them right and the 7 off-topic questions still get `none` (the closest call is "Write a SPARQL query to list all
-suppliers.", `none` at 0.49). The one remaining miss, "What did OPENSCIENCE spend on equipment?", gets `none` from both
-routes: q02 no longer carries `equipment` and the raw SPARQL does not mention it either. The `via` column of `make eval`
-says which route answered each question.
+gets all 5 right and the 7 off-topic questions still get `none` (the closest call is "Write a SPARQL query to list all
+suppliers.", `none` at 0.63). The `via` column of `make eval` says which route answered each question.
 
 `make eval-direct` is the baseline without tags: for each labeled question, one `choice` over the raw SPARQL text of all
-10 queries plus `none`, then the same parameter extraction and run. It scores **35/40** on its own, with other misses than
-the tag route (4 of its 5 are "one figure" questions on q05 and q06, "How much budget remains on each project?", "How much
-ineligible spending do we have in total?"); only the equipment question fails in both, which is why the two routes
-combined reach 39/40. On this catalog the tag stage does not buy accuracy by itself. It buys explainability (the tag and
+10 queries plus `none`, then the same parameter extraction and run. It scores **36/40** on its own, with other misses than
+the tag route (all 4 are "one figure" questions on q05 and q06, "How much budget remains on each project?", "How much
+ineligible spending do we have in total?"); no question fails in both, which is why the two routes combined reach 40/40. On this catalog the tag stage does not buy
+accuracy by itself. It buys explainability (the tag and
 candidate tables) and a choice over 3 short descriptions instead of 10 full queries, which is what matters once the
 catalog grows past what one `choice` can hold.
 

@@ -129,14 +129,18 @@ Ollaya's `noul` answers are reproducible: the nine untouched descriptions got id
 `make query-tags` run.
 
 `make eval-direct`, the baseline without tags (one `choice` over the raw `.rq` text of all 10 queries plus `none`, no
-dictionary, no query tags, no candidates): also **35/40**, with other misses.
+dictionary, no query tags, no candidates): **36/40**, with other misses.
 
 | method | misses (q_id) | the other method on them |
 |---|---|---|
-| tags → 3 candidates → choice over descriptions | 2, 5, 6, 16, 19, all answered `none` | direct gets 2, 6, 16, 19 right |
-| direct choice over the raw SPARQL | 5, 21, 23, 26, 54, all answered `none` | tags get 21, 23, 26, 54 right |
+| tags → 3 candidates → choice over descriptions | 2, 5, 6, 16, 19, all answered `none` | direct gets all 5 right |
+| direct choice over the raw SPARQL | 21, 23, 26, 54, all answered `none` | tags get all 4 right |
 
-Only q_id 5, "What did OPENSCIENCE spend on equipment?", fails in both. The 7 off-topic questions get `none` in both.
+No question fails in both; the 7 off-topic questions get `none` in both. q_id 5, "What did OPENSCIENCE spend on
+equipment?", failed in both until `pipeline.DIRECT_INSTRUCTIONS` said that `none` is for an answer no query "computes
+or contains among its rows": Ollaya read the q02 breakdown as not computing a one-category figure (`none` 0.73 against
+q02 0.25, and a SPARQL comment listing the categories made it worse, 0.81 against 0.16). With the clause q02 wins at 0.73
+and the closest off-topic call, "Write a SPARQL query to list all suppliers.", moves from `none` 0.49 to 0.63.
 
 ### Fallback
 
@@ -144,26 +148,27 @@ Only q_id 5, "What did OPENSCIENCE spend on equipment?", fails in both. The 7 of
 fallback (the `via` column says which route answered; the 28 lines answered by the tag route are omitted):
 
     tags: query tags run_id 9, question tags cache run_id 3
-    ok   [ 2] q01-total-expenses-by-project    q01-total-expenses-by-project    0.97 3 rows     fallback | What is the total amount spent on LUMEN so far?
-    FAIL [ 5] q02-project-expense-breakdown    none                             0.70 -          fallback | What did OPENSCIENCE spend on equipment?
-    ok   [ 6] q03-travel-expenses-by-project   q03-travel-expenses-by-project   0.81 3 rows     fallback | Compare travel costs between LUMEN and GRAPHIA.
-    ok   [16] q04-expenses-by-work-package     q04-expenses-by-work-package     0.97 5 rows     fallback | Which work package of GRAPHIA is the most expensive?
-    ok   [19] q05-budget-vs-spent              q05-budget-vs-spent              0.92 3 rows     fallback | What is the budget of each European project?
+    ok   [ 2] q01-total-expenses-by-project    q01-total-expenses-by-project    0.94 3 rows     fallback | What is the total amount spent on LUMEN so far?
+    ok   [ 5] q02-project-expense-breakdown    q02-project-expense-breakdown    0.70 3 rows     fallback | What did OPENSCIENCE spend on equipment?
+    ok   [ 6] q03-travel-expenses-by-project   q03-travel-expenses-by-project   0.95 3 rows     fallback | Compare travel costs between LUMEN and GRAPHIA.
+    ok   [16] q04-expenses-by-work-package     q04-expenses-by-work-package     0.99 5 rows     fallback | Which work package of GRAPHIA is the most expensive?
+    ok   [19] q05-budget-vs-spent              q05-budget-vs-spent              0.91 3 rows     fallback | What is the budget of each European project?
     ok   [37] none                             none                             0.98 -          fallback | List every expense above 5000 euros.
-    ok   [45] none                             none                             0.70 -          fallback | Which German suppliers have we worked with?
-    ok   [46] none                             none                             0.99 -          fallback | When does the LUMEN grant agreement end?
+    ok   [45] none                             none                             0.94 -          fallback | Which German suppliers have we worked with?
+    ok   [46] none                             none                             1.00 -          fallback | When does the LUMEN grant agreement end?
     ok   [47] none                             none                             1.00 -          fallback | How many employees work on OPENSCIENCE?
     ok   [48] none                             none                             1.00 -          fallback | What is the weather like in Brussels today?
     ok   [49] none                             none                             1.00 -          fallback | Can you book me a train to Paris next Monday?
-    ok   [50] none                             none                             0.49 -          fallback | Write a SPARQL query to list all suppliers.
-    39/40 with the direct fallback, 35/40 tag route alone (skipped 19 questions without expected_query)
+    ok   [50] none                             none                             0.63 -          fallback | Write a SPARQL query to list all suppliers.
+    40/40 with the direct fallback, 35/40 tag route alone (skipped 19 questions without expected_query)
 
-- **39/40**, the sum the two tables above predicted: the fallback runs 12 times, on the 5 tag misses and the 7 off-topic
-  questions, gets 4 of the 5 misses right and keeps `none` on all 7 off-topic questions.
-- The remaining miss gets `none` from both routes: q02 no longer carries `equipment` after its description was tightened,
-  and the raw SPARQL of q02 names no category either (`?category ex:name ?categoryName`), so neither route sees the link
-  between "equipment" and that query.
-- The closest call is "Write a SPARQL query to list all suppliers.", `none` at 0.49: a question that talks about SPARQL
+- **40/40**: the fallback runs 12 times, on the 5 tag misses and the 7 off-topic questions, gets all 5 misses right and
+  keeps `none` on all 7 off-topic questions.
+- q_id 5 was the last miss and a wording issue of this route, not of the tags: the tag route cannot see q02 for it (the
+  question carries neither `european-project` nor `breakdown`, so q02 is not among its 3 candidates and `none` is the
+  right answer over q05, q06 and q01), and the raw SPARQL of q02 names no category (`?category ex:name ?categoryName`).
+  The "computes or contains among its rows" clause above is what lets a breakdown answer a one-category question.
+- The closest call is "Write a SPARQL query to list all suppliers.", `none` at 0.63: a question that talks about SPARQL
   while Ollaya reads raw SPARQL is the weak spot of this route.
 - Cost: one extra `choice` over the 10 raw queries per `none` answer, so the off-topic questions are now the most
   expensive ones (two choices). The 35/40 of the tag route alone stays visible on the summary line, so the tag wording

@@ -24,7 +24,8 @@ SELECT_INSTRUCTIONS = ("The queries are templates: the project, employee, suppli
 
 NONE_CRITERION = "Off-topic, or none of these queries computes the requested answer even with its parameters filled in"
 DIRECT_INSTRUCTIONS = ("Which SPARQL query computes the answer to the question? ?acronym, ?from and ?to are parameters filled in "
-                       "afterwards. Pick none only for an off-topic question or an answer no query computes.")
+                       "afterwards. Pick none only for an off-topic question or an answer no query computes or contains among its rows.")
+# ponytail: "or contains among its rows" lets a breakdown answer a one-category question; without it the fallback says none
 
 
 def choose(question, instructions, criteria, ask):
