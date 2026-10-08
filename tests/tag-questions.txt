@@ -1,0 +1,50 @@
+Which European project has spent the most money?
+What is the total amount spent on LUMEN so far?
+Give me a breakdown of GRAPHIA costs by expense category.
+How much have we spent on personnel across all projects?
+What did OPENSCIENCE spend on equipment?
+Compare travel costs between LUMEN and GRAPHIA.
+How much did Alice Martin spend on trips this year?
+Which employee generated the highest expenses?
+List all expenses incurred by Bob Durand.
+What are Claire Roux's expenses in March 2026?
+Which supplier did we pay the most?
+How much have we paid Air France in total?
+Show me every invoice from CloudHost Europe.
+Total subcontracting paid to Semantic Consulting GmbH on GRAPHIA.
+How is the LUMEN spending split across work packages?
+Which work package of GRAPHIA is the most expensive?
+What was spent on the Data ingestion work package?
+Is WP2 of LUMEN over its budget?
+What is the budget of each European project?
+How much budget is left on OPENSCIENCE?
+Which project has the smallest remaining budget?
+Compare the budget and the actual spending of every project.
+What percentage of the GRAPHIA budget has already been consumed?
+Are there any expenses that are not eligible?
+Show me the ineligible costs charged to LUMEN.
+How much ineligible spending do we have in total?
+Was the team dinner in March eligible for reimbursement?
+How do our expenses evolve month after month?
+What was the total spent in February 2026?
+Give me the monthly travel costs for 2026.
+In which month did we spend the most?
+List LUMEN expenses between January and March 2026.
+What did we spend during the second quarter of 2026?
+Show the expenses of the last six months.
+Has GRAPHIA spending increased since the beginning of the year?
+Is the travel spending trend going up or down?
+List every expense above 5000 euros.
+Show all expenses of type Other goods and services.
+Which expense category is the biggest cost driver overall?
+Rank the projects by travel spending.
+Spending overview please.
+costs lumen 2026
+Who travelled the most for the consortium meetings?
+How much did the Eurostar tickets cost us this year?
+Which German suppliers have we worked with?
+When does the LUMEN grant agreement end?
+How many employees work on OPENSCIENCE?
+What is the weather like in Brussels today?
+Can you book me a train to Paris next Monday?
+Write a SPARQL query to list all suppliers.
