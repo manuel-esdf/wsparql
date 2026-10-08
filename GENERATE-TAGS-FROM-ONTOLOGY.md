@@ -27,7 +27,8 @@ names are free to differ from the old ones.
 | Query tags | `make query-tags` | Ollaya `noul` per tag on each catalog query `description` | table `query_tags` |
 | Question tags | `make tags-cache`, `make ask` | Ollaya `noul` per tag on the question | table `tag_cache` |
 | Candidates | `make candidates` | unchanged: mean question-tag probability over the query's tags, top 3 | |
-| Baseline without tags, and the fallback of `make ask` when the tag route says `none` | `make eval-direct` | one Ollaya `choice` over the raw SPARQL text of all 10 queries + `none`, then parameters and run | printed only |
+| Baseline without tags | `make eval-direct` | one Ollaya `choice` over the raw SPARQL text of all 10 queries + `none`, then parameters and run | printed only |
+| Fallback | `make ask`, `make eval` | the same direct `choice`, run only when the tag route answers `none`; its answer is final | `eval_result` (the `via` column of `make eval` says which route answered) |
 
 A query's tag list is the set of tags with probability ≥ 0.5 in `query_tags`; the probabilities are kept, so the
 threshold can change without calling Ollaya again. `select`, `params` and `sparql` read descriptions and the ABOX, not tags,
@@ -136,12 +137,41 @@ dictionary, no query tags, no candidates): also **35/40**, with other misses.
 | direct choice over the raw SPARQL | 5, 21, 23, 26, 54, all answered `none` | tags get 21, 23, 26, 54 right |
 
 Only q_id 5, "What did OPENSCIENCE spend on equipment?", fails in both. The 7 off-topic questions get `none` in both.
-So `pipeline.answer` now falls back to the direct choice whenever the tag route answers `none`: `make eval` scores
-**39/40** with the fallback and prints the tag route alone next to it (35/40). The fallback triggers 12 times, on the
-5 tag misses and the 7 off-topic questions; it is one extra `choice` per `none` answer, and it only helps while the tag
-misses are `none` rather than a wrong query. The tag stage therefore buys no accuracy here; it buys explainability (tag
-and candidate tables) and a choice over 3 short descriptions instead of 10 full queries, which matters once the catalog
-outgrows one `choice`.
+
+### Fallback
+
+`pipeline.answer` therefore falls back to the direct choice whenever the tag route answers `none`. `make eval` with the
+fallback (the `via` column says which route answered; the 28 lines answered by the tag route are omitted):
+
+    tags: query tags run_id 9, question tags cache run_id 3
+    ok   [ 2] q01-total-expenses-by-project    q01-total-expenses-by-project    0.97 3 rows     fallback | What is the total amount spent on LUMEN so far?
+    FAIL [ 5] q02-project-expense-breakdown    none                             0.70 -          fallback | What did OPENSCIENCE spend on equipment?
+    ok   [ 6] q03-travel-expenses-by-project   q03-travel-expenses-by-project   0.81 3 rows     fallback | Compare travel costs between LUMEN and GRAPHIA.
+    ok   [16] q04-expenses-by-work-package     q04-expenses-by-work-package     0.97 5 rows     fallback | Which work package of GRAPHIA is the most expensive?
+    ok   [19] q05-budget-vs-spent              q05-budget-vs-spent              0.92 3 rows     fallback | What is the budget of each European project?
+    ok   [37] none                             none                             0.98 -          fallback | List every expense above 5000 euros.
+    ok   [45] none                             none                             0.70 -          fallback | Which German suppliers have we worked with?
+    ok   [46] none                             none                             0.99 -          fallback | When does the LUMEN grant agreement end?
+    ok   [47] none                             none                             1.00 -          fallback | How many employees work on OPENSCIENCE?
+    ok   [48] none                             none                             1.00 -          fallback | What is the weather like in Brussels today?
+    ok   [49] none                             none                             1.00 -          fallback | Can you book me a train to Paris next Monday?
+    ok   [50] none                             none                             0.49 -          fallback | Write a SPARQL query to list all suppliers.
+    39/40 with the direct fallback, 35/40 tag route alone (skipped 19 questions without expected_query)
+
+- **39/40**, the sum the two tables above predicted: the fallback runs 12 times, on the 5 tag misses and the 7 off-topic
+  questions, gets 4 of the 5 misses right and keeps `none` on all 7 off-topic questions.
+- The remaining miss gets `none` from both routes: q02 no longer carries `equipment` after its description was tightened,
+  and the raw SPARQL of q02 names no category either (`?category ex:name ?categoryName`), so neither route sees the link
+  between "equipment" and that query.
+- The closest call is "Write a SPARQL query to list all suppliers.", `none` at 0.49: a question that talks about SPARQL
+  while Ollaya reads raw SPARQL is the weak spot of this route.
+- Cost: one extra `choice` over the 10 raw queries per `none` answer, so the off-topic questions are now the most
+  expensive ones (two choices). The 35/40 of the tag route alone stays visible on the summary line, so the tag wording
+  can still be tuned without the fallback masking it.
+- The fallback only helps while the tag misses are `none` rather than a wrong query: a wrong selection is final.
+
+The tag stage therefore buys no accuracy here; it buys explainability (tag and candidate tables) and a choice over
+3 short descriptions instead of 10 full queries, which matters once the catalog outgrows one `choice`.
 
 ## Storage
 
@@ -164,7 +194,7 @@ rows of the old version are then ignored, never mixed with the new vocabulary.
     make tags-gen        # ontology -> tags (instant)
     make query-tags      # Ollaya reads the 10 descriptions with the 23 tags (seconds each)
     make tags-cache      # Ollaya reads the 59 test questions (minutes)
-    make eval            # routing score; the acceptance check for any wording change
+    make eval            # routing score with the fallback and for the tag route alone; the acceptance check for any wording change
 
 Changing a tag description = editing an `rdfs:comment` in `tbox.ttl`, then the four commands again.
 Adding a catalog query = description + `.rq`, then `make query-tags`.
@@ -179,3 +209,5 @@ Adding a catalog query = description + `.rq`, then `make query-tags`.
   wording through `make eval`.
 - The 0.5 threshold on query tags is a constant (`pipeline.TAG_THRESHOLD`); weighting candidates by the stored
   probabilities is the next step if the eval score drops.
+- The fallback sends the raw SPARQL of every query in one `choice`; with a large catalog it needs its own pre-selection
+  (the tag candidates, for instance) or it becomes the slow and expensive path.
