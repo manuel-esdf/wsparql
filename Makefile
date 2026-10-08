@@ -3,7 +3,7 @@ OLLAYA_MODEL ?= winnow
 PROFILE      ?= profile/eu-expense-poc
 export OLLAYA_HOST OLLAYA_MODEL PROFILE
 RUN = uv run python -m wsparql
-PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml demo-questions.yaml
+PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml demo-questions.yaml tests/tag-questions.txt
 
 .DEFAULT_GOAL := help
 .PHONY: help install profile-check sparql tags ollaya-check ollaya-smoke-test
