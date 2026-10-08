@@ -23,7 +23,7 @@ def call_ollaya(fn, *args):
 
 def main():
     p = argparse.ArgumentParser(prog="wsparql")
-    p.add_argument("--profile", default=os.environ.get("PROFILE", "profile/eu-expense-poc"))
+    p.add_argument("--profile", default=os.environ["PROFILE"])
     sub = p.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("sparql", help="run one catalog query; without an id, run all and print row counts")
     s.add_argument("query_id", nargs="?")

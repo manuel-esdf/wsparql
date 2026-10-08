@@ -37,6 +37,7 @@ Return the result
 
 - python, uv
 - one Makefile to centralize all tasks
+- `cp .env.example .env` then set `OLLAYA_HOST`, `OLLAYA_MODEL`, `PROFILE` (all required, no defaults; `.env` is gitignored)
 
 ## Role of the Ontology
 

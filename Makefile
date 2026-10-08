@@ -1,7 +1,7 @@
-OLLAYA_HOST  ?= 127.0.0.1:11435
-OLLAYA_MODEL ?= winnow
-PROFILE      ?= profile/eu-expense-poc
-export OLLAYA_HOST OLLAYA_MODEL PROFILE
+-include .env
+ENV_VARS = OLLAYA_HOST OLLAYA_MODEL PROFILE
+$(foreach v,$(ENV_VARS),$(if $($(v)),,$(error $(v) not set -> cp .env.example .env)))
+export $(ENV_VARS)
 RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml demo-questions.yaml tests/tag-questions.csv
 
@@ -9,7 +9,7 @@ PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml demo-ques
 .PHONY: help install profile-check sparql tags tags-test ollaya-check ollaya-smoke-test
 
 help: ## list targets
-	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
+	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
 
 install: ## uv sync (creates .venv with rdflib + pyyaml)
 	uv sync

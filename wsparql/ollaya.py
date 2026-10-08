@@ -3,8 +3,8 @@ import json
 import os
 import urllib.request
 
-HOST = os.environ.get("OLLAYA_HOST", "127.0.0.1:11435")
-MODEL = os.environ.get("OLLAYA_MODEL", "winnow")
+HOST = os.environ["OLLAYA_HOST"]
+MODEL = os.environ["OLLAYA_MODEL"]
 
 
 def decide(state, questions):
