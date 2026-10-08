@@ -4,6 +4,7 @@ Synthetic RDF dataset designed to demonstrate natural-language routing to predef
 
 ## Files
 
+- `VERSION`: profile version (semver), bump when tags, catalog, queries or data change
 - `tbox.ttl`: domain ontology
 - `abox.ttl`: synthetic company, projects, work packages, employees, suppliers and expenses
 - `queries/`: 10 predefined SPARQL queries

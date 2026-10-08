@@ -33,6 +33,7 @@ Files:
   `graph`, `tags`, `catalog`, `queries`, `demo_questions`; `run(query_id, **bindings)` → rows)
 - `wsparql/__main__.py` (argparse: `sparql <query-id>`)
 - Makefile: `install` (`uv sync`), `sparql Q=<id>` (no Q = all, row counts), `PROFILE ?= profile/eu-expense-poc`
+- `profile/<name>/VERSION` (semver) and Makefile `profile-check` (mandatory files + one `.rq` per catalog entry); `sparql`/`tags` depend on it
 
 Manual test:
 

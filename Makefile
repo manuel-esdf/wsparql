@@ -3,9 +3,10 @@ OLLAYA_MODEL ?= winnow
 PROFILE      ?= profile/eu-expense-poc
 export OLLAYA_HOST OLLAYA_MODEL PROFILE
 RUN = uv run python -m wsparql
+PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml demo-questions.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help install sparql tags ollaya-check ollaya-smoke-test
+.PHONY: help install profile-check sparql tags ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -13,10 +14,16 @@ help: ## list targets
 install: ## uv sync (creates .venv with rdflib + pyyaml)
 	uv sync
 
-sparql: ## run a catalog query on the ABOX (make sparql Q=q01-total-expenses-by-project); no Q = all queries, row counts only
+profile-check: ## mandatory profile files present in $(PROFILE); every catalog query has its .rq
+	@for f in $(PROFILE_FILES); do test -f $(PROFILE)/$$f || { echo "MISSING $(PROFILE)/$$f"; exit 1; }; done
+	@for q in $$(grep -oE '^  [a-z0-9-]+:' $(PROFILE)/query-catalog.yaml | tr -d ' :'); do \
+	  test -f $(PROFILE)/queries/$$q.rq || { echo "MISSING $(PROFILE)/queries/$$q.rq (listed in query-catalog.yaml)"; exit 1; }; done
+	@echo "profile $(notdir $(PROFILE)) $$(cat $(PROFILE)/VERSION) OK"
+
+sparql: profile-check ## run a catalog query on the ABOX (make sparql Q=q01-total-expenses-by-project); no Q = all queries, row counts only
 	@$(RUN) sparql $(Q)
 
-tags: ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"
+tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"
 	@$(RUN) tags "$(Q)"
 
 ollaya-check: ## prerequisites: uv, ollaya binary, server up, model pulled

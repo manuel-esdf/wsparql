@@ -8,6 +8,8 @@ from rdflib import Graph, URIRef
 class Profile:
     def __init__(self, path):
         path = Path(path)
+        self.name = path.name
+        self.version = (path / "VERSION").read_text().strip()
         self.graph = Graph()
         self.graph.parse(path / "tbox.ttl")
         self.graph.parse(path / "abox.ttl")
