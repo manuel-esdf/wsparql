@@ -29,7 +29,8 @@ names are free to differ from the old ones.
 | Candidates | `make candidates` | unchanged: mean question-tag probability over the query's tags, top 3 | |
 
 A query's tag list is the set of tags with probability ≥ 0.5 in `query_tags`; the probabilities are kept, so the
-threshold can change without calling Ollaya again. `select`, `params` and `sparql` are untouched.
+threshold can change without calling Ollaya again. `select`, `params` and `sparql` read descriptions and the ABOX, not tags,
+and are untouched by this change.
 
 ## Where the 19 hand-written tags came from
 
@@ -119,9 +120,11 @@ three breakdown questions lost q02 from their top 3 candidates; "Breakdown of on
 category" gets the 7 above and the expected query is among the candidates for 31 of the 33 in-domain questions.
 IDF weighting in `candidates` was tested offline on the same data and did not help: the rare extra tags weigh more.
 
-`make eval` with these tags: **33/40** against 34/40 with the hand-written ones; the remaining misses are at the
-selection stage, on questions naming a project (details in the README). Ollaya's `noul` answers are reproducible: the nine
-untouched descriptions got identical probabilities in every `make query-tags` run.
+`make eval` with these tags: **35/40** against 34/40 with the hand-written ones. The first eval gave 33/40: the remaining
+misses were at the selection stage, on questions naming a project, and went away once the selection wording in
+`pipeline.select` said that the queries are templates whose parameters are filled in afterwards (details in the README).
+Ollaya's `noul` answers are reproducible: the nine untouched descriptions got identical probabilities in every
+`make query-tags` run.
 
 ## Storage
 

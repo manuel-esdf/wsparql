@@ -17,14 +17,16 @@ def candidates(tag_probs, catalog, k=3):
 
 MIN_CONFIDENCE = 0.4  # ponytail: fixed threshold; tune after `make eval` if it misroutes
 NONE = "none"
-SELECT_INSTRUCTIONS = "Which predefined query answers the question? Pick none if no query fits."
+SELECT_INSTRUCTIONS = ("The queries are templates: the project, employee, supplier and dates named in the question are filled in "
+                       "afterwards. Which query computes the answer? Pick none only for an off-topic question or an answer no "
+                       "query can compute.")
 
 
 def select(question, ranked, catalog, ask=ollaya.decide):
     """One Ollaya choice question over the ranked candidates plus `none`.
     Returns (qid or None for "no suitable query", confidence, {label: probability})."""
     criteria = {qid: catalog[qid]["description"] for qid, _ in ranked}
-    criteria[NONE] = "None of these queries answers the question"
+    criteria[NONE] = "Off-topic, or none of these queries computes the requested answer even with its parameters filled in"
     a = ask(question, {"select": {"type": "choice", "instructions": SELECT_INSTRUCTIONS, "criteria": criteria}})["select"]
     qid = None if a["choice"] == NONE or a["confidence"] < MIN_CONFIDENCE else a["choice"]
     return qid, a["confidence"], a["probabilities"]

@@ -120,18 +120,25 @@ It reads the tags of one `run_id` only (never Ollaya) and stores one row per (pr
 `eval_result`, replaced on each run, so an eval is reproducible for a given `run_id` and the summary line says
 whether it matches the previous one.
 
-Current score on `profile/eu-expense-poc` with `winnow`, query tags run_id 5, question tags run_id 3: **33/40**
+Current score on `profile/eu-expense-poc` with `winnow`, query tags run_id 5, question tags run_id 3: **35/40**
 (19 ambiguous questions are unlabeled and skipped; the hand-written tags scored 34/40).
 All 7 off-topic questions are answered "no suitable query" and every correctly selected query returns rows, including the
-parameterised ones. The expected query is among the 3 candidates for 31 of the 33 in-domain questions; the q02 description
-was tightened for that ("Break down a project's expenses by cost category" made Ollaya tag it with every category plus
-`budget`, 11 tags, and the plain mean of `pipeline.candidates` diluted it out of the top 3; IDF weighting was tested offline
-and did not help, rare extra tags weigh more, not less). The 7 misses:
+parameterised ones. Two wordings got there:
 
-- 5 questions where the expected query is a candidate but the selection `choice` picks `none` with high confidence; all
-  name a project (for example "Give me a breakdown of GRAPHIA costs by expense category.", "What is the budget of each
-  European project?") while the catalog descriptions are generic. Lever: the wording of the `none` criterion and of the
-  selection instructions in `wsparql/pipeline.py`.
+- the q02 description: "Break down a project's expenses by cost category" made Ollaya tag it with every category plus
+  `budget`, 11 tags, and the plain mean of `pipeline.candidates` diluted it out of the top 3 (IDF weighting was tested
+  offline and did not help, rare extra tags weigh more, not less). "Breakdown of one European project's expenses by expense
+  category" gets 7 tags; the expected query is now among the 3 candidates for 31 of the 33 in-domain questions;
+- the selection instructions and the `none` criterion in `pipeline.select`: they now say that the queries are templates
+  whose project, employee, supplier and dates are filled in afterwards, and that `none` is for off-topic questions or
+  answers no query computes. Before, 5 questions naming a project got `none` with high confidence (33/40).
+
+The 5 misses:
+
+- 3 questions where the expected query is a candidate but the `choice` still picks `none`: "What is the total amount spent
+  on LUMEN so far?" against "Compare total expenses across European projects", "Compare travel costs between LUMEN and
+  GRAPHIA.", "What is the budget of each European project?" against "Compare project budget, spent amount and remaining
+  budget". The description promises a comparison, the question asks for one figure. Lever: the descriptions.
 - 2 questions whose expected query is not among the 3 candidates ("What did OPENSCIENCE spend on equipment?", q02 no
   longer carries `equipment`; "Which work package of GRAPHIA is the most expensive?", q04). Lever: those descriptions.
 
