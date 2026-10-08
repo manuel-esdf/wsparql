@@ -32,13 +32,13 @@ Files:
 - `wsparql/__init__.py`, `wsparql/profile.py` (`load(profile_dir)` → one object with
   `graph`, `tags`, `catalog`, `queries`, `demo_questions`; `run(query_id, **bindings)` → rows)
 - `wsparql/__main__.py` (argparse: `sparql <query-id>`)
-- Makefile: `install` (`uv sync`), `sparql Q=<id>`, `sparql-all`, `PROFILE ?= profile/eu-expense-poc`
+- Makefile: `install` (`uv sync`), `sparql Q=<id>` (no Q = all, row counts), `PROFILE ?= profile/eu-expense-poc`
 
 Manual test:
 
     make install
     make sparql Q=q01-total-expenses-by-project   # 3 rows, LUMEN first
-    make sparql-all                               # 10 queries, each prints row count > 0
+    make sparql                                   # no Q: all 10 queries, each prints row count > 0
 
 Commit: "Run catalog queries on the ABOX with rdflib"
 
