@@ -8,6 +8,7 @@ from datetime import datetime
 from wsparql import ollaya, pipeline
 from wsparql.db import ProfileDb, fill
 from wsparql.profile import Profile
+from wsparql.tags import generate
 
 
 def print_table(cols, rows):
@@ -75,6 +76,15 @@ def detect(prof, db, question, log=print):
     return call_ollaya(ollaya.detect_tags, question, prof.tags), None
 
 
+def load_tags(prof, db):
+    """prof.tags = the latest tags-gen run for this profile version; exits with the fix when there is none. Returns the run_id."""
+    hit = db.tags(prof.name, prof.version)
+    if not hit:
+        sys.exit(f"no tags for {prof.name} {prof.version} -> make tags-gen")
+    prof.tags = hit[0]
+    return hit[1]
+
+
 def main():
     p = argparse.ArgumentParser(prog="wsparql")
     p.add_argument("--profile", default=os.environ["PROFILE"])
@@ -83,7 +93,8 @@ def main():
     s = sub.add_parser("sparql", help="run one catalog query; without an id, run all and print row counts")
     s.add_argument("query_id", nargs="?")
     s.add_argument("bindings", nargs="*", help="param=value, e.g. acronym=GRAPHIA from=2026-01-01 to=2026-06-30; missing = catalog example")
-    sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag)").add_argument("question", nargs="?", help=default_q)
+    sub.add_parser("tags-gen", help="derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (new run_id); no Ollaya")
+    sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag of the dictionary)").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 3); tags from the cache when the question is cached, else Ollaya").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)").add_argument("question", nargs="?", help=default_q)
     pa = sub.add_parser("params", help="extract the query parameters found in a question: acronym (Ollaya choice over ABOX projects + none), from/to (regex); lists every catalog parameter and the queries needing it")
@@ -96,6 +107,8 @@ def main():
     prof = Profile(args.profile)
     db = ProfileDb(prof.db_path)
     labeled = [q for q in prof.test_questions if "expected_query" in q]
+    if args.cmd not in ("sparql", "tags-gen"):
+        load_tags(prof, db)
 
     if args.cmd == "sparql":
         if args.query_id:
@@ -182,6 +195,12 @@ def main():
               + ("first eval of this run_id" if not prev else f"same as previous eval {prev[0]}" if not diff
                  else f"differs from previous eval {prev[0]} on q_id {', '.join(map(str, diff))}"))
         sys.exit(0 if ok == len(labeled) else 1)
+    elif args.cmd == "tags-gen":
+        rows = generate(args.profile)
+        run_id = db.next_run_id()
+        db.put_tags(prof.name, prof.version, datetime.now().isoformat(timespec="seconds"), run_id, rows)
+        print_table(["tag", "source", "description"], [[t, s, d] for t, d, s in rows])
+        print(f"\nstored {len(rows)} tags in {prof.db_path} tags (run_id {run_id})")
     elif args.cmd == "tags-cache":
         run_id = call_ollaya(fill, prof, db, ollaya.MODEL)
         print(f"cached {len(prof.test_questions)} questions in {prof.db_path} (run_id {run_id}, total rows {db.count()})")

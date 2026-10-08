@@ -6,14 +6,20 @@
 
 ex:EuExpenseOntology a owl:Ontology .
 
-# Core classes
+# Core classes (rdfs:comment = the tag description sent to Ollaya, see GENERATE-TAGS-FROM-ONTOLOGY.md)
 ex:Company a owl:Class ; rdfs:label "Company" .
-ex:EuropeanProject a owl:Class ; rdfs:label "European project" .
-ex:WorkPackage a owl:Class ; rdfs:label "Work package" .
-ex:Employee a owl:Class ; rdfs:label "Employee" .
-ex:Supplier a owl:Class ; rdfs:label "Supplier" .
-ex:Expense a owl:Class ; rdfs:label "Expense" .
-ex:ExpenseCategory a owl:Class ; rdfs:label "Expense category" .
+ex:EuropeanProject a owl:Class ; rdfs:label "European project" ;
+  rdfs:comment "The question concerns one or more European projects" .
+ex:WorkPackage a owl:Class ; rdfs:label "Work package" ;
+  rdfs:comment "The question concerns a project work package" .
+ex:Employee a owl:Class ; rdfs:label "Employee" ;
+  rdfs:comment "The question concerns an employee or personnel member" .
+ex:Supplier a owl:Class ; rdfs:label "Supplier" ;
+  rdfs:comment "The question concerns a supplier or external provider" .
+ex:Expense a owl:Class ; rdfs:label "Expense" ;
+  rdfs:comment "The question concerns company expenses or costs" .
+ex:ExpenseCategory a owl:Class ; rdfs:label "Expense category" ;
+  rdfs:comment "The question concerns an expense category" .
 
 # Object properties
 ex:participatesIn a owl:ObjectProperty ;
@@ -58,16 +64,24 @@ ex:acronym a owl:DatatypeProperty ; rdfs:range xsd:string .
 ex:grantAgreement a owl:DatatypeProperty ; rdfs:range xsd:string .
 ex:startDate a owl:DatatypeProperty ; rdfs:range xsd:date .
 ex:endDate a owl:DatatypeProperty ; rdfs:range xsd:date .
-ex:budget a owl:DatatypeProperty ; rdfs:range xsd:decimal .
-ex:amount a owl:DatatypeProperty ; rdfs:range xsd:decimal .
+ex:budget a owl:DatatypeProperty ; rdfs:range xsd:decimal ;
+  rdfs:comment "The question concerns allocated project budget" .
+ex:amount a owl:DatatypeProperty ; rdfs:range xsd:decimal ;
+  rdfs:comment "The question concerns the amount of an expense" .
 ex:expenseDate a owl:DatatypeProperty ; rdfs:range xsd:date .
 ex:description a owl:DatatypeProperty ; rdfs:range xsd:string .
-ex:eligible a owl:DatatypeProperty ; rdfs:range xsd:boolean .
+ex:eligible a owl:DatatypeProperty ; rdfs:range xsd:boolean ;
+  rdfs:comment "The question concerns whether costs are eligible" .
 ex:country a owl:DatatypeProperty ; rdfs:range xsd:string .
 
 # Expense category individuals
-ex:Personnel a ex:ExpenseCategory ; ex:name "Personnel" .
-ex:Travel a ex:ExpenseCategory ; ex:name "Travel" .
-ex:Equipment a ex:ExpenseCategory ; ex:name "Equipment" .
-ex:Subcontracting a ex:ExpenseCategory ; ex:name "Subcontracting" .
-ex:OtherGoodsServices a ex:ExpenseCategory ; ex:name "Other goods and services" .
+ex:Personnel a ex:ExpenseCategory ; ex:name "Personnel" ;
+  rdfs:comment "The question concerns personnel costs" .
+ex:Travel a ex:ExpenseCategory ; ex:name "Travel" ;
+  rdfs:comment "The question concerns travel expenses" .
+ex:Equipment a ex:ExpenseCategory ; ex:name "Equipment" ;
+  rdfs:comment "The question concerns equipment purchases" .
+ex:Subcontracting a ex:ExpenseCategory ; ex:name "Subcontracting" ;
+  rdfs:comment "The question concerns subcontracting costs" .
+ex:OtherGoodsServices a ex:ExpenseCategory ; ex:name "Other goods and services" ;
+  rdfs:comment "The question concerns other goods and services costs" .

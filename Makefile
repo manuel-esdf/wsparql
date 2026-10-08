@@ -3,10 +3,10 @@ ENV_VARS = OLLAYA_HOST OLLAYA_MODEL PROFILE
 $(foreach v,$(ENV_VARS),$(if $($(v)),,$(error $(v) not set -> cp .env.example .env)))
 export $(ENV_VARS)
 RUN = uv run python -m wsparql
-PROFILE_FILES = VERSION tbox.ttl abox.ttl tags.yaml query-catalog.yaml tests/test-questions.yaml
+PROFILE_FILES = VERSION tbox.ttl abox.ttl query-catalog.yaml tests/test-questions.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help install test profile-check sparql tags candidates select params ask demo eval tags-cache ollaya-check ollaya-smoke-test
+.PHONY: help install test profile-check sparql tags-gen tags candidates select params ask demo eval tags-cache ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -25,6 +25,9 @@ profile-check: ## mandatory profile files present in $(PROFILE); every catalog q
 
 sparql: profile-check ## run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
 	@$(RUN) sparql "$(Q)" $(ARGS)
+
+tags-gen: profile-check ## derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (new run_id); no Ollaya, instant. See GENERATE-TAGS-FROM-ONTOLOGY.md
+	@$(RUN) tags-gen
 
 tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"; no Q = first tests/test-questions.yaml question
 	@$(RUN) tags "$(Q)"

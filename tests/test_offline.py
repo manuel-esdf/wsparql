@@ -5,6 +5,7 @@ import unittest
 from wsparql.db import ProfileDb
 from wsparql.pipeline import answer, candidates, extract_params, extract_period, select
 from wsparql.profile import Profile
+from wsparql.tags import generate, slug
 
 CATALOG = {
     "q01-total-expenses-by-project": {"description": "d", "tags": ["expense", "project", "total", "comparison"]},
@@ -103,8 +104,30 @@ class AnswerTest(unittest.TestCase):
         self.assertEqual((out["selected"], out["params"], out["result"]), (None, {}, None))
 
 
+class TagsGenTest(unittest.TestCase):
+    def test_profile_dictionary(self):
+        rows = generate(os.environ["PROFILE"])
+        self.assertEqual([t for t, _, _ in rows], [
+            "employee", "european-project", "expense", "expense-category", "supplier", "work-package",  # R1, Company skipped
+            "equipment", "other-goods-services", "personnel", "subcontracting", "travel",  # R2
+            "amount", "budget", "eligible", "time",  # R3
+            "total", "breakdown", "comparison", "ranking", "list", "trend", "month", "date-range"])  # R4
+        self.assertTrue(all(d for _, d, _ in rows))
+        self.assertEqual({t: s for t, _, s in rows}["travel"], "individual ex:Travel")
+        self.assertEqual(slug("EuropeanProject"), "european-project")
+
+
 class DbTest(unittest.TestCase):
     KEY = ("p", "winnow", "1.0.0")
+
+    def test_tags_runs_share_the_counter(self):
+        db = ProfileDb(":memory:")
+        self.assertIsNone(db.tags("p", "1.0.0"))
+        db.put_tags("p", "1.0.0", "d1", db.next_run_id(), [("a", "A", "intent")])
+        db.put("p", 1, "q?", {"a": 0.1}, "winnow", "1.0.0", "d1", db.next_run_id())
+        db.put_tags("p", "1.0.0", "d2", db.next_run_id(), [("a", "A2", "intent"), ("b", "B", "class ex:B")])
+        self.assertEqual(db.tags("p", "1.0.0"), ({"a": "A2", "b": "B"}, 3))
+        self.assertIsNone(db.tags("p", "2.0.0"))
 
     def test_tag_runs_and_eval_rows(self):
         db = ProfileDb(":memory:")

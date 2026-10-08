@@ -1,5 +1,6 @@
 """profile/profile.db (SQLite, stdlib, git-ignored, shared by all profiles). Created on first use.
 
+tags:        the tag dictionary derived from the ontology by `make tags-gen` (one run_id per invocation), read by every command.
 tag_cache:   Ollaya tag probabilities per question, filled by `make tags-cache` (one run_id per invocation),
              read by `make candidates` / `select` / `ask` / `demo` (latest run) and `make eval` (one fixed run).
 eval_result: one row per (profile, q_id, run_id), replaced by each `make eval`; run_id = the tag_cache run the tags came from.
@@ -11,6 +12,14 @@ from datetime import datetime
 from wsparql import ollaya
 
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS tags (
+    profile     TEXT NOT NULL,
+    tag         TEXT NOT NULL,
+    description TEXT NOT NULL,
+    source      TEXT NOT NULL,
+    version     TEXT NOT NULL,
+    date        TEXT NOT NULL,
+    run_id      INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS tag_cache (
     profile  TEXT NOT NULL,
     q_id     INTEGER NOT NULL,
@@ -37,10 +46,13 @@ CREATE TABLE IF NOT EXISTS eval_result (
     date       TEXT NOT NULL);
 CREATE UNIQUE INDEX IF NOT EXISTS eval_key ON eval_result (profile, q_id, run_id);
 """
-# tag_cache:   tags = JSON {tag: probability}; run_id = 1, 2, ... per `make tags-cache`
+# tags:        description = the noul instruction sent to Ollaya; source = "class ex:Expense" / "individual ex:Travel" / "property ex:budget" / "intent"
+# tag_cache:   tags = JSON {tag: probability}
+# run_id:      one counter over the tag tables (RUN_TABLES): 1, 2, ... per `make tags-gen` / `tags-cache` invocation
 # eval_result: selected = catalog id or "none"; params = JSON of the bound values; missing = "acronym, from" or "";
 #              row_count NULL when no query ran; date = the `make eval` that wrote the row (one value per eval)
 
+RUN_TABLES = ["tags", "tag_cache"]
 EVAL_COLS = "profile, q_id, question, expected, selected, confidence, params, missing, row_count, ok, model, version, run_id, date"
 
 
@@ -50,10 +62,28 @@ class ProfileDb:
         self.conn = sqlite3.connect(path)
         self.conn.executescript(SCHEMA)
 
-    # tag_cache
     def next_run_id(self):
-        """run_id for a new fill: 1 on an empty table, then max + 1."""
-        return self.conn.execute("SELECT COALESCE(MAX(run_id), 0) + 1 FROM tag_cache").fetchone()[0]
+        """run_id for a new run: 1 on an empty db, then max over RUN_TABLES + 1."""
+        union = " UNION ALL ".join(f"SELECT run_id FROM {t}" for t in RUN_TABLES)
+        return self.conn.execute(f"SELECT COALESCE(MAX(run_id), 0) + 1 FROM ({union})").fetchone()[0]
+
+    # tags
+    def put_tags(self, profile, version, date, run_id, rows):
+        """Store one `make tags-gen`: rows = [(tag, description, source)]; one transaction."""
+        with self.conn:
+            self.conn.executemany("INSERT INTO tags (profile, tag, description, source, version, date, run_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                                  [(profile, t, d, s, version, date, run_id) for t, d, s in rows])
+
+    def tags(self, profile, version):
+        """({tag: description} of the latest tags-gen run for this profile/version, run_id), or None."""
+        run_id = self.conn.execute("SELECT MAX(run_id) FROM tags WHERE profile = ? AND version = ?", (profile, version)).fetchone()[0]
+        if not run_id:
+            return None
+        rows = self.conn.execute("SELECT tag, description FROM tags WHERE profile = ? AND version = ? AND run_id = ? ORDER BY rowid",
+                                 (profile, version, run_id))
+        return dict(rows), run_id
+
+    # tag_cache
 
     def last_run_id(self, profile, model, version):
         """Latest run_id holding tags for this profile/model/version, or None."""

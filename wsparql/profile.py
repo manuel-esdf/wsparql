@@ -1,4 +1,4 @@
-"""Load a POC profile directory: ontology + data graph, tags, catalog, queries, test questions."""
+"""Load a POC profile directory: ontology + data graph, catalog, queries, test questions."""
 import re
 from pathlib import Path
 
@@ -21,7 +21,7 @@ class Profile:
         self.graph = Graph()
         self.graph.parse(path / "tbox.ttl")
         self.graph.parse(path / "abox.ttl")
-        self.tags = yaml.safe_load((path / "tags.yaml").read_text())["tags"]
+        self.tags = None  # {tag: description} from profile.db table tags (make tags-gen), set by __main__.load_tags
         self.catalog = yaml.safe_load((path / "query-catalog.yaml").read_text())["queries"]
         self.queries = {p.stem: p.read_text() for p in sorted((path / "queries").glob("*.rq"))}
         # ponytail: profile-specific IRI in code; move to a params file when a second profile appears
