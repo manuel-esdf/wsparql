@@ -178,6 +178,16 @@ fallback (the `via` column says which route answered; the 28 lines answered by t
 The tag stage therefore buys no accuracy here; it buys explainability (tag and candidate tables) and a choice over
 3 short descriptions instead of 10 full queries, which matters once the catalog outgrows one `choice`.
 
+Tried after that, no gain: an acronym hint to the tagger. The tag route cannot see q02 for q_id 5 because OPENSCIENCE
+is not recognized as a project (`european-project` 0.28). Appending "(LUMEN, GRAPHIA or OPENSCIENCE)" to the
+`european-project` tag description lifts the tag to 0.8–0.9 on every question naming an acronym and q_id 5 is then
+answered by the tag route. But only q01 and q02 carry `european-project` in their query tags (0.99; the descriptions of
+the other project queries say "projects" and get 0.02–0.06), so every acronym question now lifts those two above q04
+and q08: the expected query is in the top 3 for 30/33 instead of 31/33 (q_id 15 and 57 lost), 34/40 tag route alone,
+40/40 with the fallback. Adding `european-project` to the tags of q03, q04, q05 and q10 by hand does not restore it
+(candidate misses 16, 17, 57), and putting the hint in the question state instead changes every tag and drops the top 3
+to 24/33. Not adopted; the `make eval` numbers above are without it.
+
 ## Storage
 
 `profile/profile.db` (SQLite, git-ignored, created on first use):

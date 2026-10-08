@@ -143,6 +143,9 @@ parameterised ones. Three wordings got there:
 The 5 misses of the tag route are all `none` answers, so the fallback takes them: the direct choice over the raw SPARQL
 gets all 5 right and the 7 off-topic questions still get `none` (the closest call is "Write a SPARQL query to list all
 suppliers.", `none` at 0.63). The `via` column of `make eval` says which route answered each question.
+An acronym hint to the tagger, "(LUMEN, GRAPHIA or OPENSCIENCE)" appended to the `european-project` tag description,
+was tried after that: it lets the tag route answer the equipment question but costs two others at the candidate stage,
+34/40 alone and 40/40 with the fallback, so it is not adopted (numbers in GENERATE-TAGS-FROM-ONTOLOGY.md).
 
 `make eval-direct` is the baseline without tags: for each labeled question, one `choice` over the raw SPARQL text of all
 10 queries plus `none`, then the same parameter extraction and run. It scores **36/40** on its own, with other misses than
