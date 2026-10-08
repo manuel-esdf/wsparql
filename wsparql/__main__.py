@@ -48,7 +48,7 @@ def main():
     s = sub.add_parser("sparql", help="run one catalog query; without an id, run all and print row counts")
     s.add_argument("query_id", nargs="?")
     t = sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag)")
-    t.add_argument("question")
+    t.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
     c = sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 3); tags from the cache when the question is cached, else Ollaya")
     c.add_argument("question", nargs="?", help="defaults to the first profile tests/test-questions.yaml question")
     sl = sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)")
@@ -66,7 +66,7 @@ def main():
             for qid in prof.queries:
                 print(f"{qid:<36} {len(prof.run(qid)[1]):>3} rows")
     elif args.cmd == "tags":
-        probs = call_ollaya(ollaya.detect_tags, args.question, prof.tags)
+        probs = call_ollaya(ollaya.detect_tags, question_or_default(p, prof, args.question), prof.tags)
         print_table(["tag", "prob"], [[t, f"{v:.2f}"] for t, v in probs.items()])
     elif args.cmd == "candidates":
         question = question_or_default(p, prof, args.question)
