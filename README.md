@@ -138,7 +138,11 @@ The 5 misses:
 - 3 questions where the expected query is a candidate but the `choice` still picks `none`: "What is the total amount spent
   on LUMEN so far?" against "Compare total expenses across European projects", "Compare travel costs between LUMEN and
   GRAPHIA.", "What is the budget of each European project?" against "Compare project budget, spent amount and remaining
-  budget". The description promises a comparison, the question asks for one figure. Lever: the descriptions.
+  budget". The description promises a comparison, the question asks for one figure. Rewording the three descriptions was
+  tried: "Total expenses of each European project" scores 32/40 (the `list` tag appears, the comparison questions are
+  lost), "Compare ... across European projects (one total per project)" scores 35/40 with other misses (the two "one
+  figure" questions pass, two budget questions and a breakdown question fail). The score is a plateau of this 40-question
+  set; the next gain is more test questions, or one catalog query per intent (a single-project total next to the comparison).
 - 2 questions whose expected query is not among the 3 candidates ("What did OPENSCIENCE spend on equipment?", q02 no
   longer carries `equipment`; "Which work package of GRAPHIA is the most expensive?", q04). Lever: those descriptions.
 
