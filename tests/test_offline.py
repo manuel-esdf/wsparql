@@ -1,7 +1,13 @@
 """Offline checks (no Ollaya): run with `make test`."""
 import os
+import shutil
+import tempfile
 import unittest
+from pathlib import Path
 
+from rdflib import Graph
+
+from wsparql import etl
 from wsparql.db import ProfileDb
 from wsparql.pipeline import answer, candidates, extract_params, extract_period, select
 from wsparql.profile import Profile
@@ -173,3 +179,25 @@ class DbTest(unittest.TestCase):
         self.assertEqual(db.prev_eval(*self.KEY, 2), ("e1", {1: ("q01", 0.99, 3, 1), 2: ("none", 1.0, None, 1)}))
         db.put_evals([row[:-1] + ("e2",)])  # same (profile, q_id, run_id): replaced, not added
         self.assertEqual(db.conn.execute("SELECT COUNT(*), MAX(date) FROM eval_result").fetchone(), (2, "e2"))
+
+
+class EtlTest(unittest.TestCase):
+    def test_csv_round_trip_equals_the_committed_abox(self):
+        path = os.environ["PROFILE"]
+        committed = set(Graph().parse(os.path.join(path, "abox.ttl")))  # no blank nodes: set equality is graph equality
+        self.assertEqual(set(etl.build(path)), committed, "csv/ and abox.ttl differ -> make abox")
+
+    def test_rejects_bad_value_unknown_column_and_dangling_reference(self):
+        with tempfile.TemporaryDirectory() as d:
+            shutil.copy(os.path.join(os.environ["PROFILE"], "tbox.ttl"), d)
+            os.mkdir(os.path.join(d, "csv"))
+            expense = lambda text: Path(d, "csv", "Expense.csv").write_text(text)
+            expense("id,amount,expenseDate\nE1,10.00,2026-13-01\n")
+            with self.assertLogs("rdflib"), self.assertRaisesRegex(ValueError, "E1.expenseDate"):
+                etl.build(d)
+            expense("id,amount,colour\nE1,10.00,red\n")
+            self.assertRaisesRegex(ValueError, "colour", etl.build, d)
+            expense("id,amount,supplier\nE1,10.00,Nobody\n")
+            self.assertRaisesRegex(ValueError, "Nobody", etl.build, d)
+            expense("id,amount,category\nE1,10.00,Travel\n")  # TBOX individuals are valid references
+            self.assertEqual(len(etl.build(d)), 3)

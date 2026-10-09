@@ -1,0 +1,6 @@
+id,name,belongsToProject,budget
+GRAPHIA-WP1,Data ingestion,GRAPHIA,90000.00
+GRAPHIA-WP3,Graph analytics,GRAPHIA,110000.00
+LUMEN-WP2,Semantic services,LUMEN,150000.00
+LUMEN-WP4,Integration and validation,LUMEN,120000.00
+OPENSCIENCE-WP2,Service integration,OPENSCIENCE,80000.00

@@ -28,7 +28,7 @@ ex:participatesIn a owl:ObjectProperty ;
 
 ex:hasWorkPackage a owl:ObjectProperty ;
   rdfs:domain ex:EuropeanProject ; rdfs:range ex:WorkPackage ;
-  rdfs:label "has work package" .
+  rdfs:label "has work package" ; owl:inverseOf ex:belongsToProject .
 
 ex:belongsToProject a owl:ObjectProperty ;
   rdfs:domain ex:WorkPackage ; rdfs:range ex:EuropeanProject ;
