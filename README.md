@@ -64,6 +64,7 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     install              uv sync (creates .venv with rdflib + pyyaml)
     test                 offline unit tests (no Ollaya)
     clean                drop the derived artefacts: $(PROFILE)/abox.ttl (make abox rebuilds it), profile/profile.db (tags, query tags, tag cache, eval results; make tags-gen query-tags tags-cache rebuild them, minutes on winnow) and __pycache__; keeps .venv
+    build                build all derived artefacts in order: abox.ttl (ETL), then profile/profile.db tags (tags-gen), query tags (query-tags, Ollaya) and the question tag cache (tags-cache, Ollaya, minutes on winnow); then make eval
     profile-check        mandatory profile files present in $(PROFILE); every catalog query has its .rq
     abox                 ETL: build $(PROFILE)/abox.ttl from tbox.ttl + csv/*.csv (file = class, column = property, id = IRI local name, | separates values; the TBOX types the values); committed, rerun after editing a csv; no Ollaya
     sparql               run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only

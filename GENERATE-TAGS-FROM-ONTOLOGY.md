@@ -245,6 +245,8 @@ rows of the old version are then ignored, never mixed with the new vocabulary.
     make tags-cache      # Ollaya reads the 59 test questions (minutes)
     make eval            # routing score with the fallback and for the tag route alone; the acceptance check for any wording change
 
+`make build` runs the first four in order; `make clean` drops what they produce (and the eval results).
+
 Changing a tag description = editing an `rdfs:comment` in `tbox.ttl`, then the four commands again.
 Adding a catalog query = description + `.rq`, then `make query-tags`.
 

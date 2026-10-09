@@ -6,7 +6,7 @@ RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl query-catalog.yaml tests/test-questions.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help install test clean profile-check abox sparql tags-gen query-tags tags candidates select params ask demo eval eval-direct tags-cache ollaya-check ollaya-smoke-test
+.PHONY: help install test clean build profile-check abox sparql tags-gen query-tags tags candidates select params ask demo eval eval-direct tags-cache ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -20,6 +20,8 @@ test: ## offline unit tests (no Ollaya)
 clean: ## drop the derived artefacts: $(PROFILE)/abox.ttl (make abox rebuilds it), profile/profile.db (tags, query tags, tag cache, eval results; make tags-gen query-tags tags-cache rebuild them, minutes on winnow) and __pycache__; keeps .venv
 	rm -f $(PROFILE)/abox.ttl $(PROFILE)/../profile.db
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +
+
+build: abox tags-gen query-tags tags-cache ## build all derived artefacts in order: abox.ttl (ETL), then profile/profile.db tags (tags-gen), query tags (query-tags, Ollaya) and the question tag cache (tags-cache, Ollaya, minutes on winnow); then make eval
 
 profile-check: ## mandatory profile files present in $(PROFILE); every catalog query has its .rq
 	@for f in $(PROFILE_FILES); do test -f $(PROFILE)/$$f || { echo "MISSING $(PROFILE)/$$f"; exit 1; }; done
