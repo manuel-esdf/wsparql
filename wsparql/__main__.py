@@ -5,7 +5,7 @@ import sys
 import urllib.error
 from datetime import datetime
 
-from wsparql import ollaya, pipeline
+from wsparql import etl, ollaya, pipeline
 from wsparql.db import ProfileDb, fill
 from wsparql.profile import Profile
 from wsparql.tags import generate
@@ -132,7 +132,12 @@ def main():
     sub.add_parser("eval", help="full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-cache run_id: expected query selected and returns rows, none answers no suitable query; rows stored in profile/profile.db eval_result; exit 1 on any mismatch")
     sub.add_parser("eval-direct", help="baseline without tags: for each tests/test-questions.yaml question that has an expected_query, one Ollaya choice over the raw SPARQL of all catalog queries + none, then parameters and run; exit 1 on any mismatch")
     sub.add_parser("tags-cache", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
+    sub.add_parser("abox", help="ETL: build abox.ttl from tbox.ttl + csv/*.csv; file = class, column = property, id = IRI local name, | separates values; the TBOX types the values, owl:inverseOf pairs are materialised")
     args = p.parse_args()
+    if args.cmd == "abox":  # before Profile(), which parses the file being generated
+        out, n = etl.write(args.profile)
+        print(f"wrote {out} ({n} triples)")
+        return
     prof = Profile(args.profile)
     db = ProfileDb(prof.db_path)
     labeled = [q for q in prof.test_questions if "expected_query" in q]

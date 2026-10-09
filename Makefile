@@ -6,7 +6,7 @@ RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl query-catalog.yaml tests/test-questions.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help install test profile-check sparql tags-gen query-tags tags candidates select params ask demo eval eval-direct tags-cache ollaya-check ollaya-smoke-test
+.PHONY: help install test profile-check abox sparql tags-gen query-tags tags candidates select params ask demo eval eval-direct tags-cache ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -22,6 +22,9 @@ profile-check: ## mandatory profile files present in $(PROFILE); every catalog q
 	@for q in $$(grep -oE '^  [a-z0-9-]+:' $(PROFILE)/query-catalog.yaml | tr -d ' :'); do \
 	  test -f $(PROFILE)/queries/$$q.rq || { echo "MISSING $(PROFILE)/queries/$$q.rq (listed in query-catalog.yaml)"; exit 1; }; done
 	@echo "profile $(notdir $(PROFILE)) $$(cat $(PROFILE)/VERSION) OK"
+
+abox: ## ETL: build $(PROFILE)/abox.ttl from tbox.ttl + csv/*.csv (file = class, column = property, id = IRI local name, | separates values; the TBOX types the values); committed, rerun after editing a csv; no Ollaya
+	@$(RUN) abox
 
 sparql: profile-check ## run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
 	@$(RUN) sparql "$(Q)" $(ARGS)

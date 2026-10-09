@@ -13,7 +13,8 @@ It only chooses among trusted, existing queries, extracts their parameters from 
 Everything the system knows lives in one profile directory (`PROFILE` in `.env`, currently `profile/eu-expense-poc`, see its [README](profile/eu-expense-poc/README.md)):
 
 - a TBOX ontology describing the domain (`tbox.ttl`);
-- an ABOX dataset containing the actual data (`abox.ttl`);
+- CSV source files with the business data (`csv/*.csv`, one file per class); the ABOX (`abox.ttl`) is derived from them by a
+  minimal ETL (`make abox`): the TBOX is the schema, column = property, its `rdfs:range` types the value, committed, no Ollaya;
 - a catalog of predefined SPARQL queries (`query-catalog.yaml`: description, parameters with example values; `queries/*.rq`);
 - test questions with the expected query (`tests/test-questions.yaml`).
 
@@ -63,6 +64,7 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     install              uv sync (creates .venv with rdflib + pyyaml)
     test                 offline unit tests (no Ollaya)
     profile-check        mandatory profile files present in $(PROFILE); every catalog query has its .rq
+    abox                 ETL: build $(PROFILE)/abox.ttl from tbox.ttl + csv/*.csv (file = class, column = property, id = IRI local name, | separates values; the TBOX types the values); committed, rerun after editing a csv; no Ollaya
     sparql               run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
     tags-gen             derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya, instant. See GENERATE-TAGS-FROM-ONTOLOGY.md
     query-tags           Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5 (seconds per query on winnow)
