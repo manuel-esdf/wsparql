@@ -1,5 +1,4 @@
 PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
-
 SELECT ?empName ?year ?hourlyRate WHERE {
   ?emp c3po:C3PO_0000340 ?empName .
   {
@@ -19,5 +18,7 @@ SELECT ?empName ?year ?hourlyRate WHERE {
       BIND((?annualPersonnelCost / ((?annualProductiveHours / 12) * ?nPayslips)) AS ?hourlyRate)
     }
   }
+  FILTER(!BOUND(?from) || ?year >= SUBSTR(STR(?from), 1, 4))
+  FILTER(!BOUND(?to) || ?year <= SUBSTR(STR(?to), 1, 4))
 }
 ORDER BY ?empName ?year

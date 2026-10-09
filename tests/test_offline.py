@@ -13,7 +13,7 @@ from rdflib import Graph
 from wsparql import etl
 from wsparql.db import ProfileDb
 from wsparql.pipeline import answer, candidates, extract_params, extract_period, select
-from wsparql.profile import Profile
+from wsparql.profile import Profile, literal
 from wsparql.tags import generate, slug
 
 EU = "profile/eu-expense-poc"
@@ -71,6 +71,14 @@ class PeriodTest(unittest.TestCase):
         self.assertIsNone(extract_period("Show the expenses of the last six months."))
 
 
+class FakeProfile:
+    """What extract_params reads: the parameter kinds, the ABOX values of a property, what they name, the reporting periods."""
+    parameters = {"acronym": "acronym", "from": "date", "to": "date", "kind": ["ERP", "CRP"]}
+    periods = {"ERP1": ("2022-06-01", "2023-05-31")}
+    values = staticmethod(lambda label: ["GRAPHIA", "LUMEN"])
+    noun = staticmethod(lambda label: "European project")
+
+
 class ParamsTest(unittest.TestCase):
     NAMES = ["acronym", "from", "to"]
 
@@ -78,19 +86,24 @@ class ParamsTest(unittest.TestCase):
         return lambda question, questions: {"acronym": {"choice": choice, "confidence": confidence, "probabilities": {}}}
 
     def test_found_and_missing(self):
-        found, how = extract_params("List LUMEN expenses for Q1 2026", self.NAMES, ["GRAPHIA", "LUMEN"], self.ask("LUMEN", 0.9))
+        never = lambda question, questions: self.fail("a value written in the question needs no Ollaya")
+        found, how = extract_params("List LUMEN expenses for Q1 2026", self.NAMES, FakeProfile, never)
         self.assertEqual(found, {"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"})
         self.assertEqual(sorted(how), self.NAMES)  # one explanation per requested parameter
-        found, how = extract_params("Spending overview please.", self.NAMES, ["LUMEN"], self.ask("none", 0.9))
+        found, how = extract_params("Spending overview please.", self.NAMES, FakeProfile, self.ask("none", 0.9))
         self.assertEqual((found, sorted(how)), ({}, self.NAMES))
-        self.assertEqual(extract_params("q", ["acronym"], ["LUMEN"], self.ask("LUMEN", 0.2))[0], {})
+        self.assertEqual(extract_params("Lumen's spending", ["acronym"], FakeProfile, never)[0], {"acronym": "LUMEN"})  # word, any case
+        self.assertEqual(extract_params("q", ["acronym"], FakeProfile, self.ask("LUMEN", 0.2))[0], {})
+        found, how = extract_params("Who worked in ERP1 on the KoM 2023?", ["kind", "from", "to"], FakeProfile, never)
+        self.assertEqual(found, {"from": "2022-06-01", "to": "2023-05-31"})  # the named period's dates, not the year; ERP1 is not the word ERP
+        self.assertEqual(extract_params("List the ERP of the project", ["kind"], FakeProfile, never)[0], {"kind": "ERP"})
 
 
 class BindingsTest(unittest.TestCase):
     def test_q10_runs_with_bound_params(self):
         prof = Profile(EU)
         q = "q10-project-expenses-in-period"
-        self.assertEqual(prof.acronyms, ["GRAPHIA", "LUMEN", "OPENSCIENCE"])
+        self.assertEqual((prof.values("acronym"), prof.noun("acronym"), prof.periods), (["GRAPHIA", "LUMEN", "OPENSCIENCE"], "European project", {}))
         self.assertEqual(len(prof.run(q, {"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"})[1]), 6)  # the old hard-coded query
         self.assertEqual(len(prof.run(q, {"acronym": "GRAPHIA", "from": "2026-01-01", "to": "2026-06-30"})[1]), 3)
 
@@ -240,14 +253,18 @@ class ExpectedRowsTest(unittest.TestCase):
         except InvalidOperation:
             return v
 
-    def test_every_query_reproduces_the_expected_values(self):
-        """profile/*/tests/expected.json = {query id: the cell values of its rows, flattened} (c3po: the draft's
-        cq/expected.json re-keyed, verbatim). Compared as sets: the draft deduplicated two of its lists (q03, q07).
-        Raw graph.query, so IRIs compare in full."""
+    def test_every_case_reproduces_the_expected_values(self):
+        """profile/*/tests/expected.json = [{q_id, query, params, rows, expected}]: the draft's cq/expected.json values
+        (the cells of each competency query, flattened; CQ3's "city, country" split, the merged query returns them apart)
+        with the query and parameters that answer the competency question since the siblings merged. Every expected value
+        must be among the returned cells (a merged query returns more columns) and the row count must match. Sets: the
+        draft deduplicated two of its lists (CQ3, CQ7). Raw graph.query, so IRIs compare in full."""
         for f in sorted(Path("profile").glob("*/tests/expected.json")):
-            prof, expected = Profile(f.parent.parent), json.load(f.open())
-            self.assertEqual(sorted(expected), sorted(prof.catalog), f"{f}: one entry per catalog query")
-            for qid, values in expected.items():
-                with self.subTest(profile=prof.name, query=qid):
-                    got = {self.norm(str(c)) for row in prof.graph.query(prof.queries[qid]) for c in row if c is not None}
-                    self.assertEqual(got, {self.norm(v) for v in values})
+            prof, cases = Profile(f.parent.parent), json.loads(f.read_text())
+            self.assertEqual(sorted({c["query"] for c in cases}), sorted(prof.catalog), f"{f}: every catalog query has a case")
+            for c in cases:
+                with self.subTest(profile=prof.name, q_id=c["q_id"]):
+                    rows = list(prof.graph.query(prof.queries[c["query"]], initBindings={k: literal(v) for k, v in c["params"].items()}))
+                    got = {self.norm(str(x)) for row in rows for x in row if x is not None}
+                    self.assertEqual(len(rows), c["rows"])
+                    self.assertEqual({self.norm(v) for v in c["expected"]} - got, set())

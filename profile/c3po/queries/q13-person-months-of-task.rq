@@ -1,0 +1,18 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+SELECT ?taskName (SUM(?hours / (?annualProductiveHours / 12)) AS ?totalPersonMonths)
+WHERE {
+  ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 ?projectName .
+  ?task a c3po:C3PO_0000106 ; c3po:C3PO_0000339 ?taskName .
+  ?ts a c3po:C3PO_0000107 ;
+      c3po:C3PO_0000206 ?project ;
+      c3po:C3PO_0000217 ?task ;
+      c3po:C3PO_0000202 ?emp ;
+      c3po:C3PO_0000301 ?hours ;
+      c3po:C3PO_0000347 ?tsDate .
+  FILTER(!BOUND(?from) || SUBSTR(STR(?tsDate), 1, 7) >= SUBSTR(STR(?from), 1, 7))
+  FILTER(!BOUND(?to) || SUBSTR(STR(?tsDate), 1, 7) <= SUBSTR(STR(?to), 1, 7))
+  ?emp c3po:C3PO_0000312 ?annualProductiveHours .
+  FILTER(?annualProductiveHours > 0)
+}
+GROUP BY ?task ?taskName
+ORDER BY ?taskName

@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 import yaml
-from rdflib import RDFS, XSD, Graph, Literal, URIRef
+from rdflib import RDF, RDFS, XSD, Graph, Literal, URIRef
 
 
 def camel(label):
@@ -28,7 +28,10 @@ class Profile:
         self.graph.parse(path / "tbox.ttl")
         self.graph.parse(path / "abox.ttl")
         self.tags = None  # {tag: description} from profile.db table tags (make tags-gen), set by __main__.load_tags
-        self.catalog = yaml.safe_load((path / "query-catalog.yaml").read_text())["queries"]
+        catalog = yaml.safe_load((path / "query-catalog.yaml").read_text())
+        self.catalog = catalog["queries"]
+        # {param: what fills it}: a property label (one of its ABOX values), a list (one of those words) or date (from/to)
+        self.parameters = catalog.get("parameters", {})
         self.queries = {p.stem: p.read_text() for p in sorted((path / "queries").glob("*.rq"))}
         # ponytail: the fallback reads the SPARQL text and the IRIs are opaque, so it gets the labels in their place
         # (ex:P14 -> ex:amount, ex:C02 -> ex:EuropeanProject); labeled subjects are the TBOX terms, ABOX rows have none.
@@ -40,16 +43,39 @@ class Profile:
         term = re.compile("|".join(map(re.escape, names)) + r"\b")
         strip = lambda q: re.sub(r"(?m)^[ \t]+|\n(?=\n)", "", q)
         self.readable = {qid: term.sub(lambda m: names[m.group()], strip(q)) for qid, q in self.queries.items()}
-        # ponytail: profile-specific label in code (the IRIs are opaque); c3po declares no params, so it waits for a profile that does
-        self.acronyms = sorted(str(r[0]) for r in self.graph.query(
-            'SELECT DISTINCT ?a WHERE { ?prop <http://www.w3.org/2000/01/rdf-schema#label> "acronym" . ?p ?prop ?a }'))
+        # ponytail: profile-specific labels in code: a question naming a reporting period gets its dates as from/to
+        # (c3po); eu-expense has no such period and keeps the quarter/month/year regex
+        by = lambda label: self.graph.value(predicate=RDFS.label, object=Literal(label))
+        name, start, end = by("reporting period display name"), by("reporting period start date"), by("reporting period end date")
+        self.periods = {str(n): (str(self.graph.value(s, start)), str(self.graph.value(s, end)))
+                        for s, n in self.graph.subject_objects(name)} if name else {}
+        self._values = {}
         # [{q_id, question, expected_query?}]; expected_query = catalog id or "none", absent = not evaluated
         self.test_questions = yaml.safe_load((path / "tests/test-questions.yaml").read_text())["questions"]
         self.db_path = path.parent / "profile.db"  # shared tag cache, one folder up, git-ignored
 
+    def property(self, label):
+        p = self.graph.value(predicate=RDFS.label, object=Literal(label))
+        if p is None:
+            raise ValueError(f"{self.name}: no property of tbox.ttl is labeled {label!r}")
+        return p
+
+    def values(self, label):
+        """The distinct ABOX values of the property labeled `label`, sorted (the choices of a query parameter)."""
+        if label not in self._values:
+            self._values[label] = sorted({str(v) for v in self.graph.objects(None, self.property(label))})
+        return self._values[label]
+
+    def noun(self, label):
+        """What the values of the property labeled `label` name: the label of its rdfs:domain, else of the class of a
+        subject carrying it ('acronym' -> 'European project'), else the label itself."""
+        p = self.property(label)
+        c = self.graph.value(p, RDFS.domain) or next((c for s in self.graph.subjects(p) for c in self.graph.objects(s, RDF.type)), None)
+        return str(self.graph.value(c, RDFS.label) or label) if c is not None else label
+
     def run(self, query_id, bindings=None):
-        """Run one catalog query with its parameters bound (rdflib initBindings, no templating);
-        returns (column names, rows of display strings)."""
+        """Run one catalog query with its parameters bound (rdflib initBindings, no templating; an unbound optional
+        parameter leaves its variable free); returns (column names, rows of display strings)."""
         res = self.graph.query(self.queries[query_id], initBindings={k: literal(v) for k, v in (bindings or {}).items()})
         nm = self.graph.namespace_manager
         cell = lambda c: "" if c is None else c.n3(nm) if isinstance(c, URIRef) else str(c)

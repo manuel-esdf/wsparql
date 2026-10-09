@@ -1,23 +1,17 @@
 PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
 SELECT ?wpName (SUM(?personMonth) AS ?personMonths)
 WHERE {
-  ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
-  ?rp a c3po:C3PO_0000110 ; c3po:C3PO_0000341 "CRP5" ;
-      c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
-
+  ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 ?projectName .
   ?ts a c3po:C3PO_0000107 ;
       c3po:C3PO_0000206 ?project ;
       c3po:C3PO_0000217 ?task ;
       c3po:C3PO_0000202 ?emp ;
       c3po:C3PO_0000301 ?hours ;
       c3po:C3PO_0000347 ?tsDate .
-  BIND(STRDT(SUBSTR(STR(?tsDate), 1, 7), xsd:gYearMonth) AS ?ym)
+  FILTER(!BOUND(?from) || SUBSTR(STR(?tsDate), 1, 7) >= SUBSTR(STR(?from), 1, 7))
+  FILTER(!BOUND(?to) || SUBSTR(STR(?tsDate), 1, 7) <= SUBSTR(STR(?to), 1, 7))
   ?task c3po:C3PO_0000213 ?wp .
   ?wp c3po:C3PO_0000338 ?wpName .
-  FILTER(STR(?ym) >= SUBSTR(STR(?rpStart), 1, 7) && STR(?ym) <= SUBSTR(STR(?rpEnd), 1, 7))
-
   ?emp c3po:C3PO_0000312 ?annualProductiveHours .
   FILTER(?annualProductiveHours > 0)
   BIND(?hours / (?annualProductiveHours / 12) AS ?personMonth)

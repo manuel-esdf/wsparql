@@ -12,8 +12,8 @@ It only chooses among trusted, existing queries, extracts their parameters from 
 
 Everything the system knows lives in one profile directory (`PROFILE` in `.env`). Two profiles exist:
 `profile/eu-expense-poc`, synthetic, the one the numbers below refer to unless said otherwise (see its
-[README](profile/eu-expense-poc/README.md)), and `profile/c3po`, the cost reporting of one H2020 project with 29
-competency queries (see its [README](profile/c3po/README.md)); `make PROFILE=profile/c3po <target>` runs any target on
+[README](profile/eu-expense-poc/README.md)), and `profile/c3po`, the cost reporting of one H2020 project, 29
+competency questions over 13 parameterised queries (see its [README](profile/c3po/README.md)); `make PROFILE=profile/c3po <target>` runs any target on
 the other one. A profile holds:
 
 - a TBOX ontology describing the domain (`tbox.ttl`);
@@ -37,7 +37,7 @@ each query are detected by Ollaya from the query description. Both live in `prof
 | Identify the most relevant SPARQL queries | `make candidates` | pure Python: mean detected probability over each query's tags, top 5 |
 | Ollaya selects the best candidate | `make select` | one `choice` question over the 3 candidate descriptions plus `none`; `none` or confidence below 0.4 = no suitable query |
 | Fallback when that answer is `none` | `make ask` | one more `choice` over the SPARQL (labels in place of the opaque IRIs) text of all catalog queries plus `none`; its answer is final |
-| Extract query parameters | `make params` | `acronym`: `choice` over the ABOX project acronyms plus `none`; `from`/`to`: regex on quarter, month name or year |
+| Extract query parameters | `make params` | each parameter of the selected query as the catalog `parameters` declare it: an ABOX value written in the question, else a `choice` over the property's values plus `none`; `from`/`to`: the dates of a reporting period named in the question, else regex on quarter, month name or year; an optional parameter not found leaves its variable free |
 | Execute SPARQL on the ABOX | `make sparql` | rdflib in memory, parameters bound with `initBindings` (no templating) |
 | Return the result | `make ask` | the six demo blocks below, or "no suitable query" / "no suitable query (missing parameter X)" |
 
@@ -77,7 +77,7 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     tags                 detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"; no Q = first tests/test-questions.yaml question
     candidates           rank top 5 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
     select               rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question
-    params               extract the query parameters found in Q (acronym: Ollaya choice over ABOX projects + none; from/to: regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
+    params               extract the query parameters found in Q (an ABOX value written in the question, else an Ollaya choice over the property's values + none; from/to: a named reporting period's dates, else regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
     ask                  answer Q end to end: tags, candidates, selected query (fallback: direct choice over the SPARQL (labels in place of the opaque IRIs) when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
     demo                 make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
     eval                 full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M with the direct fallback and for the tag route alone, exit 1 on any mismatch (minutes on winnow)
@@ -106,7 +106,7 @@ Example, `make ask Q="List LUMEN expenses for Q1 2026"`:
     selected: q10-project-expenses-in-period (confidence 0.94)
 
     param    value       how
-    acronym  LUMEN       Ollaya choice over 3 ABOX projects + none, confidence 0.99
+    acronym  LUMEN       named in the question
     from     2026-01-01  regex: quarter, month name or year in the question
     to       2026-03-31  regex: quarter, month name or year in the question
 
@@ -163,17 +163,23 @@ misses are "one figure" questions whose answer is a row or a sum of the rows (th
 consumed, the smallest and the per-project remaining budget, the ineligible total, the personnel one above) plus "Rank
 external providers by total expenditure." at `none` 0.87.
 
-Current score on `profile/c3po` with `winnow`, profile 1.0.0 (the C3PO ontology; 29 competency questions, one per
-query, all in-domain, no `none` questions yet; query tags run_id 11, question tags run_id 12): **25/29** with the direct
-fallback, **22/29** for the tag route alone, `make eval-direct` **26/29**. Every miss selects a sibling query whose rows
-contain the expected ones: "Who is working on the project FAIR-IMPACT in ERP3?" gets the employees of the whole project
-(q09, 0.92), "What is the hourly rate of employee named "Employe2" in 2022?" the rate of every employee per year (q06,
-0.42), "What is the duration of ERP1 on project FAIR-IMPACT?" the european reporting periods with their dates (q15,
-through the fallback at 0.61) and "List all travel events in ERP2 of project FAIR-IMPACT." the same events with their
-cost (q03, fallback 0.63); the direct route makes the same two period choices and answers `none` (0.47) to the ERP1
-travel total. The constants are in the query text, so the catalog holds filtered and unfiltered siblings that the
-`choice` cannot tell apart once its `none` criterion is "computes or contains among its rows"; parameterising the
-constants (period, employee, year, work package) merges the siblings and is the next step for this profile.
+Current score on `profile/c3po` with `winnow`, profile 1.1.0 (the C3PO ontology; 29 competency questions, all
+in-domain, no `none` questions yet, over 13 queries whose constants became optional parameters; query tags run_id 13,
+question tags run_id 14): **27/29** with the direct fallback, **26/29** for the tag route alone, `make eval-direct`
+**27/29**. Profile 1.0.0 had one query per competency question with its constants in the text and scored 25/29, 22/29
+and 26/29: each of its four misses picked a sibling query, the same shape with or without a filter, whose rows contained
+the answer (the employees of the whole project for those of ERP3, every employee's hourly rate for Employe2's in 2022,
+the list of european reporting periods for ERP1's dates, the ERP2 travel events with their cost for those without).
+Merging the siblings removed that confusion: the four are routed and answered exactly, their parameters read from the
+question (the period ERP3 becomes `from`/`to`, "Employee 1" an Ollaya choice over the five employee names). The two
+misses: "What is the total travel cost for ERP1 for the project FAIR-IMPACT?" (`total-travel-cost`, `travel` and `total`
+rank the travel events query first and the choice takes it at 0.65 over the expenditure by reporting period, whose
+description says "travel invoices"; the direct route agrees at 0.50) and "List all ERP of project FAIR-IMPACT."
+(`european-reporting-period` is detected at 0.39 only, `list` at 0.86, so the all-projects query leads the candidates
+and every choice answers `none` at 0.92: the merged SPARQL no longer names the european class, its `kind` filter stands
+for it). One soft spot: "Employee1" written without a space is not the ABOX name `Employe1` and the choice over the five
+names answers `none`, so the hours question is answered for every employee, rows that contain the answer and count as a
+hit.
 
 On the first test set (59 questions, 40 labeled, profile 1.2.0, query tags run_id 1, question tags run_id 2) the score
 was **40/40** with the direct fallback and **35/40** for the tag route alone (19 ambiguous questions unlabeled and
@@ -249,7 +255,7 @@ up (q03 0.83 → 0.98 and 0.78 → 0.94), the closest off-topic call `none` 0.73
 the 0.4 minimum) and the CloudHost total (q08 0.66) and loses "Rank external providers by total expenditure."
 (`none` 0.57); the other 4 misses are the 1.3.0 ones.
 
-The second profile changed what the fallback is given: one `choice` over the 29 c3po queries came to 8213 tokens against
+The second profile changed what the fallback is given: one `choice` over the 29 c3po queries of its profile 1.0.0 came to 8213 tokens against
 winnow's 8192 context (Ollaya HTTP 422), so `Profile.readable` now drops the indentation and the blank lines of every
 query. The PREFIX lines stay: dropping those instead cost three fallback answers (83/87: "What is GRAPHIA's cumulative
 expenditure?", "What were LUMEN's subcontracting costs?" and the travel comparison at `none`) and three direct ones

@@ -1,7 +1,6 @@
 PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-SELECT ?rpName ?rpType
+SELECT ?period ?rpType
        (SUM(?personnelCost) AS ?totalPersonnelCost)
        (SUM(?invoiceAmount) AS ?totalTravelInvoices)
        ((SUM(?personnelCost) + SUM(?invoiceAmount)) AS ?totalExpenditure)
@@ -26,17 +25,17 @@ WHERE {
     }
     {
       {
-        ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
+        ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 ?projectName .
         ?ts a c3po:C3PO_0000107 ;
             c3po:C3PO_0000206 ?project ;
             c3po:C3PO_0000301 ?hours ;
             c3po:C3PO_0000202 ?employee ;
             c3po:C3PO_0000347 ?tsDate .
       }
-        BIND(STRDT(SUBSTR(STR(?tsDate), 1, 7), xsd:gYearMonth) AS ?tsYearMonth)
+      BIND(STRDT(SUBSTR(STR(?tsDate), 1, 7), xsd:gYearMonth) AS ?tsYearMonth)
       ?rp a ?rpType .
       FILTER(?rpType IN (c3po:C3PO_0000109, c3po:C3PO_0000110))
-      ?rp c3po:C3PO_0000341 ?rpName ; c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
+      ?rp c3po:C3PO_0000341 ?period ; c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
       FILTER(STR(?tsYearMonth) >= SUBSTR(STR(?rpStart), 1, 7) && STR(?tsYearMonth) <= SUBSTR(STR(?rpEnd), 1, 7))
     }
     FILTER(SUBSTR(STR(?tsYearMonth), 1, 4) = ?yr)
@@ -46,10 +45,10 @@ WHERE {
   UNION
   {
     ?employee c3po:C3PO_0000015 ?rate .
-    ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
+    ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 ?projectName .
     ?rp a ?rpType .
     FILTER(?rpType IN (c3po:C3PO_0000109, c3po:C3PO_0000110))
-    ?rp c3po:C3PO_0000341 ?rpName ; c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
+    ?rp c3po:C3PO_0000341 ?period ; c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
     ?ts a c3po:C3PO_0000107 ;
         c3po:C3PO_0000206 ?project ;
         c3po:C3PO_0000301 ?hours ;
@@ -62,10 +61,10 @@ WHERE {
   }
   UNION
   {
-    ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
+    ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 ?projectName .
     ?rp a ?rpType .
     FILTER(?rpType IN (c3po:C3PO_0000109, c3po:C3PO_0000110))
-    ?rp c3po:C3PO_0000341 ?rpName ; c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
+    ?rp c3po:C3PO_0000341 ?period ; c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
     ?inv a c3po:C3PO_0000102 ;
          c3po:C3PO_0000201 ?project ;
          c3po:C3PO_0000308 ?invoiceDate ;
@@ -74,5 +73,5 @@ WHERE {
     BIND(0 AS ?personnelCost)
   }
 }
-GROUP BY ?rp ?rpName ?rpType
-ORDER BY ?rpName
+GROUP BY ?rp ?period ?rpType
+ORDER BY ?period

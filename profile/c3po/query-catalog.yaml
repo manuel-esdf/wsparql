@@ -1,59 +1,54 @@
+# parameters: what fills each query parameter (bound with rdflib initBindings, never templated). A property label = one
+# of its ABOX values, taken when written in the question, else by an Ollaya choice over them plus none; a list = one of
+# those words written in the question; date = from/to, the dates of a reporting period named in the question, else the
+# quarter, month or year written in it. Per query, `params` are required (none found = the query is not run) and
+# `optional` ones leave their variable free when not found (no filter, the whole set); the values are the examples that
+# `make sparql` runs without ARGS.
+parameters:
+  projectName: project display name
+  period: reporting period display name
+  empName: employee display name
+  wpName: work package display name
+  taskName: task display name
+  purpose: travel purpose
+  kind: [ERP, CRP]
+  from: date
+  to: date
 queries:
-  q01-personnel-cost-in-reporting-period:
-    description: "Total personnel cost of the project in european reporting period ERP3"
-  q02-person-months-of-work-package-in-period:
-    description: "Person-months spent in work package WP4 during european reporting period ERP1"
-  q03-travel-events-in-period-with-cost:
-    description: "List the travel events of european reporting period ERP2 with their dates, cost, destination and purpose"
-  q04-travel-cost-in-reporting-period:
-    description: "Total travel cost of the project in european reporting period ERP1"
-  q05-person-months-by-work-package-in-period:
-    description: "Person-months spent per work package during coordinator reporting period CRP5"
-  q06-hourly-rate-by-employee-and-year:
-    description: "Hourly rate of each employee per year"
-  q07-expenditure-by-reporting-period:
-    description: "Total expenditure (personnel cost and travel invoices) per reporting period"
-  q08-employees-on-project-in-period:
-    description: "Employees who worked on the project in european reporting period ERP3"
-  q09-employees-on-project:
-    description: "Employees who work on the project"
-  q10-timesheets-and-hours-of-employee:
-    description: "Number of timesheet entries and total hours of Employe1 on the project"
-  q11-hourly-rate-of-employee-in-year:
-    description: "Hourly rate of Employe2 in 2022"
-  q12-annual-personnel-cost-of-employee:
-    description: "Annual personnel cost of Employe1 in 2025, gross salary plus employer contributions"
-  q13-annual-productive-hours-of-employee:
-    description: "Annual productive hours of Employe3"
-  q14-reporting-period-dates:
-    description: "Start and end dates of european reporting period ERP1"
-  q15-european-reporting-periods-of-project:
-    description: "List the european reporting periods of the project with their dates"
-  q16-monthly-productive-hours-of-employee:
-    description: "Monthly productive hours of Employe2"
-  q17-work-packages-of-project:
-    description: "List the work packages of the project with their allocated person-months"
-  q18-travel-events-of-project:
-    description: "List the travel events of the project with their dates and destination"
-  q19-travel-cost-of-event:
-    description: "Total travel cost of the travel event Dagstuhl Workshop 2023"
-  q20-travel-destination-of-event:
-    description: "Destination city and country of the travel event Dagstuhl Workshop 2023"
-  q21-travel-purpose-of-event:
-    description: "Purpose of the travel event Dagstuhl Workshop 2023"
-  q22-travel-events-in-period:
-    description: "List the travel events of european reporting period ERP2"
-  q23-reporting-periods-of-project:
-    description: "List all reporting periods of the project, european and coordinator"
-  q24-gross-salary-of-employee-in-year:
-    description: "Total gross salary of Employe1 in 2023"
-  q25-employer-contribution-of-employee-in-year:
-    description: "Total employer (patronal) contribution of Employe1 in 2023"
-  q26-all-employees:
+  q01-expenditure-by-reporting-period:
+    description: "Personnel cost, travel invoices and total expenditure of the project per reporting period, or of one reporting period"
+    optional: {projectName: FAIR-IMPACT, period: ERP3}
+  q02-person-months-by-work-package:
+    description: "Person-months spent per work package, or in one work package, over the whole project or a reporting period"
+    optional: {projectName: FAIR-IMPACT, wpName: "WP4 - Metadata and ontologies", from: "2022-06-01", to: "2023-05-31"}
+  q03-travel-events:
+    description: "Travel events of the project with their dates, destination and total cost: all of them, those of a reporting period, or one event by its purpose"
+    optional: {projectName: FAIR-IMPACT, purpose: "Dagstuhl Workshop 2023", from: "2023-06-01", to: "2024-05-31"}
+  q04-hourly-rate-by-employee-and-year:
+    description: "Hourly rate of each employee per year, or of one employee in one year"
+    optional: {empName: Employe2, from: "2022-01-01", to: "2022-12-31"}
+  q05-employees-on-project:
+    description: "Employees who worked on the project, over its whole duration or in a reporting period"
+    optional: {projectName: FAIR-IMPACT, from: "2024-06-01", to: "2025-05-31"}
+  q06-hours-by-employee:
+    description: "Timesheet entries and total hours logged per employee, or by one employee, over the whole project, a month, a year or a reporting period"
+    optional: {projectName: FAIR-IMPACT, empName: Employe1, from: "2025-05-01", to: "2025-05-31"}
+  q07-personnel-cost-of-employee-by-year:
+    description: "Gross salary, employer social contribution and annual personnel cost of an employee per year"
+    optional: {empName: Employe1, from: "2025-01-01", to: "2025-12-31"}
+  q08-productive-hours-of-employee:
+    description: "Annual and monthly productive hours of an employee"
+    optional: {empName: Employe3}
+  q09-reporting-periods-of-project:
+    description: "Reporting periods of the project with their start and end dates: all of them, the european (ERP) or coordinator (CRP) ones, or one period"
+    optional: {projectName: FAIR-IMPACT, period: ERP1, kind: ERP}
+  q10-work-packages-of-project:
+    description: "Work packages of the project with their allocated person-months"
+    optional: {projectName: FAIR-IMPACT}
+  q11-all-employees:
     description: "List all employees of the company"
-  q27-all-projects:
+  q12-all-projects:
     description: "List the European projects"
-  q28-hours-by-employee-in-month:
-    description: "Hours worked by each employee in May 2025"
-  q29-person-months-of-task-in-period:
-    description: "Person-months spent in task 1.1 during european reporting period ERP1"
+  q13-person-months-of-task:
+    description: "Person-months spent on a task, over the whole project or a reporting period"
+    optional: {projectName: FAIR-IMPACT, taskName: "1.1", from: "2022-06-01", to: "2023-05-31"}

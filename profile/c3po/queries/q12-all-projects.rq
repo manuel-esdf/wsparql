@@ -1,5 +1,4 @@
 PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
-
 SELECT ?projectName
 WHERE {
   ?project a c3po:C3PO_0000101 ;

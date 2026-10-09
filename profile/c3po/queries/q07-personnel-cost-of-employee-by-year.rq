@@ -1,0 +1,18 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+SELECT ?empName ?year
+       (SUM(?grossSalary) AS ?totalSalaryGross)
+       (SUM(?patronalContribution) AS ?totalPatronalContribution)
+       ((SUM(?grossSalary) + SUM(?patronalContribution)) AS ?annualPersonnelCost)
+WHERE {
+  ?emp a c3po:C3PO_0000105 ; c3po:C3PO_0000340 ?empName .
+  ?payslip a c3po:C3PO_0000111 ;
+           c3po:C3PO_0000205 ?emp ;
+           c3po:C3PO_0000313 ?grossSalary ;
+           c3po:C3PO_0000314 ?patronalContribution ;
+           c3po:C3PO_0000330 ?yearMonth .
+  BIND(SUBSTR(STR(?yearMonth), 1, 4) AS ?year)
+  FILTER(!BOUND(?from) || ?year >= SUBSTR(STR(?from), 1, 4))
+  FILTER(!BOUND(?to) || ?year <= SUBSTR(STR(?to), 1, 4))
+}
+GROUP BY ?emp ?empName ?year
+ORDER BY ?empName ?year

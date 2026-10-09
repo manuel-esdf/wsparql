@@ -25,7 +25,7 @@ build: abox tags-gen query-tags tags-cache ## build all derived artefacts in ord
 
 profile-check: ## mandatory profile files present in $(PROFILE); every catalog query has its .rq
 	@for f in $(PROFILE_FILES); do test -f $(PROFILE)/$$f || { echo "MISSING $(PROFILE)/$$f"; exit 1; }; done
-	@for q in $$(grep -oE '^  [a-z0-9-]+:' $(PROFILE)/query-catalog.yaml | tr -d ' :'); do \
+	@for q in $$(grep -oE '^  q[0-9]+[a-z0-9-]*:' $(PROFILE)/query-catalog.yaml | tr -d ' :'); do \
 	  test -f $(PROFILE)/queries/$$q.rq || { echo "MISSING $(PROFILE)/queries/$$q.rq (listed in query-catalog.yaml)"; exit 1; }; done
 	@echo "profile $(notdir $(PROFILE)) $$(cat $(PROFILE)/VERSION) OK"
 
@@ -50,7 +50,7 @@ candidates: profile-check ## rank top 5 queries for Q; question tags from the la
 select: profile-check ## rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question
 	@$(RUN) select "$(Q)"
 
-params: profile-check ## extract the query parameters found in Q (acronym: Ollaya choice over ABOX projects + none; from/to: regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
+params: profile-check ## extract the query parameters found in Q (an ABOX value written in the question, else an Ollaya choice over the property's values + none; from/to: a named reporting period's dates, else regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
 	@$(RUN) params "$(Q)"
 
 ask: profile-check ## answer Q end to end: tags, candidates, selected query (fallback: direct choice over the SPARQL (labels in place of the opaque IRIs) when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question

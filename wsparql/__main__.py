@@ -119,13 +119,13 @@ def main():
     default_q = "defaults to the first profile tests/test-questions.yaml question"
     s = sub.add_parser("sparql", help="run one catalog query; without an id, run all and print row counts")
     s.add_argument("query_id", nargs="?")
-    s.add_argument("bindings", nargs="*", help="param=value, e.g. acronym=GRAPHIA from=2026-01-01 to=2026-06-30; missing = catalog example")
+    s.add_argument("bindings", nargs="*", help="param=value, e.g. acronym=GRAPHIA from=2026-01-01 to=2026-06-30; none = the catalog examples; with some, a required one not given = its example, an optional one stays unbound")
     sub.add_parser("tags-gen", help="derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya")
     sub.add_parser("query-tags", help="Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5")
     sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag of the dictionary)").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 5); question tags from the cache when the question is cached, else Ollaya; query tags from the latest query-tags run").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)").add_argument("question", nargs="?", help=default_q)
-    pa = sub.add_parser("params", help="extract the query parameters found in a question: acronym (Ollaya choice over ABOX projects + none), from/to (regex); lists every catalog parameter and the queries needing it")
+    pa = sub.add_parser("params", help="extract the query parameters found in a question: an ABOX value written in the question, else an Ollaya choice over the property's values + none; from/to: the dates of a named reporting period, else a regex on quarter, month, year; lists every catalog parameter and the queries needing it")
     pa.add_argument("question", nargs="?", help="no question = run on every test question whose expected query takes parameters")
     sub.add_parser("ask", help="answer a question end to end: tags, candidates, selected query (direct choice over the SPARQL (labels in place of the opaque IRIs) as fallback when the tag route says none), parameters, result rows or no suitable query").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("demo", help="ask every tests/test-questions.yaml question that has an expected_query, off-topic ones included")
@@ -143,23 +143,24 @@ def main():
     labeled = [q for q in prof.test_questions if "expected_query" in q]
     qt_run = load_tags(prof, db, args.cmd in NEED_QUERY_TAGS) if args.cmd not in ("sparql", "tags-gen", "eval-direct") else None
 
+    takes = lambda q: {**q.get("params", {}), **q.get("optional", {})}  # required + optional, with their example values
     if args.cmd == "sparql":
         if args.query_id:
             if args.query_id not in prof.queries:
                 p.error(f"unknown query id {args.query_id!r}; one of: {', '.join(prof.queries)}")
-            declared = prof.catalog[args.query_id].get("params", {})
+            declared = takes(prof.catalog[args.query_id])
             if bad := [b for b in args.bindings if "=" not in b]:
                 p.error(f"ARGS must be param=value pairs, got {' '.join(bad)!r}")
             given = dict(b.split("=", 1) for b in args.bindings)
             if unknown := set(given) - set(declared):
                 p.error(f"{args.query_id} takes {', '.join(declared) or 'no parameters'}, not {', '.join(sorted(unknown))}")
-            params = {**declared, **given}
+            params = {**prof.catalog[args.query_id].get("params", {}), **given} if given else declared  # ARGS: the other optional parameters stay unbound
             if params:
                 print("params: " + " ".join(f"{k}={v}" for k, v in params.items()) + ("" if given else " (catalog example)"))
             print_table(*prof.run(args.query_id, params))
         else:
             for qid in prof.queries:
-                print(f"{qid:<36} {len(prof.run(qid, prof.catalog[qid].get('params'))[1]):>3} rows")
+                print(f"{qid:<40} {len(prof.run(qid, takes(prof.catalog[qid]))[1]):>3} rows")
     elif args.cmd == "tags":
         print_tags(call_ollaya(ollaya.detect_tags, question_or_default(p, prof, args.question), prof.tags))
     elif args.cmd == "candidates":
@@ -175,19 +176,19 @@ def main():
         ranked = pipeline.candidates(probs, prof.catalog)
         print_selection(prof, ranked, *call_ollaya(pipeline.select, question, ranked, prof.catalog))
     elif args.cmd == "params":
-        needed_by = {n: [qid for qid, q in prof.catalog.items() if n in q.get("params", {})]
-                     for n in sorted({n for q in prof.catalog.values() for n in q.get("params", {})})}
+        needed_by = {n: [qid for qid, q in prof.catalog.items() if n in takes(q)] for n in prof.parameters}
+        needed_by = {n: qids for n, qids in needed_by.items() if qids}
         names = list(needed_by)
         if args.question and args.question.strip():
             print(f"Q: {args.question}", flush=True)
-            found, how = call_ollaya(pipeline.extract_params, args.question, names, prof.acronyms)
+            found, how = call_ollaya(pipeline.extract_params, args.question, names, prof)
             print_table(["param", "value", "how", "needed by"],
                         [[n, found.get(n, "-"), how[n], ", ".join(qids)] for n, qids in needed_by.items()])
         else:  # working examples: every test question whose expected query takes parameters
-            examples = [q for q in prof.test_questions if prof.catalog.get(q.get("expected_query"), {}).get("params")]
+            examples = [q for q in prof.test_questions if takes(prof.catalog.get(q.get("expected_query"), {}))]
             rows = []
             for q in examples:
-                found, _ = call_ollaya(pipeline.extract_params, q["question"], names, prof.acronyms)
+                found, _ = call_ollaya(pipeline.extract_params, q["question"], names, prof)
                 rows.append([str(q["q_id"]), q["question"], q["expected_query"], *[found.get(n, "-") for n in names]])
             print_table(["q_id", "question", "expected_query", *names], rows)
     elif args.cmd == "ask":

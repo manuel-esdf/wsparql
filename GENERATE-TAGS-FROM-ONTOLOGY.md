@@ -178,7 +178,7 @@ dictionary, no query tags, no candidates): **36/40**, with other misses.
 | direct choice over the raw SPARQL | 21, 23, 26, 54, all answered `none` | tags get all 4 right |
 
 No question fails in both; the 7 off-topic questions get `none` in both. q_id 5, "What did OPENSCIENCE spend on
-equipment?", failed in both until `pipeline.DIRECT_INSTRUCTIONS` said that `none` is for an answer no query "computes
+equipment?", failed in both until `pipeline.direct_instructions` said that `none` is for an answer no query "computes
 or contains among its rows": Ollaya read the q02 breakdown as not computing a one-category figure (`none` 0.73 against
 q02 0.25, and a SPARQL comment listing the categories made it worse, 0.81 against 0.16). With the clause q02 wins at 0.73
 and the closest off-topic call, "Write a SPARQL query to list all suppliers.", moves from `none` 0.49 to 0.63.
@@ -263,7 +263,8 @@ c3po queries fit the model's context), see the README, "Fallback".
 ## Result on c3po
 
 The second profile (`profile/c3po`, 1.0.0: the C3PO European Reporting Ontology, 17 classes, 61 properties, 347 rows
-in 11 classes, 29 competency queries with their constants in the text, no `params`) runs the same rules unchanged.
+in 11 classes, 29 competency questions over 13 queries since profile 1.1.0 merged the siblings, every constant an
+optional parameter) runs the same rules unchanged.
 `make PROFILE=profile/c3po tags-gen` (41 tags; the descriptions are the `rdfs:comment`s written in its `tbox.ttl`):
 
     tag                                source                      description
@@ -316,18 +317,20 @@ individual each and the four personnel-cost classes none (the ontology's cost gr
 R2 finds no TBOX individuals. R3 gives the 21 numeric properties and `time` for the `xsd:date` ones; the string,
 `xsd:gYear` and `xsd:gYearMonth` properties get none. The 8 intents close the list.
 
-`make PROFILE=profile/c3po query-tags` (run_id 11, 29 descriptions): 210 tags in all, from 1 (q27 "List the European
-projects": `list` alone, the project class has one individual and no tag) to 13 (q28, hours by employee in May 2025);
-`time` is on 24 queries, `date-range` on 21, `reporting-period` on 20, `internal-employee` on 14. Six tags land on no
-query: `budget-remaining`, `total-budget`, `external-employee-hourly-rate`, `gross-monthly-salary`, `exchange-rate`
-(properties no competency query reads) and `ranking`. The single-tag q27 is the plain mean's artefact seen the other way
-round from the q02 dilution above: its score is the probability of `list`, so it tops the candidates of every "List ..."
-question (0.83 for "Who is working on the project FAIR-IMPACT in ERP3?", 0.90 for "List all travel events in ERP2 of
-project FAIR-IMPACT.") without ever being chosen. `make PROFILE=profile/c3po tags-cache` (run_id 12) tags the 29
-competency questions; `make PROFILE=profile/c3po eval` then scores **25/29** with the fallback and **22/29** for the tag
-route alone, `make PROFILE=profile/c3po eval-direct` **26/29**, every miss a sibling query whose rows contain the
-expected ones (the four questions are in the README, "Current score on `profile/c3po`"). The fallback's one `choice` over
-the 29 rendered queries is what made `Profile.readable` drop the indentation (8213 tokens against winnow's 8192).
+`make PROFILE=profile/c3po query-tags` (run_id 13, the 13 merged descriptions of profile 1.1.0): 129 tags in all, from 1
+(q12 "List the European projects": `list` alone, the project class has one individual and no tag) to 19 (q06, hours per
+employee over a month, a year or a reporting period: a description that names every filter collects every tag); `time`
+is on 11 queries, `reporting-period` on 10, `date-range` on 9, `comparison` on 8. Seven tags land on no query:
+`budget-remaining`, `total-budget`, `external-employee-hourly-rate`, `gross-monthly-salary`, `exchange-rate`,
+`total-gross-salary` and `total-employer-social-contribution` (properties no competency query reads, or read under a
+wider description). The single-tag q12 is the plain mean's artefact seen the other way round from the q02 dilution
+above: its score is the probability of `list`, so it tops the candidates of every "List ..." question without ever being
+chosen. `make PROFILE=profile/c3po tags-cache` (run_id 14) tags the 29 competency questions; `make PROFILE=profile/c3po
+eval` then scores **27/29** with the fallback and **26/29** for the tag route alone, `make PROFILE=profile/c3po
+eval-direct` **27/29**. Profile 1.0.0, one query per competency question with its constants in the text (run_ids 11/12),
+scored 25/29, 22/29 and 26/29, every miss a sibling query whose rows contained the expected ones; the two questions still
+missed are in the README, "Current score on `profile/c3po`". That profile's fallback, one `choice` over 29 rendered
+queries, is what made `Profile.readable` drop the indentation (8213 tokens against winnow's 8192).
 
 ## Storage
 

@@ -1,3 +1,10 @@
+# parameters: what fills each query parameter: a property label = one of its ABOX values (written in the question, else an
+# Ollaya choice over them plus none), date = from/to from the quarter, month or year written in the question. Per query,
+# `params` are required (none found = the query is not run); the values are the examples `make sparql` runs without ARGS.
+parameters:
+  acronym: acronym
+  from: date
+  to: date
 queries:
   q01-total-expenses-by-project:
     description: "Compare total expenses across European projects"

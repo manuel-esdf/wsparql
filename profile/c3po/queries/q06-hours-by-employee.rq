@@ -1,0 +1,20 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+SELECT ?empName (COUNT(DISTINCT ?entry) AS ?timesheetCount) (SUM(?hours) AS ?totalHoursWorked)
+WHERE {
+  ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 ?projectName .
+  ?emp c3po:C3PO_0000340 ?empName .
+  ?ts a c3po:C3PO_0000107 ;
+      c3po:C3PO_0000206 ?project ;
+      c3po:C3PO_0000202 ?emp ;
+      c3po:C3PO_0000301 ?hours ;
+      c3po:C3PO_0000347 ?tsDate .
+  FILTER(!BOUND(?from) || SUBSTR(STR(?tsDate), 1, 7) >= SUBSTR(STR(?from), 1, 7))
+  FILTER(!BOUND(?to) || SUBSTR(STR(?tsDate), 1, 7) <= SUBSTR(STR(?to), 1, 7))
+  OPTIONAL { ?ts c3po:C3PO_0000209 ?workPackage }
+  OPTIONAL { ?ts c3po:C3PO_0000217 ?task }
+  BIND(CONCAT(SUBSTR(STR(?tsDate), 1, 7), "|",
+              STR(COALESCE(?workPackage, "")), "|",
+              STR(COALESCE(?task, ""))) AS ?entry)
+}
+GROUP BY ?emp ?empName
+ORDER BY ?empName
