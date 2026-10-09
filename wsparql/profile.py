@@ -3,7 +3,13 @@ import re
 from pathlib import Path
 
 import yaml
-from rdflib import XSD, Graph, Literal, URIRef
+from rdflib import RDFS, XSD, Graph, Literal, URIRef
+
+
+def camel(label):
+    """'charged to work package' -> 'chargedToWorkPackage', 'European project' -> 'EuropeanProject'."""
+    w = label.split()
+    return w[0] + "".join(x.capitalize() for x in w[1:])
 
 
 def literal(value):
@@ -24,9 +30,15 @@ class Profile:
         self.tags = None  # {tag: description} from profile.db table tags (make tags-gen), set by __main__.load_tags
         self.catalog = yaml.safe_load((path / "query-catalog.yaml").read_text())["queries"]
         self.queries = {p.stem: p.read_text() for p in sorted((path / "queries").glob("*.rq"))}
-        # ponytail: profile-specific IRI in code; move to a params file when a second profile appears
+        # ponytail: the fallback reads the SPARQL text and the IRIs are opaque, so it gets the labels in their place
+        # (ex:P14 -> ex:amount, ex:C02 -> ex:EuropeanProject); labeled subjects are the TBOX terms, ABOX rows have none
+        nm = self.graph.namespace_manager
+        names = {nm.normalizeUri(s): nm.normalizeUri(s).split(":")[0] + ":" + camel(str(l)) for s, l in self.graph.subject_objects(RDFS.label)}
+        term = re.compile("|".join(map(re.escape, names)) + r"\b")
+        self.readable = {qid: term.sub(lambda m: names[m.group()], q) for qid, q in self.queries.items()}
+        # ponytail: profile-specific label in code (the IRIs are opaque); move to a params file when a second profile appears
         self.acronyms = sorted(str(r[0]) for r in self.graph.query(
-            "SELECT DISTINCT ?a WHERE { ?p <https://example.org/eu-expense#acronym> ?a }"))
+            'SELECT DISTINCT ?a WHERE { ?prop <http://www.w3.org/2000/01/rdf-schema#label> "acronym" . ?p ?prop ?a }'))
         # [{q_id, question, expected_query?}]; expected_query = catalog id or "none", absent = not evaluated
         self.test_questions = yaml.safe_load((path / "tests/test-questions.yaml").read_text())["questions"]
         self.db_path = path.parent / "profile.db"  # shared tag cache, one folder up, git-ignored

@@ -1,11 +1,14 @@
-"""Minimal ETL: csv/*.csv + tbox.ttl -> abox.ttl. Convention, the TBOX is the schema: file stem = class, column = property
-local name, `id` = IRI local name, `|` separates several values in a cell, empty cell = no triple. The TBOX decides whether
-a column is a reference (owl:ObjectProperty) or a literal and its datatype (rdfs:range). No inference: a relation is
-stored once, in one direction, and queries walk it with property paths."""
+"""Minimal ETL: csv/*.csv + tbox.ttl -> abox.ttl. Convention, the TBOX is the schema and its IRIs are opaque: file stem =
+class label, column = property label, a reference cell = TBOX individual label or CSV row `id`, `id` = IRI local name,
+`|` separates several values in a cell, empty cell = no triple. Names are compared as slugs (`expenseDate` = `expense date`).
+The TBOX decides whether a column is a reference (owl:ObjectProperty) or a literal and its datatype (rdfs:range).
+No inference: a relation is stored once, in one direction, and queries walk it with an explicit join."""
 import csv
 from pathlib import Path
 
 from rdflib import OWL, RDF, RDFS, XSD, Graph, Literal, Namespace
+
+from wsparql.tags import slug, words
 
 SEP = "|"
 
@@ -16,20 +19,24 @@ def build(path):
     path = Path(path)
     tbox = Graph().parse(path / "tbox.ttl")
     ns = Namespace(dict(tbox.namespaces())["ex"])  # ponytail: the profile prefix is ex in queries and ontology alike
-    rng = {p: tbox.value(p, RDFS.range) for p in tbox.subjects(RDF.type, OWL.DatatypeProperty)}
+    name = lambda nodes: {slug(words(n, tbox)): n for n in nodes}  # label -> term; opaque IRIs carry no name
+    classes = name(tbox.subjects(RDF.type, OWL.Class))
     objs = set(tbox.subjects(RDF.type, OWL.ObjectProperty))
+    rng = {p: tbox.value(p, RDFS.range) for p in tbox.subjects(RDF.type, OWL.DatatypeProperty)}
+    props = name(objs | set(rng))
+    # ponytail: a CSV row id that slugs like a TBOX individual label (a supplier called Travel) resolves to the individual
+    individuals = name(i for i, c in tbox.subject_objects(RDF.type) if (c, RDF.type, OWL.Class) in tbox)
     g = Graph(bind_namespaces="core")
     g.bind("ex", ns)
     for f in sorted((path / "csv").glob("*.csv")):
-        cls = ns[f.stem]
-        if (cls, RDF.type, OWL.Class) not in tbox:
-            raise ValueError(f"{f.name}: {f.stem} is not a class of tbox.ttl")
+        if (cls := classes.get(slug(f.stem))) is None:
+            raise ValueError(f"{f.name}: no class of tbox.ttl is labeled {f.stem}")
         with f.open(newline="", encoding="utf-8") as fh:
             reader = csv.DictReader(fh)
             cols = reader.fieldnames or []
             if "id" not in cols:
                 raise ValueError(f"{f.name}: no id column")
-            if unknown := [c for c in cols if c != "id" and ns[c] not in objs and ns[c] not in rng]:
+            if unknown := [c for c in cols if c != "id" and slug(c) not in props]:
                 raise ValueError(f"{f.name}: {', '.join(unknown)} is not a property of tbox.ttl")
             for row in reader:
                 if not (rid := row.pop("id")):
@@ -37,10 +44,10 @@ def build(path):
                 s = ns[rid]
                 g.add((s, RDF.type, cls))
                 for col, cell in row.items():
-                    p = ns[col]
+                    p = props[slug(col)]
                     for v in filter(None, (cell or "").split(SEP)):
                         if p in objs:
-                            g.add((s, p, ns[v]))
+                            g.add((s, p, individuals.get(slug(v), ns[v])))
                         else:  # ponytail: xsd:string -> plain literal, what hand-written Turtle produces
                             lit = Literal(v, datatype=None if rng[p] == XSD.string else rng[p])
                             if lit.ill_typed:

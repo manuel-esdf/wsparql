@@ -36,7 +36,7 @@ def print_answer(prof, out):
     print()
     if out["via"] == "fallback":
         print_selection(prof, out["candidates"], None, *out["tag_route"])
-        print(f"fallback: direct choice over the raw SPARQL of {len(prof.catalog)} queries -> "
+        print(f"fallback: direct choice over the SPARQL (labels in place of the opaque IRIs) of {len(prof.catalog)} queries -> "
               + (f"{out['selected']} (confidence {out['confidence']:.2f})" if out["selected"] else f"no suitable query ({out['confidence']:.2f})"))
     else:
         print_selection(prof, out["candidates"], out["selected"], out["confidence"], out["probabilities"])
@@ -127,12 +127,12 @@ def main():
     sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)").add_argument("question", nargs="?", help=default_q)
     pa = sub.add_parser("params", help="extract the query parameters found in a question: acronym (Ollaya choice over ABOX projects + none), from/to (regex); lists every catalog parameter and the queries needing it")
     pa.add_argument("question", nargs="?", help="no question = run on every test question whose expected query takes parameters")
-    sub.add_parser("ask", help="answer a question end to end: tags, candidates, selected query (direct choice over the raw SPARQL as fallback when the tag route says none), parameters, result rows or no suitable query").add_argument("question", nargs="?", help=default_q)
+    sub.add_parser("ask", help="answer a question end to end: tags, candidates, selected query (direct choice over the SPARQL (labels in place of the opaque IRIs) as fallback when the tag route says none), parameters, result rows or no suitable query").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("demo", help="ask every tests/test-questions.yaml question that has an expected_query, off-topic ones included")
     sub.add_parser("eval", help="full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-cache run_id: expected query selected and returns rows, none answers no suitable query; rows stored in profile/profile.db eval_result; exit 1 on any mismatch")
-    sub.add_parser("eval-direct", help="baseline without tags: for each tests/test-questions.yaml question that has an expected_query, one Ollaya choice over the raw SPARQL of all catalog queries + none, then parameters and run; exit 1 on any mismatch")
+    sub.add_parser("eval-direct", help="baseline without tags: for each tests/test-questions.yaml question that has an expected_query, one Ollaya choice over the SPARQL (labels in place of the opaque IRIs) of all catalog queries + none, then parameters and run; exit 1 on any mismatch")
     sub.add_parser("tags-cache", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
-    sub.add_parser("abox", help="ETL: build abox.ttl from tbox.ttl + csv/*.csv; file = class, column = property, id = IRI local name, | separates values; the TBOX types the values; no inference")
+    sub.add_parser("abox", help="ETL: build abox.ttl from tbox.ttl + csv/*.csv; TBOX IRIs are opaque, rdfs:label is the name: file = class label, column = property label, id = IRI local name, | separates values; the TBOX types the values; no inference")
     args = p.parse_args()
     if args.cmd == "abox":  # before Profile(), which parses the file being generated
         out, n = etl.write(args.profile)
@@ -240,7 +240,7 @@ def main():
         print(f"stored {len(rows)} rows in {prof.db_path} query_tags (run_id {run_id})")
     elif args.cmd == "eval-direct":  # ponytail: printed only; store in eval_result with a mode column if it becomes a tracked baseline
         hits = [eval_line(d, call_ollaya(pipeline.answer, d["question"], {}, prof, ollaya.decide, True))[2] for d in labeled]
-        print(f"{sum(hits)}/{len(labeled)} direct: one choice over the raw SPARQL of {len(prof.catalog)} queries + none, no tags")
+        print(f"{sum(hits)}/{len(labeled)} direct: one choice over the SPARQL (labels in place of the opaque IRIs) of {len(prof.catalog)} queries + none, no tags")
         sys.exit(0 if all(hits) else 1)
     elif args.cmd == "tags-cache":
         run_id = call_ollaya(fill, prof, db, ollaya.MODEL)

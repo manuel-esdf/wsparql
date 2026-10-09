@@ -6,74 +6,78 @@
 
 ex:EuExpenseOntology a owl:Ontology .
 
-# Core classes (rdfs:comment = the tag description sent to Ollaya, see GENERATE-TAGS-FROM-ONTOLOGY.md)
-ex:Company a owl:Class ; rdfs:label "Company" .
-ex:EuropeanProject a owl:Class ; rdfs:label "European project" ;
+# Opaque IRIs: C = class, P = property, I = individual, numbered in declaration order. The name of a term is its
+# rdfs:label (the ETL maps csv file stems, columns and category cells to it, compared as slugs: expenseDate = expense date);
+# rdfs:comment = the tag description sent to Ollaya, see GENERATE-TAGS-FROM-ONTOLOGY.md
+
+# Core classes
+ex:C01 a owl:Class ; rdfs:label "Company" .
+ex:C02 a owl:Class ; rdfs:label "European project" ;
   rdfs:comment "The question concerns one or more European projects" .
-ex:WorkPackage a owl:Class ; rdfs:label "Work package" ;
+ex:C03 a owl:Class ; rdfs:label "Work package" ;
   rdfs:comment "The question concerns a project work package" .
-ex:Employee a owl:Class ; rdfs:label "Employee" ;
+ex:C04 a owl:Class ; rdfs:label "Employee" ;
   rdfs:comment "The question concerns an employee or personnel member" .
-ex:Supplier a owl:Class ; rdfs:label "Supplier" ;
+ex:C05 a owl:Class ; rdfs:label "Supplier" ;
   rdfs:comment "The question concerns a supplier or external provider" .
-ex:Expense a owl:Class ; rdfs:label "Expense" ;
+ex:C06 a owl:Class ; rdfs:label "Expense" ;
   rdfs:comment "The question concerns company expenses or costs" .
-ex:ExpenseCategory a owl:Class ; rdfs:label "Expense category" ;
+ex:C07 a owl:Class ; rdfs:label "Expense category" ;
   rdfs:comment "The question concerns an expense category" .
 
 # Object properties
-ex:participatesIn a owl:ObjectProperty ;
-  rdfs:domain ex:Company ; rdfs:range ex:EuropeanProject ;
+ex:P01 a owl:ObjectProperty ;
+  rdfs:domain ex:C01 ; rdfs:range ex:C02 ;
   rdfs:label "participates in" .
 
-ex:belongsToProject a owl:ObjectProperty ;
-  rdfs:domain ex:WorkPackage ; rdfs:range ex:EuropeanProject ;
+ex:P02 a owl:ObjectProperty ;
+  rdfs:domain ex:C03 ; rdfs:range ex:C02 ;
   rdfs:label "belongs to project" .
 
-ex:incurredBy a owl:ObjectProperty ;
-  rdfs:domain ex:Expense ; rdfs:range ex:Company ;
+ex:P03 a owl:ObjectProperty ;
+  rdfs:domain ex:C06 ; rdfs:range ex:C01 ;
   rdfs:label "incurred by" .
 
-ex:chargedToWorkPackage a owl:ObjectProperty ;
-  rdfs:domain ex:Expense ; rdfs:range ex:WorkPackage ;
+ex:P04 a owl:ObjectProperty ;
+  rdfs:domain ex:C06 ; rdfs:range ex:C03 ;
   rdfs:label "charged to work package" .
 
-ex:category a owl:ObjectProperty ;
-  rdfs:domain ex:Expense ; rdfs:range ex:ExpenseCategory ;
-  rdfs:label "expense category" .
+ex:P05 a owl:ObjectProperty ;
+  rdfs:domain ex:C06 ; rdfs:range ex:C07 ;
+  rdfs:label "category" .
 
-ex:employee a owl:ObjectProperty ;
-  rdfs:domain ex:Expense ; rdfs:range ex:Employee ;
-  rdfs:label "related employee" .
+ex:P06 a owl:ObjectProperty ;
+  rdfs:domain ex:C06 ; rdfs:range ex:C04 ;
+  rdfs:label "employee" .
 
-ex:supplier a owl:ObjectProperty ;
-  rdfs:domain ex:Expense ; rdfs:range ex:Supplier ;
+ex:P07 a owl:ObjectProperty ;
+  rdfs:domain ex:C06 ; rdfs:range ex:C05 ;
   rdfs:label "supplier" .
 
 # Datatype properties
-ex:name a owl:DatatypeProperty ; rdfs:range xsd:string .
-ex:acronym a owl:DatatypeProperty ; rdfs:range xsd:string .
-ex:grantAgreement a owl:DatatypeProperty ; rdfs:range xsd:string .
-ex:startDate a owl:DatatypeProperty ; rdfs:range xsd:date .
-ex:endDate a owl:DatatypeProperty ; rdfs:range xsd:date .
-ex:budget a owl:DatatypeProperty ; rdfs:range xsd:decimal ;
+ex:P08 a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "name" .
+ex:P09 a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "acronym" .
+ex:P10 a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "grant agreement" .
+ex:P11 a owl:DatatypeProperty ; rdfs:range xsd:date ; rdfs:label "start date" .
+ex:P12 a owl:DatatypeProperty ; rdfs:range xsd:date ; rdfs:label "end date" .
+ex:P13 a owl:DatatypeProperty ; rdfs:range xsd:decimal ; rdfs:label "budget" ;
   rdfs:comment "The question concerns allocated project budget" .
-ex:amount a owl:DatatypeProperty ; rdfs:range xsd:decimal ;
+ex:P14 a owl:DatatypeProperty ; rdfs:range xsd:decimal ; rdfs:label "amount" ;
   rdfs:comment "The question concerns the amount of an expense" .
-ex:expenseDate a owl:DatatypeProperty ; rdfs:range xsd:date .
-ex:description a owl:DatatypeProperty ; rdfs:range xsd:string .
-ex:eligible a owl:DatatypeProperty ; rdfs:range xsd:boolean ;
+ex:P15 a owl:DatatypeProperty ; rdfs:range xsd:date ; rdfs:label "expense date" .
+ex:P16 a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "description" .
+ex:P17 a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "eligible" ;
   rdfs:comment "The question concerns whether costs are eligible" .
-ex:country a owl:DatatypeProperty ; rdfs:range xsd:string .
+ex:P18 a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "country" .
 
 # Expense category individuals
-ex:Personnel a ex:ExpenseCategory ; ex:name "Personnel" ;
+ex:I01 a ex:C07 ; rdfs:label "Personnel" ;
   rdfs:comment "The question concerns personnel costs" .
-ex:Travel a ex:ExpenseCategory ; ex:name "Travel" ;
+ex:I02 a ex:C07 ; rdfs:label "Travel" ;
   rdfs:comment "The question concerns travel expenses" .
-ex:Equipment a ex:ExpenseCategory ; ex:name "Equipment" ;
+ex:I03 a ex:C07 ; rdfs:label "Equipment" ;
   rdfs:comment "The question concerns equipment purchases" .
-ex:Subcontracting a ex:ExpenseCategory ; ex:name "Subcontracting" ;
+ex:I04 a ex:C07 ; rdfs:label "Subcontracting" ;
   rdfs:comment "The question concerns subcontracting costs" .
-ex:OtherGoodsServices a ex:ExpenseCategory ; ex:name "Other goods and services" ;
+ex:I05 a ex:C07 ; rdfs:label "Other goods and services" ;
   rdfs:comment "The question concerns other goods and services costs" .

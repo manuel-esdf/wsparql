@@ -44,8 +44,8 @@ def select(question, ranked, catalog, ask=ollaya.decide):
 
 
 def select_direct(question, prof, ask=ollaya.decide):
-    """Baseline without tags: every catalog query, described by its raw SPARQL text."""
-    return choose(question, DIRECT_INSTRUCTIONS, {qid: prof.queries[qid] for qid in prof.catalog}, ask)
+    """Baseline without tags: every catalog query, described by its SPARQL text with the opaque IRIs rendered as labels."""
+    return choose(question, DIRECT_INSTRUCTIONS, {qid: prof.readable[qid] for qid in prof.catalog}, ask)
 
 
 MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
@@ -107,7 +107,7 @@ def answer(question, tag_probs, prof, ask=ollaya.decide, direct=False):
     else:
         ranked = candidates(tag_probs, prof.catalog)
         qid, conf, prob = select(question, ranked, prof.catalog, ask)
-        if not qid:  # ponytail: one more choice over the raw SPARQL; the tag route's misses are all `none` answers
+        if not qid:  # ponytail: one more choice over the SPARQL (labels in place of the opaque IRIs); the tag route's misses are all `none` answers
             via, tag_route = "fallback", (conf, prob)
             qid, conf, prob = select_direct(question, prof, ask)
     out = dict(question=question, tags=tag_probs, candidates=ranked, selected=qid, confidence=conf, probabilities=prob,

@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS eval_result (
     date       TEXT NOT NULL);
 CREATE UNIQUE INDEX IF NOT EXISTS eval_key ON eval_result (profile, q_id, run_id);
 """
-# tags:        description = the noul instruction sent to Ollaya; source = "class ex:Expense" / "individual ex:Travel" / "property ex:budget" / "intent"
+# tags:        description = the noul instruction sent to Ollaya; source = "class ex:C06" / "individual ex:I02" / "property ex:P13" / "intent" (opaque IRIs, the tag name is the label)
 # query_tags:  q_id = 1-based catalog position, q_label = catalog id (q01-total-expenses-by-project), tags = JSON {tag: probability}
 # tag_cache:   tags = JSON {tag: probability}
 # run_id:      one counter over the Ollaya tables (RUN_TABLES): 1, 2, ... per `make query-tags` / `tags-cache` invocation

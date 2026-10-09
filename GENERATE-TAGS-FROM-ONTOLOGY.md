@@ -28,7 +28,7 @@ names are free to differ from the old ones.
 | Query tags | `make query-tags` | Ollaya `noul` per tag on each catalog query `description` | table `query_tags` |
 | Question tags | `make tags-cache`, `make ask` | Ollaya `noul` per tag on the question | table `tag_cache` |
 | Candidates | `make candidates` | unchanged: mean question-tag probability over the query's tags, top 5 (3 until profile 1.3.0) | |
-| Baseline without tags | `make eval-direct` | one Ollaya `choice` over the raw SPARQL text of all 10 queries + `none`, then parameters and run | printed only |
+| Baseline without tags | `make eval-direct` | one Ollaya `choice` over the SPARQL (labels in place of the opaque IRIs) text of all 10 queries + `none`, then parameters and run | printed only |
 | Fallback | `make ask`, `make eval` | the same direct `choice`, run only when the tag route answers `none`; its answer is final | `eval_result` (the `via` column of `make eval` says which route answered) |
 
 A query's tag list is the set of tags with probability ≥ 0.5 in `query_tags`; the probabilities are kept, so the
@@ -39,10 +39,10 @@ and are untouched by this change.
 
 | tag | source in the ontology | kind |
 |---|---|---|
-| expense, project, work-package, employee, supplier, category | `owl:Class` `ex:Expense`, `ex:EuropeanProject`, `ex:WorkPackage`, `ex:Employee`, `ex:Supplier`, `ex:ExpenseCategory` | class |
-| travel | individual `ex:Travel` of `ex:ExpenseCategory`, declared in `tbox.ttl` | TBOX individual |
-| budget, eligibility | `owl:DatatypeProperty` `ex:budget` (`xsd:decimal`), `ex:eligible` (`xsd:boolean`) | datatype property |
-| time | the `xsd:date` properties `ex:expenseDate`, `ex:startDate`, `ex:endDate` | datatype property |
+| expense, project, work-package, employee, supplier, category | `owl:Class` `ex:C06` Expense, `ex:C02` European project, `ex:C03` Work package, `ex:C04` Employee, `ex:C05` Supplier, `ex:C07` Expense category | class |
+| travel | individual `ex:I02` Travel of `ex:C07`, declared in `tbox.ttl` | TBOX individual |
+| budget, eligibility | `owl:DatatypeProperty` `ex:P13` budget (`xsd:decimal`), `ex:P17` eligible (`xsd:boolean`) | datatype property |
+| time | the `xsd:date` properties `ex:P15` expense date, `ex:P11` start date, `ex:P12` end date | datatype property |
 | total, breakdown, comparison, ranking, list, trend, month, date-range | none: the shape of the answer the user wants | intent |
 | remaining | none: q05 computes `budget - spent`; q05 keeps `budget` and `comparison` | dropped |
 
@@ -52,23 +52,25 @@ and are untouched by this change.
 
 The ABOX is not an input any more. `make abox` builds `abox.ttl` from `tbox.ttl` and `csv/*.csv`, one file per class
 (`Company`, `EuropeanProject`, `WorkPackage`, `Employee`, `Supplier`, `Expense`, 29 rows in all). There is no mapping
-file: the TBOX is the schema, and the CSV names are the ontology names.
+file: the TBOX is the schema, its IRIs are opaque (`ex:C06`, `ex:P14`, `ex:I02`, numbered in declaration order since
+profile 1.4.0) and the CSV names are the `rdfs:label`s, compared as slugs (`expenseDate` = `expense date`,
+`EuropeanProject` = `European project`). Details in GENERATE-ABOX.md.
 
 | CSV | RDF | decided by |
 |---|---|---|
-| file stem `Expense.csv` | `ex:E003 a ex:Expense` | must be an `owl:Class` of the TBOX |
-| column `id` | the IRI local name | convention |
-| column `amount`, `expenseDate`, `eligible`, `name` | typed literal `680.00`, `"2026-02-12"^^xsd:date`, `true`, plain string | `owl:DatatypeProperty`, its `rdfs:range` (`xsd:string` → plain literal, as hand-written Turtle has it) |
-| column `chargedToWorkPackage`, `category`, `supplier` | reference `ex:LUMEN-WP4`, `ex:Travel`, `ex:Eurostar` | `owl:ObjectProperty` |
+| file stem `Expense.csv` | `ex:E003 a ex:C06` | the `owl:Class` of the TBOX labeled `Expense` |
+| column `id` | the IRI local name | convention: ABOX ids stay the CSV ids |
+| column `amount`, `expenseDate`, `eligible`, `name` | typed literal `680.00`, `"2026-02-12"^^xsd:date`, `true`, plain string | `owl:DatatypeProperty` with that label, its `rdfs:range` (`xsd:string` → plain literal, as hand-written Turtle has it) |
+| column `chargedToWorkPackage`, `category`, `supplier` | reference `ex:LUMEN-WP4`, `ex:I02`, `ex:Eurostar` | `owl:ObjectProperty` with that label; a cell that matches a TBOX individual label (`Travel`) is that individual, else a CSV row id |
 | cell `LUMEN\|GRAPHIA\|OPENSCIENCE` | three triples | `\|` separates values |
 | empty cell | no triple | `E001` has no supplier |
-| no `chargedToProject` column, no `hasWorkPackage` property | nothing: the queries join `?workPackage ex:belongsToProject ?project . ?expense ex:chargedToWorkPackage ?workPackage` | no inference: a relation is stored once, in one direction; no `owl:inverseOf`, no derived triples |
+| no `chargedToProject` column, no `hasWorkPackage` property | nothing: the queries join `?workPackage ex:P02 ?project . ?expense ex:P04 ?workPackage` (belongs to project, charged to work package) | no inference: a relation is stored once, in one direction; no `owl:inverseOf`, no derived triples |
 
 The build fails, naming file, row and column, on an unknown file or column, an empty `id`, a value that does not
 parse as its range (`2026-13-01`, rdflib's `Literal.ill_typed`) and on a reference to an IRI that is neither a CSV
 row nor a TBOX subject. The TBOX individuals are the controlled vocabulary of R2 below, so `category` cells hold
-their ids (`Personnel`, `OtherGoodsServices`) and resolve without a lookup; the ABOX individuals that R1 counts and
-that `extract_params` offers as parameter values are the CSV rows. Same split as in the tag rules.
+their label (`Personnel`, `OtherGoodsAndServices`) and resolve to the individual; the ABOX individuals that R1 counts
+and that `extract_params` offers as parameter values are the CSV rows. Same split as in the tag rules.
 
 Result: 179 triples (196 before `ex:chargedToProject` and `ex:hasWorkPackage` were dropped, then the same set as the hand-written `abox.ttl`; no blank nodes, so set equality is graph equality);
 `make test` rebuilds the graph from the CSV files and compares it with the committed file, so an edited csv without
@@ -78,9 +80,9 @@ eval (40/40 with the fallback, 35/40 tag route alone) were unchanged by the ETL 
 reads, see the README section "Fallback" for the wording that keeps 40/40.
 The committed `abox.ttl` is now rdflib's serialisation, sorted by subject; the CSV files are the readable form.
 
-Limits: headers equal ontology names (a mapping file is the upgrade when real exports differ); one file per class, no
-joins or lookups (a label column such as `Other goods and services` would need a `ex:name` lookup); datatype
-properties without `rdfs:range` are not handled.
+Limits: headers equal ontology labels up to the slug (a mapping file is the upgrade when real exports differ); one
+file per class, no joins or lookups beyond the TBOX individuals; a row id that slugs like a TBOX individual label is
+read as the individual; datatype properties without `rdfs:range` are not handled.
 
 ## Rules (`wsparql/tags.py`)
 
@@ -88,8 +90,8 @@ Generic, applied in order; the first rule to produce a name wins. `tbox` is the 
 
 | | Rule | Extraction (rdflib) | On this profile |
 |---|---|---|---|
-| R1 | one tag per `owl:Class` with at least 2 individuals in the data | `tbox.subjects(RDF.type, OWL.Class)`, count `g.subjects(RDF.type, c)` | 6 classes; `ex:Company` (1 individual) skipped: it cannot discriminate questions |
-| R2 | one tag per individual declared in the TBOX: they are controlled vocabulary, not data | `tbox.subject_objects(RDF.type)` whose object is an `owl:Class` | the 5 `ex:ExpenseCategory` values |
+| R1 | one tag per `owl:Class` with at least 2 individuals in the data | `tbox.subjects(RDF.type, OWL.Class)`, count `g.subjects(RDF.type, c)` | 6 classes; `ex:C01` Company (1 individual) skipped: it cannot discriminate questions |
+| R2 | one tag per individual declared in the TBOX: they are controlled vocabulary, not data | `tbox.subject_objects(RDF.type)` whose object is an `owl:Class` | the 5 `ex:C07` Expense category values |
 | R3 | one tag per `xsd:boolean` or numeric datatype property; all `xsd:date` properties collapse into one `time` tag; `xsd:string` skipped | `tbox.subjects(RDF.type, OWL.DatatypeProperty)`, `rdfs:range` | `eligible`, `budget`, `amount`, `time`; `name`, `acronym`, `grantAgreement`, `description`, `country` skipped |
 | R4 | fixed intent tags, the same for every profile | `INTENT` dict in `wsparql/tags.py` | the 8 intents above |
 
@@ -97,7 +99,8 @@ ABOX individuals (projects, employees, suppliers) never become tags: they are pa
 the `acronym` choice in `pipeline.extract_params`, and a tag per entity would grow with the data.
 
 - **name**: slug of `rdfs:label`, else of the IRI local name split on camelCase: `European project` → `european-project`,
-  `OtherGoodsServices` → `other-goods-services`.
+  `Other goods and services` → `other-goods-and-services`. Since profile 1.4.0 the IRIs are opaque (`ex:C02`, `ex:I05`),
+  so every term that can become a tag carries a label; the fallback would name a tag `c02`.
 - **description**: `rdfs:comment` when present, else a template (`The question concerns: expense category`).
   The templates are a fallback; the wording Ollaya sees belongs in the ontology, so `tbox.ttl` carries an
   `rdfs:comment` on the 6 classes, on `budget`, `amount`, `eligible` and on the 5 category individuals, reusing the
@@ -107,30 +110,33 @@ the `acronym` choice in `pipeline.extract_params`, and a tag per entity would gr
 
 `make tags-gen` (23 tags):
 
-    tag                    source                           description
-    employee               class ex:Employee                The question concerns an employee or personnel member
-    european-project       class ex:EuropeanProject         The question concerns one or more European projects
-    expense                class ex:Expense                 The question concerns company expenses or costs
-    expense-category       class ex:ExpenseCategory         The question concerns an expense category
-    supplier               class ex:Supplier                The question concerns a supplier or external provider
-    work-package           class ex:WorkPackage             The question concerns a project work package
-    equipment              individual ex:Equipment          The question concerns equipment purchases
-    other-goods-services   individual ex:OtherGoodsServices The question concerns other goods and services costs
-    personnel              individual ex:Personnel          The question concerns personnel costs
-    subcontracting         individual ex:Subcontracting     The question concerns subcontracting costs
-    travel                 individual ex:Travel             The question concerns travel expenses
-    amount                 property ex:amount               The question concerns the amount of an expense
-    budget                 property ex:budget               The question concerns allocated project budget
-    eligible               property ex:eligible             The question concerns whether costs are eligible
-    time                   property xsd:date                The question includes a temporal dimension
-    total                  intent                           The user wants a total amount
-    breakdown              intent                           The user wants a breakdown by dimension
-    comparison             intent                           The user wants to compare several entities or values
-    ranking                intent                           The user wants entities ordered by amount
-    list                   intent                           The user wants individual records listed
-    trend                  intent                           The user wants evolution over time
-    month                  intent                           The question concerns monthly aggregation
-    date-range             intent                           The question specifies or implies a period
+    tag                       source             description
+    european-project          class ex:C02       The question concerns one or more European projects
+    work-package              class ex:C03       The question concerns a project work package
+    employee                  class ex:C04       The question concerns an employee or personnel member
+    supplier                  class ex:C05       The question concerns a supplier or external provider
+    expense                   class ex:C06       The question concerns company expenses or costs
+    expense-category          class ex:C07       The question concerns an expense category
+    personnel                 individual ex:I01  The question concerns personnel costs
+    travel                    individual ex:I02  The question concerns travel expenses
+    equipment                 individual ex:I03  The question concerns equipment purchases
+    subcontracting            individual ex:I04  The question concerns subcontracting costs
+    other-goods-and-services  individual ex:I05  The question concerns other goods and services costs
+    time                      property xsd:date  The question includes a temporal dimension
+    budget                    property ex:P13    The question concerns allocated project budget
+    amount                    property ex:P14    The question concerns the amount of an expense
+    eligible                  property ex:P17    The question concerns whether costs are eligible
+    total                     intent             The user wants a total amount
+    breakdown                 intent             The user wants a breakdown by dimension
+    comparison                intent             The user wants to compare several entities or values
+    ranking                   intent             The user wants entities ordered by amount
+    list                      intent             The user wants individual records listed
+    trend                     intent             The user wants evolution over time
+    month                     intent             The question concerns monthly aggregation
+    date-range                intent             The question specifies or implies a period
+
+(profile 1.4.0, opaque IRIs: each rule lists its terms in IRI order, which is declaration order; before 1.4.0 the
+same 23 tags came out in alphabetical order of the named IRIs, with `other-goods-services` for `ex:OtherGoodsServices`)
 
 Compared with the old `tags.yaml`: renamed `project` → `european-project`, `category` → `expense-category`,
 `eligibility` → `eligible`; added `personnel`, `equipment`, `subcontracting`, `other-goods-services`, `amount`;
@@ -246,6 +252,13 @@ tag route: 5 candidates instead of 3 (74/87) and the fallback's "computes or con
 `pipeline.select` too (72/87), together **76/87** alone and 86/87 with the fallback. Both adopted, table in the README
 "Current score".
 
+Profile 1.4.0 (opaque IRIs, query tags run_id 9, question tags run_id 10) checks what the tag chain actually reads:
+the 23 tags come out the same (one renamed by its label, `other-goods-and-services`), the 10 query tag sets are
+identical to run 3, the 109 question tag rows are identical for 107 questions (q_id 12 and 48 differ, no routing
+change) and `make eval` gives the same **76/87** tag route alone with the same 62 answers. Only the fallback moved,
+86/87 → 85/87 when it read the opaque SPARQL as-is, back to **86/87** with the labels rendered in place of the IRIs
+(`Profile.readable`; `make eval-direct` 81 → 82/87), see the README, "Fallback".
+
 ## Storage
 
 `profile/profile.db` (SQLite, git-ignored, created on first use):
@@ -282,8 +295,8 @@ Adding a catalog query = description + `.rq`, then `make query-tags`.
 - Large enumerations: R2 emits one tag per TBOX individual; above a few dozen values they should become a
   parameter (a `choice` over the values, like `acronym`), not tags.
 - Ontologies without `rdfs:label` or `rdfs:comment` fall back to local names and templates; expect to tune the
-  wording through `make eval`.
+  wording through `make eval`. With opaque IRIs (this profile since 1.4.0) the fallback is useless, labels are required.
 - The 0.5 threshold on query tags is a constant (`pipeline.TAG_THRESHOLD`); weighting candidates by the stored
   probabilities is the next step if the eval score drops.
-- The fallback sends the raw SPARQL of every query in one `choice`; with a large catalog it needs its own pre-selection
+- The fallback sends the SPARQL (labels in place of the opaque IRIs) of every query in one `choice`; with a large catalog it needs its own pre-selection
   (the tag candidates, for instance) or it becomes the slow and expensive path.

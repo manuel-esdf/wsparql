@@ -132,20 +132,23 @@ class AnswerTest(unittest.TestCase):
             return {k: {"choice": {"select": self.Q10, "acronym": "LUMEN"}[k], "confidence": 0.9, "probabilities": {}} for k in questions}
         out = answer("List LUMEN expenses for Q1 2026", {}, prof, ask, direct=True)
         self.assertEqual(list(seen["select"]["criteria"]), [*prof.catalog, "none"])
-        self.assertTrue(seen["select"]["criteria"][self.Q10].startswith("PREFIX"))  # the raw .rq text
+        self.assertTrue(seen["select"]["criteria"][self.Q10].startswith("PREFIX"))  # the .rq text, labels for the opaque IRIs
+        self.assertIn("?project a ex:EuropeanProject ; ex:acronym ?acronym", seen["select"]["criteria"][self.Q10])
+        self.assertIn("ex:chargedToWorkPackage ?workPackage", seen["select"]["criteria"][self.Q10])
+        self.assertNotIn("ex:P", seen["select"]["criteria"][self.Q10])
         self.assertEqual(([q for q, _ in out["candidates"]], out["selected"], out["via"], len(out["result"][1])), (list(prof.catalog), self.Q10, "direct", 6))
 
 
 class TagsGenTest(unittest.TestCase):
     def test_profile_dictionary(self):
         rows = generate(os.environ["PROFILE"])
-        self.assertEqual([t for t, _, _ in rows], [
-            "employee", "european-project", "expense", "expense-category", "supplier", "work-package",  # R1, Company skipped
-            "equipment", "other-goods-services", "personnel", "subcontracting", "travel",  # R2
-            "amount", "budget", "eligible", "time",  # R3
+        self.assertEqual([t for t, _, _ in rows], [  # each rule in IRI order (opaque IRIs, numbered in declaration order)
+            "european-project", "work-package", "employee", "supplier", "expense", "expense-category",  # R1, Company skipped
+            "personnel", "travel", "equipment", "subcontracting", "other-goods-and-services",  # R2
+            "time", "budget", "amount", "eligible",  # R3
             "total", "breakdown", "comparison", "ranking", "list", "trend", "month", "date-range"])  # R4
         self.assertTrue(all(d for _, d, _ in rows))
-        self.assertEqual({t: s for t, _, s in rows}["travel"], "individual ex:Travel")
+        self.assertEqual({t: s for t, _, s in rows}["travel"], "individual ex:I02")
         self.assertEqual(slug("EuropeanProject"), "european-project")
 
 

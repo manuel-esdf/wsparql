@@ -1,8 +1,8 @@
 PREFIX ex: <https://example.org/eu-expense#>
 SELECT ?supplier ?supplierName (SUM(?amount) AS ?total)
 WHERE {
-  ?expense a ex:Expense ; ex:supplier ?supplier ; ex:amount ?amount .
-  ?supplier ex:name ?supplierName .
+  ?expense a ex:C06 ; ex:P07 ?supplier ; ex:P14 ?amount .
+  ?supplier ex:P08 ?supplierName .
 }
 GROUP BY ?supplier ?supplierName
 ORDER BY DESC(?total)

@@ -29,7 +29,7 @@ profile-check: ## mandatory profile files present in $(PROFILE); every catalog q
 	  test -f $(PROFILE)/queries/$$q.rq || { echo "MISSING $(PROFILE)/queries/$$q.rq (listed in query-catalog.yaml)"; exit 1; }; done
 	@echo "profile $(notdir $(PROFILE)) $$(cat $(PROFILE)/VERSION) OK"
 
-abox: ## ETL: build $(PROFILE)/abox.ttl from tbox.ttl + csv/*.csv (file = class, column = property, id = IRI local name, | separates values; the TBOX types the values); committed, rerun after editing a csv; no Ollaya
+abox: ## ETL: build $(PROFILE)/abox.ttl from tbox.ttl + csv/*.csv (TBOX IRIs are opaque, rdfs:label is the name: file = class label, column = property label, id = IRI local name, | separates values; the TBOX types the values); committed, rerun after editing a csv; no Ollaya
 	@$(RUN) abox
 
 sparql: profile-check ## run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
@@ -53,7 +53,7 @@ select: profile-check ## rank candidates, then Ollaya picks the best query or no
 params: profile-check ## extract the query parameters found in Q (acronym: Ollaya choice over ABOX projects + none; from/to: regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
 	@$(RUN) params "$(Q)"
 
-ask: profile-check ## answer Q end to end: tags, candidates, selected query (fallback: direct choice over the raw SPARQL when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
+ask: profile-check ## answer Q end to end: tags, candidates, selected query (fallback: direct choice over the SPARQL (labels in place of the opaque IRIs) when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
 	@$(RUN) ask "$(Q)"
 
 demo: profile-check ## make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
@@ -62,7 +62,7 @@ demo: profile-check ## make ask on every tests/test-questions.yaml question that
 eval: profile-check ## full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M with the direct fallback and for the tag route alone, exit 1 on any mismatch (minutes on winnow)
 	@$(RUN) eval
 
-eval-direct: profile-check ## baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the raw SPARQL of all 10 queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
+eval-direct: profile-check ## baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the SPARQL (labels in place of the opaque IRIs) of all 10 queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
 	@$(RUN) eval-direct
 
 tags-cache: profile-check ## detect tags for every tests/test-questions.yaml question with Ollaya (needs make tags-gen), store in profile/profile.db (new run_id)

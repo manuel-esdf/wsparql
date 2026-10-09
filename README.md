@@ -32,7 +32,7 @@ each query are detected by Ollaya from the query description. Both live in `prof
 | Detect relevant tags with Ollaya | `make tags` | one `noul` question per tag in a single `/v1/systemone` call, probability per tag |
 | Identify the most relevant SPARQL queries | `make candidates` | pure Python: mean detected probability over each query's tags, top 5 |
 | Ollaya selects the best candidate | `make select` | one `choice` question over the 3 candidate descriptions plus `none`; `none` or confidence below 0.4 = no suitable query |
-| Fallback when that answer is `none` | `make ask` | one more `choice` over the raw SPARQL text of all 10 queries plus `none`; its answer is final |
+| Fallback when that answer is `none` | `make ask` | one more `choice` over the SPARQL (labels in place of the opaque IRIs) text of all 10 queries plus `none`; its answer is final |
 | Extract query parameters | `make params` | `acronym`: `choice` over the ABOX project acronyms plus `none`; `from`/`to`: regex on quarter, month name or year |
 | Execute SPARQL on the ABOX | `make sparql` | rdflib in memory, parameters bound with `initBindings` (no templating) |
 | Return the result | `make ask` | the six demo blocks below, or "no suitable query" / "no suitable query (missing parameter X)" |
@@ -66,7 +66,7 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     clean                drop the derived artefacts: $(PROFILE)/abox.ttl (make abox rebuilds it), profile/profile.db (tags, query tags, tag cache, eval results; make tags-gen query-tags tags-cache rebuild them, minutes on winnow) and __pycache__; keeps .venv
     build                build all derived artefacts in order: abox.ttl (ETL), then profile/profile.db tags (tags-gen), query tags (query-tags, Ollaya) and the question tag cache (tags-cache, Ollaya, minutes on winnow); then make eval
     profile-check        mandatory profile files present in $(PROFILE); every catalog query has its .rq
-    abox                 ETL: build $(PROFILE)/abox.ttl from tbox.ttl + csv/*.csv (file = class, column = property, id = IRI local name, | separates values; the TBOX types the values); committed, rerun after editing a csv; no Ollaya
+    abox                 ETL: build $(PROFILE)/abox.ttl from tbox.ttl + csv/*.csv (TBOX IRIs are opaque, rdfs:label is the name: file = class label, column = property label, id = IRI local name, | separates values; the TBOX types the values); committed, rerun after editing a csv; no Ollaya
     sparql               run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
     tags-gen             derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya, instant. See GENERATE-TAGS-FROM-ONTOLOGY.md
     query-tags           Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5 (seconds per query on winnow)
@@ -74,10 +74,10 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     candidates           rank top 5 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
     select               rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question
     params               extract the query parameters found in Q (acronym: Ollaya choice over ABOX projects + none; from/to: regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
-    ask                  answer Q end to end: tags, candidates, selected query (fallback: direct choice over the raw SPARQL when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
+    ask                  answer Q end to end: tags, candidates, selected query (fallback: direct choice over the SPARQL (labels in place of the opaque IRIs) when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
     demo                 make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
     eval                 full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M with the direct fallback and for the tag route alone, exit 1 on any mismatch (minutes on winnow)
-    eval-direct          baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the raw SPARQL of all 10 queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
+    eval-direct          baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the SPARQL (labels in place of the opaque IRIs) of all 10 queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
     tags-cache           detect tags for every tests/test-questions.yaml question with Ollaya (needs make tags-gen), store in profile/profile.db (new run_id)
     ollaya-check         prerequisites: uv, ollaya binary, server up, model pulled
     ollaya-smoke-test    one tag-detection query on /v1/systemone; fails if "expense" tag < 0.5
@@ -126,12 +126,16 @@ It reads the tags of one `run_id` only (never Ollaya) and stores one row per (pr
 `eval_result`, replaced on each run, so an eval is reproducible for a given `run_id` and the summary line says
 whether it matches the previous one.
 
-Current score on `profile/eu-expense-poc` with `winnow`, profile 1.3.0 (109 test questions, 87 labeled: 73 in-domain
-and 14 `none`; 22 ambiguous ones are unlabeled and skipped), query tags run_id 3, question tags run_id 4:
-**86/87** with the direct fallback, **76/87** for the tag route alone, both printed by `make eval`; `make eval-direct`
-**81/87**. The one shared miss is "Show the personnel expenditure for OPENSCIENCE." (expected q02): both routes answer
-`none` at 0.90, "personnel" reads as the employee query (its tags rank q07, q01, q05). The explored variants were rerun
-on this set against the 1.3.0 baseline, every one a scratch run with the files restored afterwards:
+Current score on `profile/eu-expense-poc` with `winnow`, profile 1.4.0 (opaque TBOX IRIs; 109 test questions, 87
+labeled: 73 in-domain and 14 `none`; 22 ambiguous ones are unlabeled and skipped), query tags run_id 9, question tags
+run_id 10: **86/87** with the direct fallback, **76/87** for the tag route alone, both printed by `make eval`;
+`make eval-direct` **82/87**. Profile 1.3.0 (the same TBOX with named IRIs, query tags run_id 3, question tags run_id 4)
+scored 86/87, 76/87 and 81/87: the tag route reads descriptions and `rdfs:comment`s, never IRIs, and its 62 answers
+are identical; the fallback and the direct route read the SPARQL text, which now gets the labels in place of the opaque
+IRIs (`ex:P14` → `ex:amount`, see "Fallback"), and answer the same 87 questions the same way, with higher confidences.
+The one miss is "Show the personnel expenditure for OPENSCIENCE." (expected q02): both routes answer `none` (0.90 tag
+route, 0.92 fallback), "personnel" reads as the employee query (its tags rank q07, q01, q05). The explored variants were
+rerun on the 109 questions against the 1.3.0 baseline, every one a scratch run with the files restored afterwards:
 
 | variant | with fallback | tag route alone | in-domain questions through the fallback |
 |---|---|---|---|
@@ -208,6 +212,24 @@ comparison still get `none`. Not adopted; the 1.2.0 descriptions stay.
 An acronym hint to the tagger, "(LUMEN, GRAPHIA or OPENSCIENCE)" appended to the `european-project` tag description,
 was tried after that: it lets the tag route answer the equipment question but costs two others at the candidate stage,
 34/40 alone and 40/40 with the fallback, so it is not adopted (numbers in GENERATE-TAGS-FROM-ONTOLOGY.md).
+Profile 1.4.0 made the TBOX IRIs opaque (`ex:C06`, `ex:P14`, `ex:I02`; the name lives in `rdfs:label`, see
+GENERATE-ABOX.md), so the raw `.rq` text lost its vocabulary: `?expense a ex:C06 ; ex:P04 ?workPackage ; ex:P14 ?amount`,
+only the variable names left to read. Measured first as-is, no comments and no label rendering, on the 109 questions:
+`make eval-direct` stayed at 81/87 but with other misses, 3 recovered ("Which project has the smallest remaining
+budget?" q05 0.66, "How much ineligible spending do we have in total?" q06 0.56, "What is our total spending with
+CloudHost Europe?" q08 0.51) and 3 lost ("What was spent on the Data ingestion work package?" `none` 0.71, "How much did
+we spend in March 2026?" to q10 0.53 with no acronym to bind, "Compare GRAPHIA and OPENSCIENCE travel spending." `none`
+0.48), with smaller margins all over (the LUMEN total q01 0.95 → 0.67; the closest off-topic call `none` 0.81 → 0.70,
+"Write a SPARQL query to list all suppliers."). Through the fallback that cost the travel comparison, 86/87 → 85/87,
+the tag route unchanged at 76/87. Adopted instead: `Profile.readable`, the same text with every labeled TBOX term
+replaced by its label in camelCase (`ex:P14` → `ex:amount`, `ex:C02` → `ex:EuropeanProject`), which is what
+`select_direct` sends and what `make eval-direct` scores; the `.rq` files stay opaque and carry no comments (a `#`
+comment on q02 cost a question earlier). It is the 1.3.0 wording again except q02's `?category rdfs:label
+?categoryName`: `make eval` is back to **86/87**, every fallback answer equal to 1.3.0 with the two travel comparisons
+up (q03 0.83 → 0.98 and 0.78 → 0.94), the closest off-topic call `none` 0.73 (the SPARQL question again).
+`make eval-direct` **82/87**: against 1.3.0 it recovers the smallest-remaining-budget question (q05 at 0.46, just above
+the 0.4 minimum) and the CloudHost total (q08 0.66) and loses "Rank external providers by total expenditure."
+(`none` 0.57); the other 4 misses are the 1.3.0 ones.
 
 `make eval-direct` is the baseline without tags: for each labeled question, one `choice` over the raw SPARQL text of all
 10 queries plus `none`, then the same parameter extraction and run. It scores **36/40** on its own, with other misses than

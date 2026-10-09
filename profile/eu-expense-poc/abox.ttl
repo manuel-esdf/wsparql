@@ -1,211 +1,211 @@
 @prefix ex: <https://example.org/eu-expense#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-ex:E001 a ex:Expense ;
-    ex:amount 8200.00 ;
-    ex:category ex:Personnel ;
-    ex:chargedToWorkPackage ex:LUMEN-WP2 ;
-    ex:description "Alice - January personnel cost" ;
-    ex:eligible true ;
-    ex:employee ex:AliceMartin ;
-    ex:expenseDate "2026-01-31"^^xsd:date ;
-    ex:incurredBy ex:ESDF .
+ex:E001 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:LUMEN-WP2 ;
+    ex:P05 ex:I01 ;
+    ex:P06 ex:AliceMartin ;
+    ex:P14 8200.00 ;
+    ex:P15 "2026-01-31"^^xsd:date ;
+    ex:P16 "Alice - January personnel cost" ;
+    ex:P17 true .
 
-ex:E002 a ex:Expense ;
-    ex:amount 7600.00 ;
-    ex:category ex:Personnel ;
-    ex:chargedToWorkPackage ex:LUMEN-WP4 ;
-    ex:description "Bob - January personnel cost" ;
-    ex:eligible true ;
-    ex:employee ex:BobDurand ;
-    ex:expenseDate "2026-01-31"^^xsd:date ;
-    ex:incurredBy ex:ESDF .
+ex:E002 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:LUMEN-WP4 ;
+    ex:P05 ex:I01 ;
+    ex:P06 ex:BobDurand ;
+    ex:P14 7600.00 ;
+    ex:P15 "2026-01-31"^^xsd:date ;
+    ex:P16 "Bob - January personnel cost" ;
+    ex:P17 true .
 
-ex:E003 a ex:Expense ;
-    ex:amount 680.00 ;
-    ex:category ex:Travel ;
-    ex:chargedToWorkPackage ex:LUMEN-WP4 ;
-    ex:description "Trip to Brussels consortium meeting" ;
-    ex:eligible true ;
-    ex:employee ex:AliceMartin ;
-    ex:expenseDate "2026-02-12"^^xsd:date ;
-    ex:incurredBy ex:ESDF ;
-    ex:supplier ex:Eurostar .
+ex:E003 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:LUMEN-WP4 ;
+    ex:P05 ex:I02 ;
+    ex:P06 ex:AliceMartin ;
+    ex:P07 ex:Eurostar ;
+    ex:P14 680.00 ;
+    ex:P15 "2026-02-12"^^xsd:date ;
+    ex:P16 "Trip to Brussels consortium meeting" ;
+    ex:P17 true .
 
-ex:E004 a ex:Expense ;
-    ex:amount 12500.00 ;
-    ex:category ex:Subcontracting ;
-    ex:chargedToWorkPackage ex:LUMEN-WP2 ;
-    ex:description "Semantic architecture consultancy" ;
-    ex:eligible true ;
-    ex:expenseDate "2026-03-15"^^xsd:date ;
-    ex:incurredBy ex:ESDF ;
-    ex:supplier ex:SemanticConsulting .
+ex:E004 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:LUMEN-WP2 ;
+    ex:P05 ex:I04 ;
+    ex:P07 ex:SemanticConsulting ;
+    ex:P14 12500.00 ;
+    ex:P15 "2026-03-15"^^xsd:date ;
+    ex:P16 "Semantic architecture consultancy" ;
+    ex:P17 true .
 
-ex:E005 a ex:Expense ;
-    ex:amount 2900.00 ;
-    ex:category ex:Equipment ;
-    ex:chargedToWorkPackage ex:LUMEN-WP2 ;
-    ex:description "Development laptop" ;
-    ex:eligible true ;
-    ex:employee ex:AliceMartin ;
-    ex:expenseDate "2026-03-20"^^xsd:date ;
-    ex:incurredBy ex:ESDF ;
-    ex:supplier ex:TechStore .
+ex:E005 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:LUMEN-WP2 ;
+    ex:P05 ex:I03 ;
+    ex:P06 ex:AliceMartin ;
+    ex:P07 ex:TechStore ;
+    ex:P14 2900.00 ;
+    ex:P15 "2026-03-20"^^xsd:date ;
+    ex:P16 "Development laptop" ;
+    ex:P17 true .
 
-ex:E006 a ex:Expense ;
-    ex:amount 240.00 ;
-    ex:category ex:OtherGoodsServices ;
-    ex:chargedToWorkPackage ex:LUMEN-WP2 ;
-    ex:description "Team dinner during project meeting" ;
-    ex:eligible false ;
-    ex:expenseDate "2026-03-21"^^xsd:date ;
-    ex:incurredBy ex:ESDF .
+ex:E006 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:LUMEN-WP2 ;
+    ex:P05 ex:I05 ;
+    ex:P14 240.00 ;
+    ex:P15 "2026-03-21"^^xsd:date ;
+    ex:P16 "Team dinner during project meeting" ;
+    ex:P17 false .
 
-ex:E007 a ex:Expense ;
-    ex:amount 7900.00 ;
-    ex:category ex:Personnel ;
-    ex:chargedToWorkPackage ex:GRAPHIA-WP3 ;
-    ex:description "Claire - February personnel cost" ;
-    ex:eligible true ;
-    ex:employee ex:ClaireRoux ;
-    ex:expenseDate "2026-02-28"^^xsd:date ;
-    ex:incurredBy ex:ESDF .
+ex:E007 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:GRAPHIA-WP3 ;
+    ex:P05 ex:I01 ;
+    ex:P06 ex:ClaireRoux ;
+    ex:P14 7900.00 ;
+    ex:P15 "2026-02-28"^^xsd:date ;
+    ex:P16 "Claire - February personnel cost" ;
+    ex:P17 true .
 
-ex:E008 a ex:Expense ;
-    ex:amount 920.00 ;
-    ex:category ex:Travel ;
-    ex:chargedToWorkPackage ex:GRAPHIA-WP3 ;
-    ex:description "Flight to Vienna review meeting" ;
-    ex:eligible true ;
-    ex:employee ex:ClaireRoux ;
-    ex:expenseDate "2026-04-03"^^xsd:date ;
-    ex:incurredBy ex:ESDF ;
-    ex:supplier ex:AirFrance .
+ex:E008 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:GRAPHIA-WP3 ;
+    ex:P05 ex:I02 ;
+    ex:P06 ex:ClaireRoux ;
+    ex:P07 ex:AirFrance ;
+    ex:P14 920.00 ;
+    ex:P15 "2026-04-03"^^xsd:date ;
+    ex:P16 "Flight to Vienna review meeting" ;
+    ex:P17 true .
 
-ex:E009 a ex:Expense ;
-    ex:amount 3600.00 ;
-    ex:category ex:OtherGoodsServices ;
-    ex:chargedToWorkPackage ex:GRAPHIA-WP1 ;
-    ex:description "Cloud hosting for graph pipeline" ;
-    ex:eligible true ;
-    ex:expenseDate "2026-04-30"^^xsd:date ;
-    ex:incurredBy ex:ESDF ;
-    ex:supplier ex:CloudHost .
+ex:E009 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:GRAPHIA-WP1 ;
+    ex:P05 ex:I05 ;
+    ex:P07 ex:CloudHost ;
+    ex:P14 3600.00 ;
+    ex:P15 "2026-04-30"^^xsd:date ;
+    ex:P16 "Cloud hosting for graph pipeline" ;
+    ex:P17 true .
 
-ex:E010 a ex:Expense ;
-    ex:amount 7600.00 ;
-    ex:category ex:Personnel ;
-    ex:chargedToWorkPackage ex:OPENSCIENCE-WP2 ;
-    ex:description "Bob - May personnel cost" ;
-    ex:eligible true ;
-    ex:employee ex:BobDurand ;
-    ex:expenseDate "2026-05-31"^^xsd:date ;
-    ex:incurredBy ex:ESDF .
+ex:E010 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:OPENSCIENCE-WP2 ;
+    ex:P05 ex:I01 ;
+    ex:P06 ex:BobDurand ;
+    ex:P14 7600.00 ;
+    ex:P15 "2026-05-31"^^xsd:date ;
+    ex:P16 "Bob - May personnel cost" ;
+    ex:P17 true .
 
-ex:E011 a ex:Expense ;
-    ex:amount 410.00 ;
-    ex:category ex:Travel ;
-    ex:chargedToWorkPackage ex:OPENSCIENCE-WP2 ;
-    ex:description "Travel to Paris interoperability workshop" ;
-    ex:eligible true ;
-    ex:employee ex:BobDurand ;
-    ex:expenseDate "2026-06-14"^^xsd:date ;
-    ex:incurredBy ex:ESDF ;
-    ex:supplier ex:Eurostar .
+ex:E011 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:OPENSCIENCE-WP2 ;
+    ex:P05 ex:I02 ;
+    ex:P06 ex:BobDurand ;
+    ex:P07 ex:Eurostar ;
+    ex:P14 410.00 ;
+    ex:P15 "2026-06-14"^^xsd:date ;
+    ex:P16 "Travel to Paris interoperability workshop" ;
+    ex:P17 true .
 
-ex:E012 a ex:Expense ;
-    ex:amount 1200.00 ;
-    ex:category ex:OtherGoodsServices ;
-    ex:chargedToWorkPackage ex:OPENSCIENCE-WP2 ;
-    ex:description "External API subscription" ;
-    ex:eligible true ;
-    ex:expenseDate "2026-06-30"^^xsd:date ;
-    ex:incurredBy ex:ESDF ;
-    ex:supplier ex:CloudHost .
+ex:E012 a ex:C06 ;
+    ex:P03 ex:ESDF ;
+    ex:P04 ex:OPENSCIENCE-WP2 ;
+    ex:P05 ex:I05 ;
+    ex:P07 ex:CloudHost ;
+    ex:P14 1200.00 ;
+    ex:P15 "2026-06-30"^^xsd:date ;
+    ex:P16 "External API subscription" ;
+    ex:P17 true .
 
-ex:AirFrance a ex:Supplier ;
-    ex:country "France" ;
-    ex:name "Air France" .
+ex:AirFrance a ex:C05 ;
+    ex:P08 "Air France" ;
+    ex:P18 "France" .
 
-ex:GRAPHIA-WP1 a ex:WorkPackage ;
-    ex:belongsToProject ex:GRAPHIA ;
-    ex:budget 90000.00 ;
-    ex:name "Data ingestion" .
+ex:GRAPHIA-WP1 a ex:C03 ;
+    ex:P02 ex:GRAPHIA ;
+    ex:P08 "Data ingestion" ;
+    ex:P13 90000.00 .
 
-ex:SemanticConsulting a ex:Supplier ;
-    ex:country "Germany" ;
-    ex:name "Semantic Consulting GmbH" .
+ex:SemanticConsulting a ex:C05 ;
+    ex:P08 "Semantic Consulting GmbH" ;
+    ex:P18 "Germany" .
 
-ex:TechStore a ex:Supplier ;
-    ex:country "France" ;
-    ex:name "TechStore SAS" .
+ex:TechStore a ex:C05 ;
+    ex:P08 "TechStore SAS" ;
+    ex:P18 "France" .
 
-ex:ClaireRoux a ex:Employee ;
-    ex:name "Claire Roux" .
+ex:ClaireRoux a ex:C04 ;
+    ex:P08 "Claire Roux" .
 
-ex:CloudHost a ex:Supplier ;
-    ex:country "Germany" ;
-    ex:name "CloudHost Europe" .
+ex:CloudHost a ex:C05 ;
+    ex:P08 "CloudHost Europe" ;
+    ex:P18 "Germany" .
 
-ex:Eurostar a ex:Supplier ;
-    ex:country "France" ;
-    ex:name "Eurostar" .
+ex:Eurostar a ex:C05 ;
+    ex:P08 "Eurostar" ;
+    ex:P18 "France" .
 
-ex:GRAPHIA-WP3 a ex:WorkPackage ;
-    ex:belongsToProject ex:GRAPHIA ;
-    ex:budget 110000.00 ;
-    ex:name "Graph analytics" .
+ex:GRAPHIA-WP3 a ex:C03 ;
+    ex:P02 ex:GRAPHIA ;
+    ex:P08 "Graph analytics" ;
+    ex:P13 110000.00 .
 
-ex:LUMEN-WP4 a ex:WorkPackage ;
-    ex:belongsToProject ex:LUMEN ;
-    ex:budget 120000.00 ;
-    ex:name "Integration and validation" .
+ex:LUMEN-WP4 a ex:C03 ;
+    ex:P02 ex:LUMEN ;
+    ex:P08 "Integration and validation" ;
+    ex:P13 120000.00 .
 
-ex:OPENSCIENCE a ex:EuropeanProject ;
-    ex:acronym "OPENSCIENCE" ;
-    ex:budget 180000.00 ;
-    ex:endDate "2028-12-31"^^xsd:date ;
-    ex:grantAgreement "GA-101000003" ;
-    ex:name "Open Science Services for Europe" ;
-    ex:startDate "2026-01-01"^^xsd:date .
+ex:OPENSCIENCE a ex:C02 ;
+    ex:P08 "Open Science Services for Europe" ;
+    ex:P09 "OPENSCIENCE" ;
+    ex:P10 "GA-101000003" ;
+    ex:P11 "2026-01-01"^^xsd:date ;
+    ex:P12 "2028-12-31"^^xsd:date ;
+    ex:P13 180000.00 .
 
-ex:AliceMartin a ex:Employee ;
-    ex:name "Alice Martin" .
+ex:AliceMartin a ex:C04 ;
+    ex:P08 "Alice Martin" .
 
-ex:BobDurand a ex:Employee ;
-    ex:name "Bob Durand" .
+ex:BobDurand a ex:C04 ;
+    ex:P08 "Bob Durand" .
 
-ex:GRAPHIA a ex:EuropeanProject ;
-    ex:acronym "GRAPHIA" ;
-    ex:budget 300000.00 ;
-    ex:endDate "2027-05-31"^^xsd:date ;
-    ex:grantAgreement "GA-101000002" ;
-    ex:name "Graph Intelligence for European Research" ;
-    ex:startDate "2024-06-01"^^xsd:date .
+ex:GRAPHIA a ex:C02 ;
+    ex:P08 "Graph Intelligence for European Research" ;
+    ex:P09 "GRAPHIA" ;
+    ex:P10 "GA-101000002" ;
+    ex:P11 "2024-06-01"^^xsd:date ;
+    ex:P12 "2027-05-31"^^xsd:date ;
+    ex:P13 300000.00 .
 
-ex:LUMEN a ex:EuropeanProject ;
-    ex:acronym "LUMEN" ;
-    ex:budget 420000.00 ;
-    ex:endDate "2027-12-31"^^xsd:date ;
-    ex:grantAgreement "GA-101000001" ;
-    ex:name "Linked and Unified Metadata for European Networks" ;
-    ex:startDate "2025-01-01"^^xsd:date .
+ex:LUMEN a ex:C02 ;
+    ex:P08 "Linked and Unified Metadata for European Networks" ;
+    ex:P09 "LUMEN" ;
+    ex:P10 "GA-101000001" ;
+    ex:P11 "2025-01-01"^^xsd:date ;
+    ex:P12 "2027-12-31"^^xsd:date ;
+    ex:P13 420000.00 .
 
-ex:OPENSCIENCE-WP2 a ex:WorkPackage ;
-    ex:belongsToProject ex:OPENSCIENCE ;
-    ex:budget 80000.00 ;
-    ex:name "Service integration" .
+ex:OPENSCIENCE-WP2 a ex:C03 ;
+    ex:P02 ex:OPENSCIENCE ;
+    ex:P08 "Service integration" ;
+    ex:P13 80000.00 .
 
-ex:LUMEN-WP2 a ex:WorkPackage ;
-    ex:belongsToProject ex:LUMEN ;
-    ex:budget 150000.00 ;
-    ex:name "Semantic services" .
+ex:LUMEN-WP2 a ex:C03 ;
+    ex:P02 ex:LUMEN ;
+    ex:P08 "Semantic services" ;
+    ex:P13 150000.00 .
 
-ex:ESDF a ex:Company ;
-    ex:country "France" ;
-    ex:name "e-Science Data Factory" ;
-    ex:participatesIn ex:GRAPHIA,
+ex:ESDF a ex:C01 ;
+    ex:P01 ex:GRAPHIA,
         ex:LUMEN,
-        ex:OPENSCIENCE .
+        ex:OPENSCIENCE ;
+    ex:P08 "e-Science Data Factory" ;
+    ex:P18 "France" .
 

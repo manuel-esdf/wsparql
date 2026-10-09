@@ -1,7 +1,7 @@
 PREFIX ex: <https://example.org/eu-expense#>
 SELECT ?year ?month (SUM(?amount) AS ?total)
 WHERE {
-  ?expense a ex:Expense ; ex:expenseDate ?date ; ex:amount ?amount .
+  ?expense a ex:C06 ; ex:P15 ?date ; ex:P14 ?amount .
   BIND(YEAR(?date) AS ?year)
   BIND(MONTH(?date) AS ?month)
 }
