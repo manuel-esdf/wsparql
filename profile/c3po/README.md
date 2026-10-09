@@ -1,0 +1,29 @@
+# C3PO FAIR-IMPACT Dataset
+
+Cost reporting of one H2020 project, FAIR-IMPACT, seen from one partner organisation: personnel costs from payslips and
+timesheets, travel costs from invoices, work packages, tasks and reporting periods. Converted from `DRAFT/C3PO`
+(git-excluded: the full ontology `t_box/c3po.ttl`, the curated A-Box `a_box/c3po_curated.ttl`, the 29 competency
+queries `cq/`) into the shape of [eu-expense-poc](../eu-expense-poc/README.md); every `make` target runs on it with
+`make PROFILE=profile/c3po <target>`.
+
+## Files
+
+- `VERSION`: profile version (semver), bump when the tags (`make tags-gen` output), the data graph, the queries or the test questions change (the cached tags are keyed by it); a catalog description change only needs `make query-tags`
+- `tbox.ttl`: lean copy of the C3PO European Reporting Ontology 0.4.0 (17 classes, 19 object properties, 42 datatype properties). The IRIs are the C3PO ids, opaque (`c3po:C3PO_0000107` is timesheet); the name of a term is its `rdfs:label`, and `rdfs:comment` on the classes with data and on the numeric properties is the tag description (`make tags-gen`: 41 tags, see [GENERATE-TAGS-FROM-ONTOLOGY.md](../../GENERATE-TAGS-FROM-ONTOLOGY.md)). Kept from the draft: labels, domains, ranges, `rdfs:subClassOf` (employee = internal + external, reporting period = european + coordinator, three personnel cost grains). Dropped: skos definitions, scope notes and French labels, identity keys and extraction flags (`meta:`), union and disjointness axioms; read them in the draft
+- `csv/`: 11 files, one per class with data, written once from the draft A-Box (a scratchpad script, not kept): `EuropeanProject` (1, FAIR-IMPACT), `InternalEmployee` (4), `ExternalEmployee` (1), `WorkPackage` (6), `Task` (5), `EuropeanReportingPeriod` (3, ERP1–ERP3), `CoordinatorReportingPeriod` (6, CRP1–CRP6, overlapping), `Travel` (9), `Invoice` (96), `Timesheet` (96, one row per employee, day and task), `Payslip` (120, one per employee and month). Same convention as eu-expense-poc: file stem = class label, column = property label in camelCase (`hoursWorked`, `reportsOnProject`), `id` = IRI local name as in the draft (`Employee1`, `WP4`, `Task1_1`, `ReportingPeriod_ERP1`, `travel_Dagstuhl_Workshop_2023`, `invoice12`, `payslip100`, `timesheet7`), `|` would separate several values (no cell needs it). A relation is stored once, on the many side, as in eu-expense-poc: a reporting period `reportsOnProject`, and the draft's inverse `hasReportingPeriod` on the project (9 triples no query reads) was dropped. The draft's materialised shortcuts are kept because the queries walk them: `logsHoursForProject` (timesheet → project, q01–q10, q29), `reimbursedAgainstProject` (invoice, q04, q07), `chargedToProject` (travel, q03, q18–q22); `partOfProjectThroughWorkPackage` (task → project, 5 triples, read by none) was dropped like the inverse. Two typing differences: typed strings become plain literals (rdflib does not equate `"x"^^xsd:string` with `"x"`, so the queries match `"FAIR-IMPACT"`) and `personMonthAllocated` integers become decimals (its range); `payslipCalendarYearMonth` (`xsd:gYearMonth`) is not validated by rdflib, any cell passes
+- `abox.ttl`: derived, `make PROFILE=profile/c3po abox` (2016 triples: the draft's 2030 after those two typing changes, minus the 9 `hasReportingPeriod` and the 5 `partOfProjectThroughWorkPackage`), committed; the round-trip test rebuilds it from the CSVs
+- `queries/`: the 29 competency queries, `q01`..`q29` in the draft's CQ order, on the `c3po:` IRIs. Rewritten from `cq/Q<n>_sparql.txt`: comments out, string literals untyped, exact literal matches (`c3po:C3PO_0000340 "Employe2"` in place of the diacritics-folding `FILTER(REPLACE(…))`, `FILTER(?purpose = "Dagstuhl Workshop 2023")`), `?tsDate` for `?moisOuJour`; the logic is unchanged (subqueries for the hourly rate, UNION over internal and external employees, period membership by calendar containment on the timesheet month, the travel start date or the invoice date). The constants stay in the text (FAIR-IMPACT, ERP1–3, CRP5, WP4, task 1.1, Employe1–3, 2022–2025, May 2025, Dagstuhl Workshop 2023): no `params`, `make params` has nothing to extract; parameterising them is the next step. The fallback route reads the text with the labels rendered: `?ts a c3po:timesheet ; c3po:logsHoursForProject ?project`
+- `query-catalog.yaml`: one description per query, naming its constant ("Hourly rate of Employe2 in 2022" against "Hourly rate of each employee per year"); the routing tags of a query are detected by Ollaya from it (`make query-tags`)
+- `tests/test-questions.yaml`: the 29 competency questions, one per query, as the draft wrote them; no paraphrases and no off-topic `none` questions yet, so `make eval` measures recall only
+- `tests/expected.json`: the draft's `cq/expected.json` keyed by query id, the cell values of each query flattened in any order; `make test` runs every query against it (the draft's `baseline.json` is superseded by that test)
+- `../profile.db`: shared with eu-expense-poc, rows keyed by profile name; tables described in the [eu-expense-poc README](../eu-expense-poc/README.md)
+
+## Scenario
+
+A partner organisation reports its costs on FAIR-IMPACT (2022-06-01 to 2025-05-31, 36 months, total budget
+171 250 EUR): five employees (four internal with payslips and 1720 or 960 annual productive hours, one external at a
+contracted hourly rate), six work packages, five tasks, nine travels with 96 invoices, 96 timesheet lines, 120
+payslips, three european and six coordinator reporting periods. Hourly rates follow H2020 MGA art. 6.2.A.1 option B
+(the monthly rate pooled over the payslips of the year); person-months = hours / (annual productive hours / 12).
+
+Employee names are pseudonyms (Employe1–5); the figures are those curated in the draft.

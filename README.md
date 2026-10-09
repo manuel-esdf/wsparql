@@ -10,7 +10,11 @@ It only chooses among trusted, existing queries, extracts their parameters from 
 
 ## Input
 
-Everything the system knows lives in one profile directory (`PROFILE` in `.env`, currently `profile/eu-expense-poc`, see its [README](profile/eu-expense-poc/README.md)):
+Everything the system knows lives in one profile directory (`PROFILE` in `.env`). Two profiles exist:
+`profile/eu-expense-poc`, synthetic, the one the numbers below refer to unless said otherwise (see its
+[README](profile/eu-expense-poc/README.md)), and `profile/c3po`, the cost reporting of one H2020 project with 29
+competency queries (see its [README](profile/c3po/README.md)); `make PROFILE=profile/c3po <target>` runs any target on
+the other one. A profile holds:
 
 - a TBOX ontology describing the domain (`tbox.ttl`);
 - CSV source files with the business data (`csv/*.csv`, one file per class); the ABOX (`abox.ttl`) is derived from them by a
@@ -32,7 +36,7 @@ each query are detected by Ollaya from the query description. Both live in `prof
 | Detect relevant tags with Ollaya | `make tags` | one `noul` question per tag in a single `/v1/systemone` call, probability per tag |
 | Identify the most relevant SPARQL queries | `make candidates` | pure Python: mean detected probability over each query's tags, top 5 |
 | Ollaya selects the best candidate | `make select` | one `choice` question over the 3 candidate descriptions plus `none`; `none` or confidence below 0.4 = no suitable query |
-| Fallback when that answer is `none` | `make ask` | one more `choice` over the SPARQL (labels in place of the opaque IRIs) text of all 10 queries plus `none`; its answer is final |
+| Fallback when that answer is `none` | `make ask` | one more `choice` over the SPARQL (labels in place of the opaque IRIs) text of all catalog queries plus `none`; its answer is final |
 | Extract query parameters | `make params` | `acronym`: `choice` over the ABOX project acronyms plus `none`; `from`/`to`: regex on quarter, month name or year |
 | Execute SPARQL on the ABOX | `make sparql` | rdflib in memory, parameters bound with `initBindings` (no templating) |
 | Return the result | `make ask` | the six demo blocks below, or "no suitable query" / "no suitable query (missing parameter X)" |
@@ -53,8 +57,8 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     make ollaya-smoke-test   # one tag-detection call
     make test                # offline unit tests, no Ollaya
     make tags-gen            # tag dictionary from the ontology -> profile/profile.db
-    make query-tags          # Ollaya tags the 10 catalog descriptions (seconds each)
-    make tags-cache          # Ollaya tags the 59 test questions (minutes), optional: ask/demo call Ollaya for uncached questions
+    make query-tags          # Ollaya tags the catalog descriptions (seconds each)
+    make tags-cache          # Ollaya tags the test questions (minutes), optional: ask/demo call Ollaya for uncached questions
 
 ## Usage
 
@@ -77,7 +81,7 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     ask                  answer Q end to end: tags, candidates, selected query (fallback: direct choice over the SPARQL (labels in place of the opaque IRIs) when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
     demo                 make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
     eval                 full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M with the direct fallback and for the tag route alone, exit 1 on any mismatch (minutes on winnow)
-    eval-direct          baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the SPARQL (labels in place of the opaque IRIs) of all 10 queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
+    eval-direct          baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the SPARQL (labels in place of the opaque IRIs) of all catalog queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
     tags-cache           detect tags for every tests/test-questions.yaml question with Ollaya (needs make tags-gen), store in profile/profile.db (new run_id)
     ollaya-check         prerequisites: uv, ollaya binary, server up, model pulled
     ollaya-smoke-test    one tag-detection query on /v1/systemone; fails if "expense" tag < 0.5
@@ -129,10 +133,11 @@ whether it matches the previous one.
 Current score on `profile/eu-expense-poc` with `winnow`, profile 1.4.0 (opaque TBOX IRIs; 109 test questions, 87
 labeled: 73 in-domain and 14 `none`; 22 ambiguous ones are unlabeled and skipped), query tags run_id 9, question tags
 run_id 10: **86/87** with the direct fallback, **76/87** for the tag route alone, both printed by `make eval`;
-`make eval-direct` **82/87**. Profile 1.3.0 (the same TBOX with named IRIs, query tags run_id 3, question tags run_id 4)
-scored 86/87, 76/87 and 81/87: the tag route reads descriptions and `rdfs:comment`s, never IRIs, and its 62 answers
-are identical; the fallback and the direct route read the SPARQL text, which now gets the labels in place of the opaque
-IRIs (`ex:P14` → `ex:amount`, see "Fallback"), and answer the same 87 questions the same way, with higher confidences.
+`make eval-direct` **80/87** (82/87 until the second profile made the text lose its indentation, see "Fallback").
+Profile 1.3.0 (the same TBOX with named IRIs, query tags run_id 3, question tags run_id 4) scored 86/87, 76/87 and
+81/87: the tag route reads descriptions and `rdfs:comment`s, never IRIs, and its 62 answers are identical; the fallback
+and the direct route read the SPARQL text, which now gets the labels in place of the opaque IRIs (`ex:P14` →
+`ex:amount`, see "Fallback"); the fallback answers the same 87 questions the same way, with higher confidences.
 The one miss is "Show the personnel expenditure for OPENSCIENCE." (expected q02): both routes answer `none` (0.90 tag
 route, 0.92 fallback), "personnel" reads as the employee query (its tags rank q07, q01, q05). The explored variants were
 rerun on the 109 questions against the 1.3.0 baseline, every one a scratch run with the files restored afterwards:
@@ -153,9 +158,22 @@ Top 5 is the ranking fix: the expected query is in the top 3 for 66 of the 73 in
 tags rank q03 and q08 first). The 11 remaining tag-route `none` answers sit on the "Compare ..." descriptions of q01,
 q03 and q05 (q_id 2, 6, 19, 61, 62, 63, 71), on q02 one-category questions (65, 66, 67) and on 92. Rewording those
 descriptions is the variant that lost most: "of each European project" adds `european-project`, `list` and `breakdown`
-to the three queries (q03 6 → 10 tags) and the plain mean pushes 11 questions out of the top 3. The direct route's 6
-misses are still "one figure" questions whose answer is a row or a sum of the rows (percentage consumed, remaining
-budget, ineligible total, the personnel one above) plus "What is our total spending with CloudHost Europe?" at `none` 0.46.
+to the three queries (q03 6 → 10 tags) and the plain mean pushes 11 questions out of the top 3. The direct route's 7
+misses are "one figure" questions whose answer is a row or a sum of the rows (the work-package split, the percentage
+consumed, the smallest and the per-project remaining budget, the ineligible total, the personnel one above) plus "Rank
+external providers by total expenditure." at `none` 0.87.
+
+Current score on `profile/c3po` with `winnow`, profile 1.0.0 (the C3PO ontology; 29 competency questions, one per
+query, all in-domain, no `none` questions yet; query tags run_id 11, question tags run_id 12): **25/29** with the direct
+fallback, **22/29** for the tag route alone, `make eval-direct` **26/29**. Every miss selects a sibling query whose rows
+contain the expected ones: "Who is working on the project FAIR-IMPACT in ERP3?" gets the employees of the whole project
+(q09, 0.92), "What is the hourly rate of employee named "Employe2" in 2022?" the rate of every employee per year (q06,
+0.42), "What is the duration of ERP1 on project FAIR-IMPACT?" the european reporting periods with their dates (q15,
+through the fallback at 0.61) and "List all travel events in ERP2 of project FAIR-IMPACT." the same events with their
+cost (q03, fallback 0.63); the direct route makes the same two period choices and answers `none` (0.47) to the ERP1
+travel total. The constants are in the query text, so the catalog holds filtered and unfiltered siblings that the
+`choice` cannot tell apart once its `none` criterion is "computes or contains among its rows"; parameterising the
+constants (period, employee, year, work package) merges the siblings and is the next step for this profile.
 
 On the first test set (59 questions, 40 labeled, profile 1.2.0, query tags run_id 1, question tags run_id 2) the score
 was **40/40** with the direct fallback and **35/40** for the tag route alone (19 ambiguous questions unlabeled and
@@ -231,6 +249,15 @@ up (q03 0.83 → 0.98 and 0.78 → 0.94), the closest off-topic call `none` 0.73
 the 0.4 minimum) and the CloudHost total (q08 0.66) and loses "Rank external providers by total expenditure."
 (`none` 0.57); the other 4 misses are the 1.3.0 ones.
 
+The second profile changed what the fallback is given: one `choice` over the 29 c3po queries came to 8213 tokens against
+winnow's 8192 context (Ollaya HTTP 422), so `Profile.readable` now drops the indentation and the blank lines of every
+query. The PREFIX lines stay: dropping those instead cost three fallback answers (83/87: "What is GRAPHIA's cumulative
+expenditure?", "What were LUMEN's subcontracting costs?" and the travel comparison at `none`) and three direct ones
+(79/87). Without the indentation `make eval` gives the same **86/87** with the same answers, and `make eval-direct`
+**80/87**: the smallest-remaining-budget question is lost again (`none` 0.62) along with "How much budget remains on each
+project?" (`none` 0.55). A catalog bigger than c3po's needs a fallback that reads fewer queries (the top candidates, or
+the descriptions first).
+
 `make eval-direct` is the baseline without tags: for each labeled question, one `choice` over the raw SPARQL text of all
 10 queries plus `none`, then the same parameter extraction and run. It scores **36/40** on its own, with other misses than
 the tag route (all 4 are "one figure" questions on q04, q05 and q06, "How is the LUMEN spending split across work
@@ -272,7 +299,7 @@ The POC is successful if it demonstrates that natural-language questions can be 
 
 - `Makefile`, `.env.example`, `pyproject.toml`, `uv.lock`
 - `wsparql/`: `ollaya.py` (HTTP client, `decide`, `detect_tags`), `profile.py` (profile loader, `run` with bindings), `tags.py` (tag dictionary from the ontology), `pipeline.py` (`candidates`, `select`, `extract_period`, `extract_params`, `answer`), `db.py` (`tags`, `query_tags`, `tag_cache`, `eval_result`), `__main__.py` (CLI behind the Makefile)
-- `profile/eu-expense-poc/`: the profile (see its README); `profile/profile.db`: local cache, gitignored
+- `profile/eu-expense-poc/`, `profile/c3po/`: the profiles (see their READMEs); `profile/profile.db`: local cache shared by the profiles, gitignored
 - `tests/test_offline.py`: unit tests without Ollaya (`make test`)
 - `GENERATE-TAGS-FROM-ONTOLOGY.md`: how the tags are derived from the ontology and the query tags from the descriptions
 

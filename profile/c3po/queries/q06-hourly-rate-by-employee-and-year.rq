@@ -1,0 +1,23 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+
+SELECT ?empName ?year ?hourlyRate WHERE {
+  ?emp c3po:C3PO_0000340 ?empName .
+  {
+    SELECT ?emp ?year ?hourlyRate WHERE {
+      ?emp c3po:C3PO_0000312 ?annualProductiveHours .
+      FILTER(?annualProductiveHours > 0)
+      {
+        SELECT ?emp ?year (SUM(?grossSalary + ?patronalContribution) AS ?annualPersonnelCost) (COUNT(*) AS ?nPayslips) WHERE {
+          ?payslip a c3po:C3PO_0000111 ;
+                   c3po:C3PO_0000205 ?emp ;
+                   c3po:C3PO_0000313 ?grossSalary ;
+                   c3po:C3PO_0000314 ?patronalContribution ;
+                   c3po:C3PO_0000330 ?yearMonth .
+          BIND(SUBSTR(STR(?yearMonth), 1, 4) AS ?year)
+        } GROUP BY ?emp ?year
+      }
+      BIND((?annualPersonnelCost / ((?annualProductiveHours / 12) * ?nPayslips)) AS ?hourlyRate)
+    }
+  }
+}
+ORDER BY ?empName ?year

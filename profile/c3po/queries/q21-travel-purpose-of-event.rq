@@ -1,0 +1,10 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+
+SELECT ?purpose
+WHERE {
+  ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
+  ?travel a c3po:C3PO_0000108 ;
+          c3po:C3PO_0000214 ?project ;
+          c3po:C3PO_0000318 ?purpose .
+  FILTER(?purpose = "Dagstuhl Workshop 2023")
+}

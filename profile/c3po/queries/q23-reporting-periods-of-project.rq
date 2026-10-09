@@ -1,0 +1,8 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+
+SELECT ?rpName
+WHERE {
+  ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
+  ?rp c3po:C3PO_0000204 ?project ;
+      c3po:C3PO_0000341 ?rpName .
+}

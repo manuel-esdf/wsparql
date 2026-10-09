@@ -1,0 +1,9 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+
+SELECT ?empName ?annualProductiveHours
+WHERE {
+  ?emp a c3po:C3PO_0000105 ;
+       c3po:C3PO_0000340 ?empName ;
+       c3po:C3PO_0000312 ?annualProductiveHours .
+  FILTER(?empName = "Employe3")
+}

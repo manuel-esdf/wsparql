@@ -1,0 +1,2366 @@
+@prefix c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+c3po:ReportingPeriod_CRP1 a c3po:C3PO_0000110 ;
+    c3po:C3PO_0000204 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000332 "2022-06-01"^^xsd:date ;
+    c3po:C3PO_0000335 "2022-11-30"^^xsd:date ;
+    c3po:C3PO_0000341 "CRP1" .
+
+c3po:ReportingPeriod_CRP2 a c3po:C3PO_0000110 ;
+    c3po:C3PO_0000204 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000332 "2022-12-01"^^xsd:date ;
+    c3po:C3PO_0000335 "2023-05-31"^^xsd:date ;
+    c3po:C3PO_0000341 "CRP2" .
+
+c3po:ReportingPeriod_CRP3 a c3po:C3PO_0000110 ;
+    c3po:C3PO_0000204 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000332 "2023-06-01"^^xsd:date ;
+    c3po:C3PO_0000335 "2023-11-30"^^xsd:date ;
+    c3po:C3PO_0000341 "CRP3" .
+
+c3po:ReportingPeriod_CRP4 a c3po:C3PO_0000110 ;
+    c3po:C3PO_0000204 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000332 "2023-12-01"^^xsd:date ;
+    c3po:C3PO_0000335 "2024-05-31"^^xsd:date ;
+    c3po:C3PO_0000341 "CRP4" .
+
+c3po:ReportingPeriod_CRP5 a c3po:C3PO_0000110 ;
+    c3po:C3PO_0000204 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000332 "2024-05-01"^^xsd:date ;
+    c3po:C3PO_0000335 "2024-11-30"^^xsd:date ;
+    c3po:C3PO_0000341 "CRP5" .
+
+c3po:ReportingPeriod_CRP6 a c3po:C3PO_0000110 ;
+    c3po:C3PO_0000204 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000332 "2024-12-01"^^xsd:date ;
+    c3po:C3PO_0000335 "2025-05-31"^^xsd:date ;
+    c3po:C3PO_0000341 "CRP6" .
+
+c3po:ReportingPeriod_ERP1 a c3po:C3PO_0000109 ;
+    c3po:C3PO_0000204 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000332 "2022-06-01"^^xsd:date ;
+    c3po:C3PO_0000335 "2023-05-31"^^xsd:date ;
+    c3po:C3PO_0000341 "ERP1" .
+
+c3po:ReportingPeriod_ERP2 a c3po:C3PO_0000109 ;
+    c3po:C3PO_0000204 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000332 "2023-06-01"^^xsd:date ;
+    c3po:C3PO_0000335 "2024-05-31"^^xsd:date ;
+    c3po:C3PO_0000341 "ERP2" .
+
+c3po:ReportingPeriod_ERP3 a c3po:C3PO_0000109 ;
+    c3po:C3PO_0000204 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000332 "2024-06-01"^^xsd:date ;
+    c3po:C3PO_0000335 "2025-05-31"^^xsd:date ;
+    c3po:C3PO_0000341 "ERP3" .
+
+c3po:WP2 a c3po:C3PO_0000103 ;
+    c3po:C3PO_0000207 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000304 0.0 ;
+    c3po:C3PO_0000338 "WP2 - ENGAGEMENT, ADOPTION AND IMPLEMENTATION" .
+
+c3po:WP3 a c3po:C3PO_0000103 ;
+    c3po:C3PO_0000207 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000304 0.0 ;
+    c3po:C3PO_0000338 "WP3 - PERSISTENT IDENTIFIERS" .
+
+c3po:invoice1 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_KoM_Kick_-_Off_Meeting ;
+    c3po:C3PO_0000308 "2022-06-08"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 164.0 .
+
+c3po:invoice10 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2023 ;
+    c3po:C3PO_0000308 "2023-09-18"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 216.0 .
+
+c3po:invoice11 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2023 ;
+    c3po:C3PO_0000308 "2023-09-18"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 283.0 .
+
+c3po:invoice12 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2023 ;
+    c3po:C3PO_0000308 "2023-09-28"^^xsd:date ;
+    c3po:C3PO_0000309 "Retrait Bancaire" ;
+    c3po:C3PO_0000310 100.0 .
+
+c3po:invoice13 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2023 ;
+    c3po:C3PO_0000308 "2023-10-01"^^xsd:date ;
+    c3po:C3PO_0000309 "Relay" ;
+    c3po:C3PO_0000310 12.2 .
+
+c3po:invoice14 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2023 ;
+    c3po:C3PO_0000308 "2023-10-05"^^xsd:date ;
+    c3po:C3PO_0000309 "Schloss Dagstuhl" ;
+    c3po:C3PO_0000310 420.0 .
+
+c3po:invoice15 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2023 ;
+    c3po:C3PO_0000308 "2023-10-06"^^xsd:date ;
+    c3po:C3PO_0000309 "Brioche Dorée" ;
+    c3po:C3PO_0000310 12.0 .
+
+c3po:invoice16 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2023 ;
+    c3po:C3PO_0000308 "2023-10-06"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 19.7 .
+
+c3po:invoice17 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee3 ;
+    c3po:C3PO_0000208 c3po:travel_All_Hands_Meeting ;
+    c3po:C3PO_0000308 "2023-07-20"^^xsd:date ;
+    c3po:C3PO_0000309 "Moxy Hôtel" ;
+    c3po:C3PO_0000310 382.5 .
+
+c3po:invoice18 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee3 ;
+    c3po:C3PO_0000208 c3po:travel_All_Hands_Meeting ;
+    c3po:C3PO_0000308 "2023-07-20"^^xsd:date ;
+    c3po:C3PO_0000309 "Easy Jet" ;
+    c3po:C3PO_0000310 126.0 .
+
+c3po:invoice19 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee3 ;
+    c3po:C3PO_0000208 c3po:travel_All_Hands_Meeting ;
+    c3po:C3PO_0000308 "2023-08-12"^^xsd:date ;
+    c3po:C3PO_0000309 "KLM" ;
+    c3po:C3PO_0000310 113.65 .
+
+c3po:invoice2 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_KoM_Kick_-_Off_Meeting ;
+    c3po:C3PO_0000308 "2022-06-08"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 255.05 .
+
+c3po:invoice20 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee3 ;
+    c3po:C3PO_0000208 c3po:travel_All_Hands_Meeting ;
+    c3po:C3PO_0000308 "2023-10-03"^^xsd:date ;
+    c3po:C3PO_0000309 "Schipol Airport Bus" ;
+    c3po:C3PO_0000310 10.8 .
+
+c3po:invoice21 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee3 ;
+    c3po:C3PO_0000208 c3po:travel_All_Hands_Meeting ;
+    c3po:C3PO_0000308 "2023-10-06"^^xsd:date ;
+    c3po:C3PO_0000309 "Moxy Hôtel" ;
+    c3po:C3PO_0000310 16.05 .
+
+c3po:invoice22 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-07"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 319.67 .
+
+c3po:invoice23 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-26"^^xsd:date ;
+    c3po:C3PO_0000309 "Valk Hotel Leiden" ;
+    c3po:C3PO_0000310 543.65 .
+
+c3po:invoice24 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-22"^^xsd:date ;
+    c3po:C3PO_0000309 "Resto Verboden Toegang" ;
+    c3po:C3PO_0000310 78.25 .
+
+c3po:invoice25 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-23"^^xsd:date ;
+    c3po:C3PO_0000309 "Resto Crabbetje" ;
+    c3po:C3PO_0000310 100.0 .
+
+c3po:invoice26 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-25"^^xsd:date ;
+    c3po:C3PO_0000309 "Resto Siri Thai" ;
+    c3po:C3PO_0000310 55.0 .
+
+c3po:invoice27 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-22"^^xsd:date ;
+    c3po:C3PO_0000309 "TAXI" ;
+    c3po:C3PO_0000310 12.9 .
+
+c3po:invoice28 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-22"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 14.0 .
+
+c3po:invoice29 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-21"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 6.9 .
+
+c3po:invoice3 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_KoM_Kick_-_Off_Meeting ;
+    c3po:C3PO_0000308 "2022-06-26"^^xsd:date ;
+    c3po:C3PO_0000309 "NS Schipol" ;
+    c3po:C3PO_0000310 28.0 .
+
+c3po:invoice30 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-25"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 6.9 .
+
+c3po:invoice31 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-21"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 25.34 .
+
+c3po:invoice32 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-21"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 19.35 .
+
+c3po:invoice33 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Lorentz_Workshop ;
+    c3po:C3PO_0000308 "2024-01-25"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 24.17 .
+
+c3po:invoice34 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_SemanticsRoche_2024 ;
+    c3po:C3PO_0000308 "2024-05-07"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 150.2 .
+
+c3po:invoice35 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_SemanticsRoche_2024 ;
+    c3po:C3PO_0000308 "2024-05-06"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 119.6 .
+
+c3po:invoice36 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_SemanticsRoche_2024 ;
+    c3po:C3PO_0000308 "2024-05-28"^^xsd:date ;
+    c3po:C3PO_0000309 "Hôtel" ;
+    c3po:C3PO_0000310 243.0 .
+
+c3po:invoice37 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_SemanticsRoche_2024 ;
+    c3po:C3PO_0000308 "2024-05-28"^^xsd:date ;
+    c3po:C3PO_0000309 "Hôtel" ;
+    c3po:C3PO_0000310 13.50 .
+
+c3po:invoice38 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-06-07"^^xsd:date ;
+    c3po:C3PO_0000309 "Inscription" ;
+    c3po:C3PO_0000310 650.0 .
+
+c3po:invoice39 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-06-23"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 312.65 .
+
+c3po:invoice4 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_KoM_Kick_-_Off_Meeting ;
+    c3po:C3PO_0000308 "2022-06-26"^^xsd:date ;
+    c3po:C3PO_0000309 "Hôtel Citiez" ;
+    c3po:C3PO_0000310 337.32 .
+
+c3po:invoice40 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-14"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 26.13 .
+
+c3po:invoice41 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-14"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 28.84 .
+
+c3po:invoice42 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-15"^^xsd:date ;
+    c3po:C3PO_0000309 "TAXI" ;
+    c3po:C3PO_0000310 26.52 .
+
+c3po:invoice43 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-15"^^xsd:date ;
+    c3po:C3PO_0000309 "TAXI" ;
+    c3po:C3PO_0000310 22.5 .
+
+c3po:invoice44 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-16"^^xsd:date ;
+    c3po:C3PO_0000309 "BUS" ;
+    c3po:C3PO_0000310 2.6 .
+
+c3po:invoice45 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-17"^^xsd:date ;
+    c3po:C3PO_0000309 "BUS" ;
+    c3po:C3PO_0000310 2.6 .
+
+c3po:invoice46 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-17"^^xsd:date ;
+    c3po:C3PO_0000309 "BUS" ;
+    c3po:C3PO_0000310 2.6 .
+
+c3po:invoice47 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-18"^^xsd:date ;
+    c3po:C3PO_0000309 "IntercityHotel" ;
+    c3po:C3PO_0000310 20.7 .
+
+c3po:invoice48 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-18"^^xsd:date ;
+    c3po:C3PO_0000309 "BUS" ;
+    c3po:C3PO_0000310 2.6 .
+
+c3po:invoice49 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-18"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 28.79 .
+
+c3po:invoice5 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_KoM_Kick_-_Off_Meeting ;
+    c3po:C3PO_0000308 "2022-06-26"^^xsd:date ;
+    c3po:C3PO_0000309 "Hôtel Citiez - Repas" ;
+    c3po:C3PO_0000310 33.0 .
+
+c3po:invoice50 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-19"^^xsd:date ;
+    c3po:C3PO_0000309 "IntercityHotel" ;
+    c3po:C3PO_0000310 652.5 .
+
+c3po:invoice51 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-19"^^xsd:date ;
+    c3po:C3PO_0000309 "IntercityHotel" ;
+    c3po:C3PO_0000310 14.5 .
+
+c3po:invoice52 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-19"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 24.63 .
+
+c3po:invoice53 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FOIS_2024 ;
+    c3po:C3PO_0000308 "2024-07-19"^^xsd:date ;
+    c3po:C3PO_0000309 "TAXI" ;
+    c3po:C3PO_0000310 21.92 .
+
+c3po:invoice54 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2024 ;
+    c3po:C3PO_0000308 "2024-09-14"^^xsd:date ;
+    c3po:C3PO_0000309 "SNCF" ;
+    c3po:C3PO_0000310 386.0 .
+
+c3po:invoice55 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2024 ;
+    c3po:C3PO_0000308 "2024-10-12"^^xsd:date ;
+    c3po:C3PO_0000309 "Bus - DB" ;
+    c3po:C3PO_0000310 10.2 .
+
+c3po:invoice56 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2024 ;
+    c3po:C3PO_0000308 "2024-10-13"^^xsd:date ;
+    c3po:C3PO_0000309 "Restaurant - JOMY" ;
+    c3po:C3PO_0000310 29.5 .
+
+c3po:invoice57 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2024 ;
+    c3po:C3PO_0000308 "2024-10-14"^^xsd:date ;
+    c3po:C3PO_0000309 "Bus - DB" ;
+    c3po:C3PO_0000310 8.7 .
+
+c3po:invoice58 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2024 ;
+    c3po:C3PO_0000308 "2024-10-14"^^xsd:date ;
+    c3po:C3PO_0000309 "Alimentation - Paul" ;
+    c3po:C3PO_0000310 16.7 .
+
+c3po:invoice59 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2024 ;
+    c3po:C3PO_0000308 "2024-10-17"^^xsd:date ;
+    c3po:C3PO_0000309 "Inscription" ;
+    c3po:C3PO_0000310 445.6 .
+
+c3po:invoice6 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_KoM_Kick_-_Off_Meeting ;
+    c3po:C3PO_0000308 "2022-06-26"^^xsd:date ;
+    c3po:C3PO_0000309 "Red Elephant" ;
+    c3po:C3PO_0000310 25.25 .
+
+c3po:invoice60 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2024 ;
+    c3po:C3PO_0000308 "2024-10-18"^^xsd:date ;
+    c3po:C3PO_0000309 "Alimentation - Prêt à Manger" ;
+    c3po:C3PO_0000310 26.25 .
+
+c3po:invoice61 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_Dagstuhl_Workshop_2024 ;
+    c3po:C3PO_0000308 "2024-10-18"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 23.9 .
+
+c3po:invoice62 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FAIRFest_Festival ;
+    c3po:C3PO_0000308 "2025-02-06"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 645.4 .
+
+c3po:invoice63 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FAIRFest_Festival ;
+    c3po:C3PO_0000308 "2025-02-06"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 98.0 .
+
+c3po:invoice64 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FAIRFest_Festival ;
+    c3po:C3PO_0000308 "2025-02-19"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 25.97 .
+
+c3po:invoice65 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FAIRFest_Festival ;
+    c3po:C3PO_0000308 "2025-02-19"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 37.0 .
+
+c3po:invoice66 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FAIRFest_Festival ;
+    c3po:C3PO_0000308 "2025-02-19"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 10.6 .
+
+c3po:invoice67 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FAIRFest_Festival ;
+    c3po:C3PO_0000308 "2025-02-21"^^xsd:date ;
+    c3po:C3PO_0000309 "Hotel Radisson -Transport aéroport" ;
+    c3po:C3PO_0000310 22.88 .
+
+c3po:invoice68 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FAIRFest_Festival ;
+    c3po:C3PO_0000308 "2025-02-21"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 194.4 .
+
+c3po:invoice69 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_FAIRFest_Festival ;
+    c3po:C3PO_0000308 "2025-02-21"^^xsd:date ;
+    c3po:C3PO_0000309 "Alimentation - Cafeteria Kraco" ;
+    c3po:C3PO_0000310 10.6 .
+
+c3po:invoice7 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_KoM_Kick_-_Off_Meeting ;
+    c3po:C3PO_0000308 "2022-06-27"^^xsd:date ;
+    c3po:C3PO_0000309 "InDeWaag" ;
+    c3po:C3PO_0000310 53.45 .
+
+c3po:invoice70 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-09-14"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 1184.38 .
+
+c3po:invoice71 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-09-26"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 11.0 .
+
+c3po:invoice72 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-09-26"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 30.99 .
+
+c3po:invoice73 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-09-26"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 26.99 .
+
+c3po:invoice74 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-09-26"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 11.0 .
+
+c3po:invoice75 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-08"^^xsd:date ;
+    c3po:C3PO_0000309 "Hotel Radisson -Transport aéroport" ;
+    c3po:C3PO_0000310 32.68 .
+
+c3po:invoice76 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-10"^^xsd:date ;
+    c3po:C3PO_0000309 "AIRFRANCE" ;
+    c3po:C3PO_0000310 75.0 .
+
+c3po:invoice77 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-11"^^xsd:date ;
+    c3po:C3PO_0000309 "Alimentation - Cafeteria Kraco" ;
+    c3po:C3PO_0000310 17.71 .
+
+c3po:invoice78 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-12"^^xsd:date ;
+    c3po:C3PO_0000309 "Restaurant - Ciros" ;
+    c3po:C3PO_0000310 14.51 .
+
+c3po:invoice79 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-12"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 5.15 .
+
+c3po:invoice8 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_KoM_Kick_-_Off_Meeting ;
+    c3po:C3PO_0000308 "2022-06-28"^^xsd:date ;
+    c3po:C3PO_0000309 "Bird Restaurant" ;
+    c3po:C3PO_0000310 25.5 .
+
+c3po:invoice80 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-12"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 4.43 .
+
+c3po:invoice81 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-12"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 0.92 .
+
+c3po:invoice82 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-12"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 0.92 .
+
+c3po:invoice83 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-13"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 5.5 .
+
+c3po:invoice84 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-13"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 5.0 .
+
+c3po:invoice85 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-13"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 0.93 .
+
+c3po:invoice86 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-13"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 0.93 .
+
+c3po:invoice87 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-14"^^xsd:date ;
+    c3po:C3PO_0000309 "Alimentation - Caoccios Latina" ;
+    c3po:C3PO_0000310 7.72 .
+
+c3po:invoice88 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-15"^^xsd:date ;
+    c3po:C3PO_0000309 "Restaurant - Nuestra ti" ;
+    c3po:C3PO_0000310 39.75 .
+
+c3po:invoice89 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-15"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 7.35 .
+
+c3po:invoice9 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_KoM_Kick_-_Off_Meeting ;
+    c3po:C3PO_0000308 "2022-06-29"^^xsd:date ;
+    c3po:C3PO_0000309 "RAPT métro" ;
+    c3po:C3PO_0000310 1.9 .
+
+c3po:invoice90 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-15"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 3.01 .
+
+c3po:invoice91 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-15"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 0.94 .
+
+c3po:invoice92 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-15"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 0.94 .
+
+c3po:invoice93 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-15"^^xsd:date ;
+    c3po:C3PO_0000309 "VIP LOUNGE AIRPORT" ;
+    c3po:C3PO_0000310 32.24 .
+
+c3po:invoice94 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-15"^^xsd:date ;
+    c3po:C3PO_0000309 "Hotel Radisson" ;
+    c3po:C3PO_0000310 531.91 .
+
+c3po:invoice95 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-16"^^xsd:date ;
+    c3po:C3PO_0000309 "UBER" ;
+    c3po:C3PO_0000310 29.57 .
+
+c3po:invoice96 a c3po:C3PO_0000102 ;
+    c3po:C3PO_0000201 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000203 c3po:Employee1 ;
+    c3po:C3PO_0000208 c3po:travel_RDA_P23 ;
+    c3po:C3PO_0000308 "2024-11-16"^^xsd:date ;
+    c3po:C3PO_0000309 "Alimentation - Paul" ;
+    c3po:C3PO_0000310 17.0 .
+
+c3po:payslip1 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1892.81 ;
+    c3po:C3PO_0000330 "2022-01"^^xsd:gYearMonth .
+
+c3po:payslip10 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1806.12 ;
+    c3po:C3PO_0000330 "2022-10"^^xsd:gYearMonth .
+
+c3po:payslip100 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 6000.07 ;
+    c3po:C3PO_0000314 2393.7 ;
+    c3po:C3PO_0000330 "2025-04"^^xsd:gYearMonth .
+
+c3po:payslip101 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 6000.07 ;
+    c3po:C3PO_0000314 2396.7 ;
+    c3po:C3PO_0000330 "2025-05"^^xsd:gYearMonth .
+
+c3po:payslip102 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-06"^^xsd:gYearMonth .
+
+c3po:payslip103 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-07"^^xsd:gYearMonth .
+
+c3po:payslip104 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-08"^^xsd:gYearMonth .
+
+c3po:payslip105 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-09"^^xsd:gYearMonth .
+
+c3po:payslip106 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-10"^^xsd:gYearMonth .
+
+c3po:payslip107 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-11"^^xsd:gYearMonth .
+
+c3po:payslip108 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-12"^^xsd:gYearMonth .
+
+c3po:payslip109 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2054.86 ;
+    c3po:C3PO_0000314 384.28 ;
+    c3po:C3PO_0000330 "2025-01"^^xsd:gYearMonth .
+
+c3po:payslip11 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1806.12 ;
+    c3po:C3PO_0000330 "2022-11"^^xsd:gYearMonth .
+
+c3po:payslip110 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2425.14 ;
+    c3po:C3PO_0000314 467.91 ;
+    c3po:C3PO_0000330 "2025-02"^^xsd:gYearMonth .
+
+c3po:payslip111 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2308.79 ;
+    c3po:C3PO_0000314 442.87 ;
+    c3po:C3PO_0000330 "2025-03"^^xsd:gYearMonth .
+
+c3po:payslip112 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2098.94 ;
+    c3po:C3PO_0000314 408.33 ;
+    c3po:C3PO_0000330 "2025-04"^^xsd:gYearMonth .
+
+c3po:payslip113 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2308.79 ;
+    c3po:C3PO_0000314 442.78 ;
+    c3po:C3PO_0000330 "2025-05"^^xsd:gYearMonth .
+
+c3po:payslip114 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-06"^^xsd:gYearMonth .
+
+c3po:payslip115 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-07"^^xsd:gYearMonth .
+
+c3po:payslip116 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-08"^^xsd:gYearMonth .
+
+c3po:payslip117 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-09"^^xsd:gYearMonth .
+
+c3po:payslip118 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-10"^^xsd:gYearMonth .
+
+c3po:payslip119 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-11"^^xsd:gYearMonth .
+
+c3po:payslip12 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1806.12 ;
+    c3po:C3PO_0000330 "2022-12"^^xsd:gYearMonth .
+
+c3po:payslip120 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2025-12"^^xsd:gYearMonth .
+
+c3po:payslip13 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2022-01"^^xsd:gYearMonth .
+
+c3po:payslip14 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2022-02"^^xsd:gYearMonth .
+
+c3po:payslip15 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2022-03"^^xsd:gYearMonth .
+
+c3po:payslip16 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2022-04"^^xsd:gYearMonth .
+
+c3po:payslip17 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2022-05"^^xsd:gYearMonth .
+
+c3po:payslip18 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2022-06"^^xsd:gYearMonth .
+
+c3po:payslip19 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 2408.28 ;
+    c3po:C3PO_0000314 847.29 ;
+    c3po:C3PO_0000330 "2022-07"^^xsd:gYearMonth .
+
+c3po:payslip2 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1892.81 ;
+    c3po:C3PO_0000330 "2022-02"^^xsd:gYearMonth .
+
+c3po:payslip20 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 2953.66 ;
+    c3po:C3PO_0000314 1084.69 ;
+    c3po:C3PO_0000330 "2022-08"^^xsd:gYearMonth .
+
+c3po:payslip21 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 2953.66 ;
+    c3po:C3PO_0000314 1075.26 ;
+    c3po:C3PO_0000330 "2022-09"^^xsd:gYearMonth .
+
+c3po:payslip22 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 2953.66 ;
+    c3po:C3PO_0000314 1075.88 ;
+    c3po:C3PO_0000330 "2022-10"^^xsd:gYearMonth .
+
+c3po:payslip23 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2022-11"^^xsd:gYearMonth .
+
+c3po:payslip24 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee2 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2022-12"^^xsd:gYearMonth .
+
+c3po:payslip25 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1808.99 ;
+    c3po:C3PO_0000330 "2023-01"^^xsd:gYearMonth .
+
+c3po:payslip26 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1808.99 ;
+    c3po:C3PO_0000330 "2023-02"^^xsd:gYearMonth .
+
+c3po:payslip27 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1808.99 ;
+    c3po:C3PO_0000330 "2023-03"^^xsd:gYearMonth .
+
+c3po:payslip28 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1808.99 ;
+    c3po:C3PO_0000330 "2023-04"^^xsd:gYearMonth .
+
+c3po:payslip29 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1806.06 ;
+    c3po:C3PO_0000330 "2023-05"^^xsd:gYearMonth .
+
+c3po:payslip3 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1892.81 ;
+    c3po:C3PO_0000330 "2022-03"^^xsd:gYearMonth .
+
+c3po:payslip30 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1808.99 ;
+    c3po:C3PO_0000330 "2023-06"^^xsd:gYearMonth .
+
+c3po:payslip31 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1806.06 ;
+    c3po:C3PO_0000330 "2023-07"^^xsd:gYearMonth .
+
+c3po:payslip32 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1808.99 ;
+    c3po:C3PO_0000330 "2023-08"^^xsd:gYearMonth .
+
+c3po:payslip33 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1750.71 ;
+    c3po:C3PO_0000330 "2023-09"^^xsd:gYearMonth .
+
+c3po:payslip34 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1808.99 ;
+    c3po:C3PO_0000330 "2023-10"^^xsd:gYearMonth .
+
+c3po:payslip35 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1750.71 ;
+    c3po:C3PO_0000330 "2023-11"^^xsd:gYearMonth .
+
+c3po:payslip36 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1808.99 ;
+    c3po:C3PO_0000330 "2023-12"^^xsd:gYearMonth .
+
+c3po:payslip37 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2023-01"^^xsd:gYearMonth .
+
+c3po:payslip38 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2023-02"^^xsd:gYearMonth .
+
+c3po:payslip39 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2023-03"^^xsd:gYearMonth .
+
+c3po:payslip4 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1892.81 ;
+    c3po:C3PO_0000330 "2022-04"^^xsd:gYearMonth .
+
+c3po:payslip40 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2023-04"^^xsd:gYearMonth .
+
+c3po:payslip41 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 993.28 ;
+    c3po:C3PO_0000314 607.73 ;
+    c3po:C3PO_0000330 "2023-05"^^xsd:gYearMonth .
+
+c3po:payslip42 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1340.51 ;
+    c3po:C3PO_0000314 882.27 ;
+    c3po:C3PO_0000330 "2023-06"^^xsd:gYearMonth .
+
+c3po:payslip43 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1327.0 ;
+    c3po:C3PO_0000314 874.0 ;
+    c3po:C3PO_0000330 "2023-07"^^xsd:gYearMonth .
+
+c3po:payslip44 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1308.0 ;
+    c3po:C3PO_0000314 861.0 ;
+    c3po:C3PO_0000330 "2023-08"^^xsd:gYearMonth .
+
+c3po:payslip45 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1297.0 ;
+    c3po:C3PO_0000314 881.0 ;
+    c3po:C3PO_0000330 "2023-09"^^xsd:gYearMonth .
+
+c3po:payslip46 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1301.0 ;
+    c3po:C3PO_0000314 856.0 ;
+    c3po:C3PO_0000330 "2023-10"^^xsd:gYearMonth .
+
+c3po:payslip47 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1308.0 ;
+    c3po:C3PO_0000314 861.0 ;
+    c3po:C3PO_0000330 "2023-11"^^xsd:gYearMonth .
+
+c3po:payslip48 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1296.0 ;
+    c3po:C3PO_0000314 880.0 ;
+    c3po:C3PO_0000330 "2023-12"^^xsd:gYearMonth .
+
+c3po:payslip49 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2023-01"^^xsd:gYearMonth .
+
+c3po:payslip5 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1892.81 ;
+    c3po:C3PO_0000330 "2022-05"^^xsd:gYearMonth .
+
+c3po:payslip50 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2023-02"^^xsd:gYearMonth .
+
+c3po:payslip51 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2023-03"^^xsd:gYearMonth .
+
+c3po:payslip52 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2023-04"^^xsd:gYearMonth .
+
+c3po:payslip53 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 1746.83 ;
+    c3po:C3PO_0000314 321.15 ;
+    c3po:C3PO_0000330 "2023-05"^^xsd:gYearMonth .
+
+c3po:payslip54 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2308.79 ;
+    c3po:C3PO_0000314 424.06 ;
+    c3po:C3PO_0000330 "2023-06"^^xsd:gYearMonth .
+
+c3po:payslip55 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2308.79 ;
+    c3po:C3PO_0000314 424.23 ;
+    c3po:C3PO_0000330 "2023-07"^^xsd:gYearMonth .
+
+c3po:payslip56 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2360.69 ;
+    c3po:C3PO_0000314 469.89 ;
+    c3po:C3PO_0000330 "2023-08"^^xsd:gYearMonth .
+
+c3po:payslip57 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2308.79 ;
+    c3po:C3PO_0000314 423.78 ;
+    c3po:C3PO_0000330 "2023-09"^^xsd:gYearMonth .
+
+c3po:payslip58 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2308.79 ;
+    c3po:C3PO_0000314 425.03 ;
+    c3po:C3PO_0000330 "2023-10"^^xsd:gYearMonth .
+
+c3po:payslip59 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2098.94 ;
+    c3po:C3PO_0000314 385.22 ;
+    c3po:C3PO_0000330 "2023-11"^^xsd:gYearMonth .
+
+c3po:payslip6 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 2008.55 ;
+    c3po:C3PO_0000330 "2022-06"^^xsd:gYearMonth .
+
+c3po:payslip60 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2030.84 ;
+    c3po:C3PO_0000314 376.21 ;
+    c3po:C3PO_0000330 "2023-12"^^xsd:gYearMonth .
+
+c3po:payslip61 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1756.2 ;
+    c3po:C3PO_0000330 "2024-01"^^xsd:gYearMonth .
+
+c3po:payslip62 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 3669.24 ;
+    c3po:C3PO_0000314 1446.01 ;
+    c3po:C3PO_0000330 "2024-02"^^xsd:gYearMonth .
+
+c3po:payslip63 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 1176.96 ;
+    c3po:C3PO_0000314 508.25 ;
+    c3po:C3PO_0000330 "2024-03"^^xsd:gYearMonth .
+
+c3po:payslip64 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1758.9 ;
+    c3po:C3PO_0000330 "2024-04"^^xsd:gYearMonth .
+
+c3po:payslip65 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1814.25 ;
+    c3po:C3PO_0000330 "2024-05"^^xsd:gYearMonth .
+
+c3po:payslip66 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1814.25 ;
+    c3po:C3PO_0000330 "2024-06"^^xsd:gYearMonth .
+
+c3po:payslip67 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1814.25 ;
+    c3po:C3PO_0000330 "2024-07"^^xsd:gYearMonth .
+
+c3po:payslip68 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1814.25 ;
+    c3po:C3PO_0000330 "2024-08"^^xsd:gYearMonth .
+
+c3po:payslip69 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1814.25 ;
+    c3po:C3PO_0000330 "2024-09"^^xsd:gYearMonth .
+
+c3po:payslip7 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 589.1 ;
+    c3po:C3PO_0000330 "2022-07"^^xsd:gYearMonth .
+
+c3po:payslip70 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1814.25 ;
+    c3po:C3PO_0000330 "2024-10"^^xsd:gYearMonth .
+
+c3po:payslip71 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1814.25 ;
+    c3po:C3PO_0000330 "2024-11"^^xsd:gYearMonth .
+
+c3po:payslip72 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1783.65 ;
+    c3po:C3PO_0000330 "2024-12"^^xsd:gYearMonth .
+
+c3po:payslip73 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1267.0 ;
+    c3po:C3PO_0000314 849.0 ;
+    c3po:C3PO_0000330 "2024-01"^^xsd:gYearMonth .
+
+c3po:payslip74 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1249.0 ;
+    c3po:C3PO_0000314 837.0 ;
+    c3po:C3PO_0000330 "2024-02"^^xsd:gYearMonth .
+
+c3po:payslip75 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1244.0 ;
+    c3po:C3PO_0000314 860.0 ;
+    c3po:C3PO_0000330 "2024-03"^^xsd:gYearMonth .
+
+c3po:payslip76 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 1158.0 ;
+    c3po:C3PO_0000314 953.0 ;
+    c3po:C3PO_0000330 "2024-04"^^xsd:gYearMonth .
+
+c3po:payslip77 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 299.0 ;
+    c3po:C3PO_0000314 247.0 ;
+    c3po:C3PO_0000330 "2024-05"^^xsd:gYearMonth .
+
+c3po:payslip78 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-06"^^xsd:gYearMonth .
+
+c3po:payslip79 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-07"^^xsd:gYearMonth .
+
+c3po:payslip8 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 2373.12 ;
+    c3po:C3PO_0000330 "2022-08"^^xsd:gYearMonth .
+
+c3po:payslip80 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-08"^^xsd:gYearMonth .
+
+c3po:payslip81 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-09"^^xsd:gYearMonth .
+
+c3po:payslip82 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-10"^^xsd:gYearMonth .
+
+c3po:payslip83 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-11"^^xsd:gYearMonth .
+
+c3po:payslip84 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee3 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-12"^^xsd:gYearMonth .
+
+c3po:payslip85 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2308.79 ;
+    c3po:C3PO_0000314 473.26 ;
+    c3po:C3PO_0000330 "2024-01"^^xsd:gYearMonth .
+
+c3po:payslip86 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2308.79 ;
+    c3po:C3PO_0000314 473.26 ;
+    c3po:C3PO_0000330 "2024-02"^^xsd:gYearMonth .
+
+c3po:payslip87 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 1759.04 ;
+    c3po:C3PO_0000314 376.12 ;
+    c3po:C3PO_0000330 "2024-03"^^xsd:gYearMonth .
+
+c3po:payslip88 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2381.45 ;
+    c3po:C3PO_0000314 537.38 ;
+    c3po:C3PO_0000330 "2024-04"^^xsd:gYearMonth .
+
+c3po:payslip89 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 3993.24 ;
+    c3po:C3PO_0000314 2864.96 ;
+    c3po:C3PO_0000330 "2024-05"^^xsd:gYearMonth .
+
+c3po:payslip9 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 4500.0 ;
+    c3po:C3PO_0000314 1806.12 ;
+    c3po:C3PO_0000330 "2022-09"^^xsd:gYearMonth .
+
+c3po:payslip90 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-06"^^xsd:gYearMonth .
+
+c3po:payslip91 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-07"^^xsd:gYearMonth .
+
+c3po:payslip92 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-08"^^xsd:gYearMonth .
+
+c3po:payslip93 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-09"^^xsd:gYearMonth .
+
+c3po:payslip94 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 0.0 ;
+    c3po:C3PO_0000314 0.0 ;
+    c3po:C3PO_0000330 "2024-10"^^xsd:gYearMonth .
+
+c3po:payslip95 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 1750.46 ;
+    c3po:C3PO_0000314 283.61 ;
+    c3po:C3PO_0000330 "2024-11"^^xsd:gYearMonth .
+
+c3po:payslip96 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee4 ;
+    c3po:C3PO_0000313 2250.61 ;
+    c3po:C3PO_0000314 414.67 ;
+    c3po:C3PO_0000330 "2024-12"^^xsd:gYearMonth .
+
+c3po:payslip97 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 6000.07 ;
+    c3po:C3PO_0000314 2352.9 ;
+    c3po:C3PO_0000330 "2025-01"^^xsd:gYearMonth .
+
+c3po:payslip98 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 6000.07 ;
+    c3po:C3PO_0000314 2393.7 ;
+    c3po:C3PO_0000330 "2025-02"^^xsd:gYearMonth .
+
+c3po:payslip99 a c3po:C3PO_0000111 ;
+    c3po:C3PO_0000205 c3po:Employee1 ;
+    c3po:C3PO_0000313 6000.07 ;
+    c3po:C3PO_0000314 2393.7 ;
+    c3po:C3PO_0000330 "2025-03"^^xsd:gYearMonth .
+
+c3po:timesheet1 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 4.0 ;
+    c3po:C3PO_0000347 "2022-08-01"^^xsd:date .
+
+c3po:timesheet10 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 7.0 ;
+    c3po:C3PO_0000347 "2022-10-01"^^xsd:date .
+
+c3po:timesheet11 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task6_1 ;
+    c3po:C3PO_0000301 10.0 ;
+    c3po:C3PO_0000347 "2022-10-01"^^xsd:date .
+
+c3po:timesheet12 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 15.0 ;
+    c3po:C3PO_0000347 "2022-09-01"^^xsd:date .
+
+c3po:timesheet13 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 6.0 ;
+    c3po:C3PO_0000347 "2023-08-01"^^xsd:date .
+
+c3po:timesheet14 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task5_3 ;
+    c3po:C3PO_0000301 4.0 ;
+    c3po:C3PO_0000347 "2023-08-01"^^xsd:date .
+
+c3po:timesheet15 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_2 ;
+    c3po:C3PO_0000301 1.0 ;
+    c3po:C3PO_0000347 "2023-04-01"^^xsd:date .
+
+c3po:timesheet16 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 27.0 ;
+    c3po:C3PO_0000347 "2023-04-01"^^xsd:date .
+
+c3po:timesheet17 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 49.0 ;
+    c3po:C3PO_0000347 "2023-12-01"^^xsd:date .
+
+c3po:timesheet18 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_2 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2023-02-01"^^xsd:date .
+
+c3po:timesheet19 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 4.0 ;
+    c3po:C3PO_0000347 "2023-02-01"^^xsd:date .
+
+c3po:timesheet2 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 9.0 ;
+    c3po:C3PO_0000347 "2022-12-01"^^xsd:date .
+
+c3po:timesheet20 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_2 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2023-01-01"^^xsd:date .
+
+c3po:timesheet21 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 7.0 ;
+    c3po:C3PO_0000347 "2023-01-01"^^xsd:date .
+
+c3po:timesheet22 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2023-07-01"^^xsd:date .
+
+c3po:timesheet23 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 13.0 ;
+    c3po:C3PO_0000347 "2023-07-01"^^xsd:date .
+
+c3po:timesheet24 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_2 ;
+    c3po:C3PO_0000301 3.0 ;
+    c3po:C3PO_0000347 "2023-06-01"^^xsd:date .
+
+c3po:timesheet25 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 27.0 ;
+    c3po:C3PO_0000347 "2023-06-01"^^xsd:date .
+
+c3po:timesheet26 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_2 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2023-05-01"^^xsd:date .
+
+c3po:timesheet27 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 23.0 ;
+    c3po:C3PO_0000347 "2023-05-01"^^xsd:date .
+
+c3po:timesheet28 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 31.0 ;
+    c3po:C3PO_0000347 "2023-03-01"^^xsd:date .
+
+c3po:timesheet29 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_2 ;
+    c3po:C3PO_0000301 4.0 ;
+    c3po:C3PO_0000347 "2023-11-01"^^xsd:date .
+
+c3po:timesheet3 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task5_3 ;
+    c3po:C3PO_0000301 1.0 ;
+    c3po:C3PO_0000347 "2022-12-01"^^xsd:date .
+
+c3po:timesheet30 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 44.0 ;
+    c3po:C3PO_0000347 "2023-11-01"^^xsd:date .
+
+c3po:timesheet31 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task5_3 ;
+    c3po:C3PO_0000301 7.0 ;
+    c3po:C3PO_0000347 "2023-11-01"^^xsd:date .
+
+c3po:timesheet32 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task6_1 ;
+    c3po:C3PO_0000301 5.0 ;
+    c3po:C3PO_0000347 "2023-11-01"^^xsd:date .
+
+c3po:timesheet33 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 76.0 ;
+    c3po:C3PO_0000347 "2023-10-01"^^xsd:date .
+
+c3po:timesheet34 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task5_3 ;
+    c3po:C3PO_0000301 5.0 ;
+    c3po:C3PO_0000347 "2023-10-01"^^xsd:date .
+
+c3po:timesheet35 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_2 ;
+    c3po:C3PO_0000301 4.0 ;
+    c3po:C3PO_0000347 "2023-09-01"^^xsd:date .
+
+c3po:timesheet36 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 21.0 ;
+    c3po:C3PO_0000347 "2023-09-01"^^xsd:date .
+
+c3po:timesheet37 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task5_3 ;
+    c3po:C3PO_0000301 7.0 ;
+    c3po:C3PO_0000347 "2023-09-01"^^xsd:date .
+
+c3po:timesheet38 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 4.0 ;
+    c3po:C3PO_0000347 "2024-08-01"^^xsd:date .
+
+c3po:timesheet39 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 40.0 ;
+    c3po:C3PO_0000347 "2024-04-01"^^xsd:date .
+
+c3po:timesheet4 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task6_1 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2022-12-01"^^xsd:date .
+
+c3po:timesheet40 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task5_3 ;
+    c3po:C3PO_0000301 12.0 ;
+    c3po:C3PO_0000347 "2024-04-01"^^xsd:date .
+
+c3po:timesheet41 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_2 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2024-12-01"^^xsd:date .
+
+c3po:timesheet42 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 6.0 ;
+    c3po:C3PO_0000347 "2024-12-01"^^xsd:date .
+
+c3po:timesheet43 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 32.0 ;
+    c3po:C3PO_0000347 "2024-02-01"^^xsd:date .
+
+c3po:timesheet44 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 63.0 ;
+    c3po:C3PO_0000347 "2024-01-01"^^xsd:date .
+
+c3po:timesheet45 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 84.0 ;
+    c3po:C3PO_0000347 "2024-07-01"^^xsd:date .
+
+c3po:timesheet46 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2024-06-01"^^xsd:date .
+
+c3po:timesheet47 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 39.0 ;
+    c3po:C3PO_0000347 "2024-06-01"^^xsd:date .
+
+c3po:timesheet48 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 28.0 ;
+    c3po:C3PO_0000347 "2024-05-01"^^xsd:date .
+
+c3po:timesheet49 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task5_3 ;
+    c3po:C3PO_0000301 8.0 ;
+    c3po:C3PO_0000347 "2024-05-01"^^xsd:date .
+
+c3po:timesheet5 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 3.0 ;
+    c3po:C3PO_0000347 "2022-07-01"^^xsd:date .
+
+c3po:timesheet50 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 44.0 ;
+    c3po:C3PO_0000347 "2024-03-01"^^xsd:date .
+
+c3po:timesheet51 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 56.0 ;
+    c3po:C3PO_0000347 "2024-11-01"^^xsd:date .
+
+c3po:timesheet52 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 67.0 ;
+    c3po:C3PO_0000347 "2024-10-01"^^xsd:date .
+
+c3po:timesheet53 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 34.0 ;
+    c3po:C3PO_0000347 "2024-09-01"^^xsd:date .
+
+c3po:timesheet54 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 34.0 ;
+    c3po:C3PO_0000347 "2025-04-01"^^xsd:date .
+
+c3po:timesheet55 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task6_1 ;
+    c3po:C3PO_0000301 6.0 ;
+    c3po:C3PO_0000347 "2025-04-01"^^xsd:date .
+
+c3po:timesheet56 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 53.0 ;
+    c3po:C3PO_0000347 "2025-02-01"^^xsd:date .
+
+c3po:timesheet57 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_2 ;
+    c3po:C3PO_0000301 1.0 ;
+    c3po:C3PO_0000347 "2025-01-01"^^xsd:date .
+
+c3po:timesheet58 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 40.0 ;
+    c3po:C3PO_0000347 "2025-01-01"^^xsd:date .
+
+c3po:timesheet59 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 46.0 ;
+    c3po:C3PO_0000347 "2025-05-01"^^xsd:date .
+
+c3po:timesheet6 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 18.0 ;
+    c3po:C3PO_0000347 "2022-06-01"^^xsd:date .
+
+c3po:timesheet60 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task6_1 ;
+    c3po:C3PO_0000301 11.0 ;
+    c3po:C3PO_0000347 "2025-05-01"^^xsd:date .
+
+c3po:timesheet61 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 94.0 ;
+    c3po:C3PO_0000347 "2025-03-01"^^xsd:date .
+
+c3po:timesheet62 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee2 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2022-08-01"^^xsd:date .
+
+c3po:timesheet63 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee2 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 3.5 ;
+    c3po:C3PO_0000347 "2022-07-01"^^xsd:date .
+
+c3po:timesheet64 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee2 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 1.5 ;
+    c3po:C3PO_0000347 "2022-10-01"^^xsd:date .
+
+c3po:timesheet65 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee2 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 1.0 ;
+    c3po:C3PO_0000347 "2022-10-01"^^xsd:date .
+
+c3po:timesheet66 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee2 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 3.0 ;
+    c3po:C3PO_0000347 "2022-09-01"^^xsd:date .
+
+c3po:timesheet67 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee2 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2022-09-01"^^xsd:date .
+
+c3po:timesheet68 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 11.5 ;
+    c3po:C3PO_0000347 "2023-08-01"^^xsd:date .
+
+c3po:timesheet69 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 63.0 ;
+    c3po:C3PO_0000347 "2023-12-01"^^xsd:date .
+
+c3po:timesheet7 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 27.0 ;
+    c3po:C3PO_0000347 "2022-11-01"^^xsd:date .
+
+c3po:timesheet70 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 38.0 ;
+    c3po:C3PO_0000347 "2023-07-01"^^xsd:date .
+
+c3po:timesheet71 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 78.5 ;
+    c3po:C3PO_0000347 "2023-06-01"^^xsd:date .
+
+c3po:timesheet72 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 56.5 ;
+    c3po:C3PO_0000347 "2023-05-01"^^xsd:date .
+
+c3po:timesheet73 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 67.0 ;
+    c3po:C3PO_0000347 "2023-11-01"^^xsd:date .
+
+c3po:timesheet74 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 65.5 ;
+    c3po:C3PO_0000347 "2023-10-01"^^xsd:date .
+
+c3po:timesheet75 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 52.25 ;
+    c3po:C3PO_0000347 "2023-09-01"^^xsd:date .
+
+c3po:timesheet76 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 127.0 ;
+    c3po:C3PO_0000347 "2024-04-01"^^xsd:date .
+
+c3po:timesheet77 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 48.0 ;
+    c3po:C3PO_0000347 "2024-02-01"^^xsd:date .
+
+c3po:timesheet78 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 36.0 ;
+    c3po:C3PO_0000347 "2024-01-01"^^xsd:date .
+
+c3po:timesheet79 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 14.0 ;
+    c3po:C3PO_0000347 "2024-05-01"^^xsd:date .
+
+c3po:timesheet8 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task5_3 ;
+    c3po:C3PO_0000301 4.0 ;
+    c3po:C3PO_0000347 "2022-11-01"^^xsd:date .
+
+c3po:timesheet80 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee3 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 96.0 ;
+    c3po:C3PO_0000347 "2024-03-01"^^xsd:date .
+
+c3po:timesheet81 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 5.0 ;
+    c3po:C3PO_0000347 "2023-12-01"^^xsd:date .
+
+c3po:timesheet82 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 2.0 ;
+    c3po:C3PO_0000347 "2023-11-01"^^xsd:date .
+
+c3po:timesheet83 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 2.5 ;
+    c3po:C3PO_0000347 "2023-10-01"^^xsd:date .
+
+c3po:timesheet84 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 1.0 ;
+    c3po:C3PO_0000347 "2024-04-01"^^xsd:date .
+
+c3po:timesheet85 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 5.5 ;
+    c3po:C3PO_0000347 "2024-12-01"^^xsd:date .
+
+c3po:timesheet86 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 1.0 ;
+    c3po:C3PO_0000347 "2024-02-01"^^xsd:date .
+
+c3po:timesheet87 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 8.5 ;
+    c3po:C3PO_0000347 "2025-04-01"^^xsd:date .
+
+c3po:timesheet88 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 10.5 ;
+    c3po:C3PO_0000347 "2025-02-01"^^xsd:date .
+
+c3po:timesheet89 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 4.5 ;
+    c3po:C3PO_0000347 "2025-01-01"^^xsd:date .
+
+c3po:timesheet9 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee1 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task6_1 ;
+    c3po:C3PO_0000301 7.0 ;
+    c3po:C3PO_0000347 "2022-11-01"^^xsd:date .
+
+c3po:timesheet90 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 7.5 ;
+    c3po:C3PO_0000347 "2025-05-01"^^xsd:date .
+
+c3po:timesheet91 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee4 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task1_1 ;
+    c3po:C3PO_0000301 2.5 ;
+    c3po:C3PO_0000347 "2025-03-01"^^xsd:date .
+
+c3po:timesheet92 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee5 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 18.0 ;
+    c3po:C3PO_0000347 "2025-04-01"^^xsd:date .
+
+c3po:timesheet93 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee5 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 27.0 ;
+    c3po:C3PO_0000347 "2025-02-01"^^xsd:date .
+
+c3po:timesheet94 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee5 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 30.0 ;
+    c3po:C3PO_0000347 "2025-01-01"^^xsd:date .
+
+c3po:timesheet95 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee5 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 6.0 ;
+    c3po:C3PO_0000347 "2025-05-01"^^xsd:date .
+
+c3po:timesheet96 a c3po:C3PO_0000107 ;
+    c3po:C3PO_0000202 c3po:Employee5 ;
+    c3po:C3PO_0000206 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000217 c3po:Task4_4 ;
+    c3po:C3PO_0000301 22.0 ;
+    c3po:C3PO_0000347 "2025-03-01"^^xsd:date .
+
+c3po:WP1 a c3po:C3PO_0000103 ;
+    c3po:C3PO_0000207 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000304 1.0 ;
+    c3po:C3PO_0000338 "WP1 - Project management synchronisation & sustainability" .
+
+c3po:WP5 a c3po:C3PO_0000103 ;
+    c3po:C3PO_0000207 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000304 3.0 ;
+    c3po:C3PO_0000338 "WP5 - METRICS CERTIFICATION AND GUIDELINES" .
+
+c3po:WP6 a c3po:C3PO_0000103 ;
+    c3po:C3PO_0000207 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000304 3.0 ;
+    c3po:C3PO_0000338 "WP6 - INTEROPERABILITY" .
+
+c3po:WP4 a c3po:C3PO_0000103 ;
+    c3po:C3PO_0000207 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000304 12.0 ;
+    c3po:C3PO_0000338 "WP4 - Metadata and ontologies" .
+
+c3po:travel_SemanticsRoche_2024 a c3po:C3PO_0000108 ;
+    c3po:C3PO_0000214 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000305 "Suisse" ;
+    c3po:C3PO_0000306 "Basel" ;
+    c3po:C3PO_0000318 "Semantics@Roche 2024" ;
+    c3po:C3PO_0000333 "2024-05-28"^^xsd:date ;
+    c3po:C3PO_0000336 "2024-05-30"^^xsd:date .
+
+c3po:Employee5 a c3po:C3PO_0000014 ;
+    c3po:C3PO_0000015 75.0 ;
+    c3po:C3PO_0000340 "Employe5" .
+
+c3po:travel_All_Hands_Meeting a c3po:C3PO_0000108 ;
+    c3po:C3PO_0000214 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000305 "Pays - Bas" ;
+    c3po:C3PO_0000306 "The Hague" ;
+    c3po:C3PO_0000318 "All Hands Meeting" ;
+    c3po:C3PO_0000333 "2023-10-04"^^xsd:date ;
+    c3po:C3PO_0000336 "2023-10-06"^^xsd:date .
+
+c3po:Task6_1 a c3po:C3PO_0000106 ;
+    c3po:C3PO_0000213 c3po:WP6 ;
+    c3po:C3PO_0000339 "6.1" .
+
+c3po:travel_Dagstuhl_Workshop_2023 a c3po:C3PO_0000108 ;
+    c3po:C3PO_0000214 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000305 "Allemagne" ;
+    c3po:C3PO_0000306 "Wadern" ;
+    c3po:C3PO_0000318 "Dagstuhl Workshop 2023" ;
+    c3po:C3PO_0000333 "2023-10-01"^^xsd:date ;
+    c3po:C3PO_0000336 "2023-10-06"^^xsd:date .
+
+c3po:Task5_3 a c3po:C3PO_0000106 ;
+    c3po:C3PO_0000213 c3po:WP5 ;
+    c3po:C3PO_0000339 "5.3" .
+
+c3po:travel_Dagstuhl_Workshop_2024 a c3po:C3PO_0000108 ;
+    c3po:C3PO_0000214 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000305 "Allemagne" ;
+    c3po:C3PO_0000306 "Wadern" ;
+    c3po:C3PO_0000318 "Dagstuhl Workshop 2024" ;
+    c3po:C3PO_0000333 "2024-10-14"^^xsd:date ;
+    c3po:C3PO_0000336 "2024-10-18"^^xsd:date .
+
+c3po:travel_FAIRFest_Festival a c3po:C3PO_0000108 ;
+    c3po:C3PO_0000214 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000305 "Pays - Bas" ;
+    c3po:C3PO_0000306 "The Hague" ;
+    c3po:C3PO_0000318 "FAIRFest Festival" ;
+    c3po:C3PO_0000333 "2025-02-20"^^xsd:date ;
+    c3po:C3PO_0000336 "2025-02-21"^^xsd:date .
+
+c3po:Task4_2 a c3po:C3PO_0000106 ;
+    c3po:C3PO_0000213 c3po:WP4 ;
+    c3po:C3PO_0000339 "4.2" .
+
+c3po:travel_KoM_Kick_-_Off_Meeting a c3po:C3PO_0000108 ;
+    c3po:C3PO_0000214 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000305 "Pays - Bas" ;
+    c3po:C3PO_0000306 "Amsterdam" ;
+    c3po:C3PO_0000318 "KoM (Kick - Off Meeting) Fair-Impact" ;
+    c3po:C3PO_0000333 "2022-06-27"^^xsd:date ;
+    c3po:C3PO_0000336 "2022-06-29"^^xsd:date .
+
+c3po:travel_Lorentz_Workshop a c3po:C3PO_0000108 ;
+    c3po:C3PO_0000214 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000305 "Pays - Bas" ;
+    c3po:C3PO_0000306 "Leiden" ;
+    c3po:C3PO_0000318 "Lorentz Workshop" ;
+    c3po:C3PO_0000333 "2024-01-21"^^xsd:date ;
+    c3po:C3PO_0000336 "2024-01-26"^^xsd:date .
+
+c3po:travel_FOIS_2024 a c3po:C3PO_0000108 ;
+    c3po:C3PO_0000214 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000305 "Pays-Bas" ;
+    c3po:C3PO_0000306 "Enschede" ;
+    c3po:C3PO_0000318 "FOIS 2024" ;
+    c3po:C3PO_0000333 "2024-07-15"^^xsd:date ;
+    c3po:C3PO_0000336 "2024-07-19"^^xsd:date .
+
+c3po:Task1_1 a c3po:C3PO_0000106 ;
+    c3po:C3PO_0000213 c3po:WP1 ;
+    c3po:C3PO_0000339 "1.1" .
+
+c3po:Employee2 a c3po:C3PO_0000105 ;
+    c3po:C3PO_0000312 1720 ;
+    c3po:C3PO_0000340 "Employe2" .
+
+c3po:travel_RDA_P23 a c3po:C3PO_0000108 ;
+    c3po:C3PO_0000214 c3po:FAIR-IMPACT ;
+    c3po:C3PO_0000305 "Costa Rica" ;
+    c3po:C3PO_0000306 "San José" ;
+    c3po:C3PO_0000318 "RDA P23" ;
+    c3po:C3PO_0000333 "2024-11-10"^^xsd:date ;
+    c3po:C3PO_0000336 "2024-11-16"^^xsd:date .
+
+c3po:Employee3 a c3po:C3PO_0000105 ;
+    c3po:C3PO_0000312 960 ;
+    c3po:C3PO_0000340 "Employe3" .
+
+c3po:Employee4 a c3po:C3PO_0000105 ;
+    c3po:C3PO_0000312 1720 ;
+    c3po:C3PO_0000340 "Employe4" .
+
+c3po:Task4_4 a c3po:C3PO_0000106 ;
+    c3po:C3PO_0000213 c3po:WP4 ;
+    c3po:C3PO_0000339 "4.4" .
+
+c3po:Employee1 a c3po:C3PO_0000105 ;
+    c3po:C3PO_0000312 1720 ;
+    c3po:C3PO_0000340 "Employe1" .
+
+c3po:FAIR-IMPACT a c3po:C3PO_0000101 ;
+    c3po:C3PO_0000009 171250.0 ;
+    c3po:C3PO_0000322 36 ;
+    c3po:C3PO_0000331 "2022-06-01"^^xsd:date ;
+    c3po:C3PO_0000334 "2025-05-31"^^xsd:date ;
+    c3po:C3PO_0000337 "FAIR-IMPACT" .
+

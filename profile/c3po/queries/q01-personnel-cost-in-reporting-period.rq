@@ -1,0 +1,53 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT (SUM(?lineCost) AS ?totalPersonnelCost) WHERE {
+  {
+    {
+      SELECT ?employee ?yr ?rate WHERE {
+        ?employee c3po:C3PO_0000312 ?annualProductiveHours .
+        FILTER(?annualProductiveHours > 0)
+        {
+          SELECT ?employee ?yr (SUM(?grossSalary + ?patronalContribution) AS ?annualPersonnelCost) (COUNT(*) AS ?nPayslips) WHERE {
+            ?payslip a c3po:C3PO_0000111 ;
+                     c3po:C3PO_0000205 ?employee ;
+                     c3po:C3PO_0000313 ?grossSalary ;
+                     c3po:C3PO_0000314 ?patronalContribution ;
+                     c3po:C3PO_0000330 ?yearMonth .
+            BIND(SUBSTR(STR(?yearMonth), 1, 4) AS ?yr)
+          } GROUP BY ?employee ?yr
+        }
+        BIND((?annualPersonnelCost / ((?annualProductiveHours / 12) * ?nPayslips)) AS ?rate)
+      }
+    }
+    {
+      ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
+      ?rp a c3po:C3PO_0000109 ; c3po:C3PO_0000341 "ERP3" ;
+          c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
+      ?timesheet a c3po:C3PO_0000107 ;
+               c3po:C3PO_0000202 ?employee ;
+                 c3po:C3PO_0000206 ?project ;
+                 c3po:C3PO_0000301 ?hoursWorked ;
+                 c3po:C3PO_0000347 ?tsDate .
+      BIND(STRDT(SUBSTR(STR(?tsDate), 1, 7), xsd:gYearMonth) AS ?tsYearMonth)
+      FILTER(STR(?tsYearMonth) >= SUBSTR(STR(?rpStart), 1, 7) && STR(?tsYearMonth) <= SUBSTR(STR(?rpEnd), 1, 7))
+    }
+    FILTER(SUBSTR(STR(?tsYearMonth), 1, 4) = ?yr)
+    BIND(?hoursWorked * ?rate AS ?lineCost)
+  }
+  UNION
+  {
+    ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
+    ?rp a c3po:C3PO_0000109 ; c3po:C3PO_0000341 "ERP3" ;
+        c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
+    ?employee c3po:C3PO_0000015 ?rate .
+    ?timesheet a c3po:C3PO_0000107 ;
+               c3po:C3PO_0000206 ?project ;
+               c3po:C3PO_0000301 ?hoursWorked ;
+               c3po:C3PO_0000202 ?employee ;
+               c3po:C3PO_0000347 ?tsDate .
+    BIND(STRDT(SUBSTR(STR(?tsDate), 1, 7), xsd:gYearMonth) AS ?tsYearMonth)
+    FILTER(STR(?tsYearMonth) >= SUBSTR(STR(?rpStart), 1, 7) && STR(?tsYearMonth) <= SUBSTR(STR(?rpEnd), 1, 7))
+    BIND(?hoursWorked * ?rate AS ?lineCost)
+  }
+}

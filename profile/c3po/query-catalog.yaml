@@ -1,0 +1,59 @@
+queries:
+  q01-personnel-cost-in-reporting-period:
+    description: "Total personnel cost of the project in european reporting period ERP3"
+  q02-person-months-of-work-package-in-period:
+    description: "Person-months spent in work package WP4 during european reporting period ERP1"
+  q03-travel-events-in-period-with-cost:
+    description: "List the travel events of european reporting period ERP2 with their dates, cost, destination and purpose"
+  q04-travel-cost-in-reporting-period:
+    description: "Total travel cost of the project in european reporting period ERP1"
+  q05-person-months-by-work-package-in-period:
+    description: "Person-months spent per work package during coordinator reporting period CRP5"
+  q06-hourly-rate-by-employee-and-year:
+    description: "Hourly rate of each employee per year"
+  q07-expenditure-by-reporting-period:
+    description: "Total expenditure (personnel cost and travel invoices) per reporting period"
+  q08-employees-on-project-in-period:
+    description: "Employees who worked on the project in european reporting period ERP3"
+  q09-employees-on-project:
+    description: "Employees who work on the project"
+  q10-timesheets-and-hours-of-employee:
+    description: "Number of timesheet entries and total hours of Employe1 on the project"
+  q11-hourly-rate-of-employee-in-year:
+    description: "Hourly rate of Employe2 in 2022"
+  q12-annual-personnel-cost-of-employee:
+    description: "Annual personnel cost of Employe1 in 2025, gross salary plus employer contributions"
+  q13-annual-productive-hours-of-employee:
+    description: "Annual productive hours of Employe3"
+  q14-reporting-period-dates:
+    description: "Start and end dates of european reporting period ERP1"
+  q15-european-reporting-periods-of-project:
+    description: "List the european reporting periods of the project with their dates"
+  q16-monthly-productive-hours-of-employee:
+    description: "Monthly productive hours of Employe2"
+  q17-work-packages-of-project:
+    description: "List the work packages of the project with their allocated person-months"
+  q18-travel-events-of-project:
+    description: "List the travel events of the project with their dates and destination"
+  q19-travel-cost-of-event:
+    description: "Total travel cost of the travel event Dagstuhl Workshop 2023"
+  q20-travel-destination-of-event:
+    description: "Destination city and country of the travel event Dagstuhl Workshop 2023"
+  q21-travel-purpose-of-event:
+    description: "Purpose of the travel event Dagstuhl Workshop 2023"
+  q22-travel-events-in-period:
+    description: "List the travel events of european reporting period ERP2"
+  q23-reporting-periods-of-project:
+    description: "List all reporting periods of the project, european and coordinator"
+  q24-gross-salary-of-employee-in-year:
+    description: "Total gross salary of Employe1 in 2023"
+  q25-employer-contribution-of-employee-in-year:
+    description: "Total employer (patronal) contribution of Employe1 in 2023"
+  q26-all-employees:
+    description: "List all employees of the company"
+  q27-all-projects:
+    description: "List the European projects"
+  q28-hours-by-employee-in-month:
+    description: "Hours worked by each employee in May 2025"
+  q29-person-months-of-task-in-period:
+    description: "Person-months spent in task 1.1 during european reporting period ERP1"

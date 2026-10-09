@@ -1,0 +1,14 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+
+SELECT (SUM(?amount) AS ?totalTravelCost_ERP1)
+WHERE {
+  ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
+  ?rp a c3po:C3PO_0000109 ; c3po:C3PO_0000341 "ERP1" ;
+      c3po:C3PO_0000332 ?rpStart ; c3po:C3PO_0000335 ?rpEnd .
+
+  ?invoice a c3po:C3PO_0000102 ;
+           c3po:C3PO_0000201 ?project ;
+           c3po:C3PO_0000308 ?invoiceDate ;
+           c3po:C3PO_0000310 ?amount .
+  FILTER(?invoiceDate >= ?rpStart && ?invoiceDate <= ?rpEnd)
+}

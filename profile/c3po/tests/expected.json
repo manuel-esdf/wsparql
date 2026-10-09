@@ -1,0 +1,274 @@
+{
+ "q01-personnel-cost-in-reporting-period": [
+  "26934.41257267441860465116280"
+ ],
+ "q02-person-months-of-work-package-in-period": [
+  "1.996947674418604651162790698"
+ ],
+ "q03-travel-events-in-period-with-cost": [
+  "1062.9",
+  "1206.13",
+  "2023-10-01",
+  "2023-10-04",
+  "2023-10-06",
+  "2024-01-21",
+  "2024-01-26",
+  "2024-05-28",
+  "2024-05-30",
+  "526.30",
+  "649.00",
+  "All Hands Meeting",
+  "Basel, Suisse",
+  "Dagstuhl Workshop 2023",
+  "Leiden, Pays - Bas",
+  "Lorentz Workshop",
+  "Semantics@Roche 2024",
+  "The Hague, Pays - Bas",
+  "Wadern, Allemagne"
+ ],
+ "q04-travel-cost-in-reporting-period": [
+  "923.47"
+ ],
+ "q05-person-months-by-work-package-in-period": [
+  "WP1 - Project management synchronisation & sustainability",
+  "0.01395348837209302325581395349",
+  "WP4 - Metadata and ontologies",
+  "2.351744186046511627906976745",
+  "WP5 - METRICS CERTIFICATION AND GUIDELINES",
+  "0.05581395348837209302325581397"
+ ],
+ "q06-hourly-rate-by-employee-and-year": [
+  "Employe1",
+  "2022",
+  "43.98796511627906976744186047",
+  "Employe1",
+  "2023",
+  "43.94503488372093023255813953",
+  "Employe1",
+  "2024",
+  "40.58079069767441860465116279",
+  "Employe1",
+  "2025",
+  "24.37851744186046511627906977",
+  "Employe2",
+  "2022",
+  "8.925802325581395348837209302",
+  "Employe3",
+  "2023",
+  "17.57686458333333333333333333",
+  "Employe3",
+  "2024",
+  "9.336458333333333333333333333",
+  "Employe4",
+  "2023",
+  "12.04769186046511627906976744",
+  "Employe4",
+  "2024",
+  "12.89281395348837209302325581",
+  "Employe4",
+  "2025",
+  "7.757377906976744186046511628"
+ ],
+ "q07-expenditure-by-reporting-period": [
+  "0",
+  "10166.39900012112403100775194",
+  "1044.85",
+  "11089.86900012112403100775194",
+  "13197.72502131782945736434109",
+  "15328.30643313953488372093023",
+  "15555.51587863372093023255815",
+  "15570.84696529796511627906976",
+  "16373.15643313953488372093023",
+  "1711.90",
+  "17282.74696529796511627906976",
+  "17287.94587863372093023255815",
+  "1732.43",
+  "18609.42502131782945736434109",
+  "26934.41257267441860465116280",
+  "31126.36284393168604651162792",
+  "32864.66257267441860465116280",
+  "3444.33",
+  "34570.69284393168604651162792",
+  "4294.892116279069767441860466",
+  "5218.362116279069767441860466",
+  "5411.70",
+  "5871.506883842054263565891471",
+  "5930.25",
+  "923.47",
+  "CRP1",
+  "CRP2",
+  "CRP3",
+  "CRP4",
+  "CRP5",
+  "CRP6",
+  "ERP1",
+  "ERP2",
+  "ERP3",
+  "http://www.esciencedatafactory.com/C3PO/c3po.owl#C3PO_0000109",
+  "http://www.esciencedatafactory.com/C3PO/c3po.owl#C3PO_0000110"
+ ],
+ "q08-employees-on-project-in-period": [
+  "Employe1",
+  "Employe4",
+  "Employe5"
+ ],
+ "q09-employees-on-project": [
+  "Employe1",
+  "Employe2",
+  "Employe3",
+  "Employe4",
+  "Employe5"
+ ],
+ "q10-timesheets-and-hours-of-employee": [
+  "61",
+  "1289.0"
+ ],
+ "q11-hourly-rate-of-employee-in-year": [
+  "8.925802325581395348837209302"
+ ],
+ "q12-annual-personnel-cost-of-employee": [
+  "41931.05",
+  "30000.35",
+  "11930.7"
+ ],
+ "q13-annual-productive-hours-of-employee": [
+  "Employe3",
+  "960"
+ ],
+ "q14-reporting-period-dates": [
+  "ERP1",
+  "2022-06-01",
+  "2023-05-31"
+ ],
+ "q15-european-reporting-periods-of-project": [
+  "ERP1",
+  "2022-06-01",
+  "2023-05-31",
+  "ERP2",
+  "2023-06-01",
+  "2024-05-31",
+  "ERP3",
+  "2024-06-01",
+  "2025-05-31"
+ ],
+ "q16-monthly-productive-hours-of-employee": [
+  "Employe2",
+  "143.3333333333333333333333333",
+  "1720"
+ ],
+ "q17-work-packages-of-project": [
+  "WP1 - Project management synchronisation & sustainability",
+  "1",
+  "WP2 - ENGAGEMENT, ADOPTION AND IMPLEMENTATION",
+  "0",
+  "WP3 - PERSISTENT IDENTIFIERS",
+  "0",
+  "WP4 - Metadata and ontologies",
+  "12",
+  "WP5 - METRICS CERTIFICATION AND GUIDELINES",
+  "3",
+  "WP6 - INTEROPERABILITY",
+  "3"
+ ],
+ "q18-travel-events-of-project": [
+  "KoM (Kick - Off Meeting) Fair-Impact",
+  "2022-06-27",
+  "2022-06-29",
+  "Amsterdam",
+  "Pays - Bas",
+  "Dagstuhl Workshop 2023",
+  "2023-10-01",
+  "2023-10-06",
+  "Wadern",
+  "Allemagne",
+  "All Hands Meeting",
+  "2023-10-04",
+  "2023-10-06",
+  "The Hague",
+  "Pays - Bas",
+  "Lorentz Workshop",
+  "2024-01-21",
+  "2024-01-26",
+  "Leiden",
+  "Pays - Bas",
+  "Semantics@Roche 2024",
+  "2024-05-28",
+  "2024-05-30",
+  "Basel",
+  "Suisse",
+  "FOIS 2024",
+  "2024-07-15",
+  "2024-07-19",
+  "Enschede",
+  "Pays-Bas",
+  "Dagstuhl Workshop 2024",
+  "2024-10-14",
+  "2024-10-18",
+  "Wadern",
+  "Allemagne",
+  "RDA P23",
+  "2024-11-10",
+  "2024-11-16",
+  "San Jos\u00e9",
+  "Costa Rica",
+  "FAIRFest Festival",
+  "2025-02-20",
+  "2025-02-21",
+  "The Hague",
+  "Pays - Bas"
+ ],
+ "q19-travel-cost-of-event": [
+  "1062.9"
+ ],
+ "q20-travel-destination-of-event": [
+  "Wadern",
+  "Allemagne"
+ ],
+ "q21-travel-purpose-of-event": [
+  "Dagstuhl Workshop 2023"
+ ],
+ "q22-travel-events-in-period": [
+  "All Hands Meeting",
+  "Dagstuhl Workshop 2023",
+  "Semantics@Roche 2024",
+  "Lorentz Workshop"
+ ],
+ "q23-reporting-periods-of-project": [
+  "ERP1",
+  "CRP5",
+  "ERP3",
+  "CRP2",
+  "CRP6",
+  "CRP3",
+  "CRP4",
+  "CRP1",
+  "ERP2"
+ ],
+ "q24-gross-salary-of-employee-in-year": [
+  "54000.0"
+ ],
+ "q25-employer-contribution-of-employee-in-year": [
+  "21585.46"
+ ],
+ "q26-all-employees": [
+  "Employe1",
+  "Employe2",
+  "Employe3",
+  "Employe4",
+  "Employe5"
+ ],
+ "q27-all-projects": [
+  "FAIR-IMPACT"
+ ],
+ "q28-hours-by-employee-in-month": [
+  "Employe1",
+  "57.0",
+  "Employe4",
+  "7.5",
+  "Employe5",
+  "6.0"
+ ],
+ "q29-person-months-of-task-in-period": [
+  "0.06976744186046511627906976746"
+ ]
+}

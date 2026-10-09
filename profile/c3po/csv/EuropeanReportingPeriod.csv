@@ -1,0 +1,4 @@
+id,reportsOnProject,reportingPeriodStartDate,reportingPeriodEndDate,reportingPeriodDisplayName
+ReportingPeriod_ERP1,FAIR-IMPACT,2022-06-01,2023-05-31,ERP1
+ReportingPeriod_ERP2,FAIR-IMPACT,2023-06-01,2024-05-31,ERP2
+ReportingPeriod_ERP3,FAIR-IMPACT,2024-06-01,2025-05-31,ERP3

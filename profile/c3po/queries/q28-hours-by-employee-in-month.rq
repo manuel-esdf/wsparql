@@ -1,0 +1,13 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+
+SELECT ?empName (SUM(?hours) AS ?totalHoursMay2025)
+WHERE {
+  ?ts a c3po:C3PO_0000107 ;
+      c3po:C3PO_0000202 ?emp ;
+      c3po:C3PO_0000347 ?tsDate ;
+      c3po:C3PO_0000301 ?hours .
+
+  ?emp c3po:C3PO_0000340 ?empName .
+  FILTER(SUBSTR(STR(?tsDate), 1, 7) = "2025-05")
+}
+GROUP BY ?emp ?empName

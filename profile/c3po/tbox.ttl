@@ -1,0 +1,133 @@
+@prefix c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://www.esciencedatafactory.com/C3PO/c3po.owl> a owl:Ontology ; owl:versionInfo "0.4.0" .
+
+# C3PO European Reporting Ontology, lean copy for routing: cost reporting of one EU collaborative project (personnel and
+# travel costs, work packages, timesheets, payslips, reporting periods) from the perspective of one partner organisation.
+# The IRIs are the C3PO ids (opaque); the name of a term is its rdfs:label (the ETL maps csv file stems, columns and
+# reference cells to it, compared as slugs: hoursWorked = hours worked); rdfs:comment = the tag description sent to
+# Ollaya, see GENERATE-TAGS-FROM-ONTOLOGY.md. The full ontology (skos definitions, scope notes, identity keys, French
+# labels) is DRAFT/C3PO/t_box/c3po.ttl; nothing here that is not there.
+
+# Classes
+c3po:C3PO_0000018 a owl:Class ; rdfs:label "employee" ;
+  rdfs:comment "The question concerns an employee or staff member" .
+c3po:C3PO_0000014 a owl:Class ; rdfs:subClassOf c3po:C3PO_0000018 ; rdfs:label "external employee" ;
+  rdfs:comment "The question concerns an external or freelance employee costed at a contracted hourly rate" .
+c3po:C3PO_0000105 a owl:Class ; rdfs:subClassOf c3po:C3PO_0000018 ; rdfs:label "internal employee" ;
+  rdfs:comment "The question concerns an internal employee on the payroll" .
+c3po:C3PO_0000101 a owl:Class ; rdfs:label "European project" ;
+  rdfs:comment "The question concerns the European project or its grant agreement" .
+c3po:C3PO_0000102 a owl:Class ; rdfs:label "invoice" ;
+  rdfs:comment "The question concerns invoices or receipts submitted for reimbursement" .
+c3po:C3PO_0000103 a owl:Class ; rdfs:label "work package" ;
+  rdfs:comment "The question concerns a work package" .
+c3po:C3PO_0000104 a owl:Class ; rdfs:label "reporting period" ;
+  rdfs:comment "The question concerns a reporting period" .
+c3po:C3PO_0000109 a owl:Class ; rdfs:subClassOf c3po:C3PO_0000104 ; rdfs:label "european reporting period" ;
+  rdfs:comment "The question concerns a european reporting period (ERP) reported to the European Commission" .
+c3po:C3PO_0000110 a owl:Class ; rdfs:subClassOf c3po:C3PO_0000104 ; rdfs:label "coordinator reporting period" ;
+  rdfs:comment "The question concerns a coordinator reporting period (CRP) internal to the consortium" .
+c3po:C3PO_0000106 a owl:Class ; rdfs:label "task" ;
+  rdfs:comment "The question concerns a task of a work package" .
+c3po:C3PO_0000107 a owl:Class ; rdfs:label "timesheet" ;
+  rdfs:comment "The question concerns timesheets or the hours an employee recorded" .
+c3po:C3PO_0000108 a owl:Class ; rdfs:label "travel" ;
+  rdfs:comment "The question concerns a business trip or travel event" .
+c3po:C3PO_0000111 a owl:Class ; rdfs:label "payslip" ;
+  rdfs:comment "The question concerns payslips or monthly salary" .
+c3po:C3PO_0000112 a owl:Class ; rdfs:label "personnel cost" .
+c3po:C3PO_0000113 a owl:Class ; rdfs:subClassOf c3po:C3PO_0000112 ; rdfs:label "timesheet personnel cost" .
+c3po:C3PO_0000114 a owl:Class ; rdfs:subClassOf c3po:C3PO_0000112 ; rdfs:label "annual employee personnel cost" .
+c3po:C3PO_0000115 a owl:Class ; rdfs:subClassOf c3po:C3PO_0000112 ; rdfs:label "project period personnel cost" .
+
+# Object properties
+c3po:C3PO_0000008 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000113 ; rdfs:range c3po:C3PO_0000107 ; rdfs:label "supported by timesheet" .
+c3po:C3PO_0000201 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000102 ; rdfs:range c3po:C3PO_0000101 ; rdfs:label "reimbursed against project" .
+c3po:C3PO_0000202 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000107 ; rdfs:range c3po:C3PO_0000018 ; rdfs:label "records hours of employee" .
+c3po:C3PO_0000203 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000102 ; rdfs:range c3po:C3PO_0000018 ; rdfs:label "incurred by employee" .
+c3po:C3PO_0000204 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000104 ; rdfs:range c3po:C3PO_0000101 ; rdfs:label "reports on project" .
+c3po:C3PO_0000205 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000111 ; rdfs:range c3po:C3PO_0000105 ; rdfs:label "documents salary of internal employee" .
+c3po:C3PO_0000206 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000107 ; rdfs:range c3po:C3PO_0000101 ; rdfs:label "logs hours for project" .
+c3po:C3PO_0000207 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000103 ; rdfs:range c3po:C3PO_0000101 ; rdfs:label "work package part of project" .
+c3po:C3PO_0000208 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000102 ; rdfs:range c3po:C3PO_0000108 ; rdfs:label "incurred during travel" .
+c3po:C3PO_0000209 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000107 ; rdfs:range c3po:C3PO_0000103 ; rdfs:label "logs hours for work package" .
+c3po:C3PO_0000210 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000018 ; rdfs:range c3po:C3PO_0000101 ; rdfs:label "works on project" .
+c3po:C3PO_0000211 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000101 ; rdfs:range c3po:C3PO_0000104 ; rdfs:label "has reporting period" .
+c3po:C3PO_0000212 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000106 ; rdfs:range c3po:C3PO_0000101 ; rdfs:label "part of project through work package" .
+c3po:C3PO_0000213 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000106 ; rdfs:range c3po:C3PO_0000103 ; rdfs:label "part of work package" .
+c3po:C3PO_0000214 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000108 ; rdfs:range c3po:C3PO_0000101 ; rdfs:label "charged to project" .
+c3po:C3PO_0000215 a owl:ObjectProperty ; rdfs:range c3po:C3PO_0000018 ; rdfs:label "incurred for employee" .
+c3po:C3PO_0000216 a owl:ObjectProperty ; rdfs:range c3po:C3PO_0000104 ; rdfs:label "falls within reporting period" .
+c3po:C3PO_0000217 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000107 ; rdfs:range c3po:C3PO_0000106 ; rdfs:label "logs hours for task" .
+c3po:C3PO_0000218 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000115 ; rdfs:range c3po:C3PO_0000104 ; rdfs:label "reported for reporting period" .
+c3po:C3PO_0000219 a owl:ObjectProperty ; rdfs:domain c3po:C3PO_0000115 ; rdfs:range c3po:C3PO_0000101 ; rdfs:label "reported for project" .
+
+# Datatype properties (numeric ones carry a tag description)
+c3po:C3PO_0000002 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000108 ; rdfs:range xsd:decimal ; rdfs:label "total travel cost" ;
+  rdfs:comment "The question concerns the total cost of a travel event" .
+c3po:C3PO_0000003 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000101 ; rdfs:range xsd:decimal ; rdfs:label "budget spent" ;
+  rdfs:comment "The question concerns the budget already spent on the project" .
+c3po:C3PO_0000004 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000101 ; rdfs:range xsd:decimal ; rdfs:label "budget remaining" ;
+  rdfs:comment "The question concerns the budget remaining on the project" .
+c3po:C3PO_0000009 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000101 ; rdfs:range xsd:decimal ; rdfs:label "total budget" ;
+  rdfs:comment "The question concerns the total budget of the project" .
+c3po:C3PO_0000013 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000115 ; rdfs:range xsd:decimal ; rdfs:label "total personnel cost" ;
+  rdfs:comment "The question concerns the total personnel cost charged to the project over a reporting period" .
+c3po:C3PO_0000015 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000014 ; rdfs:range xsd:decimal ; rdfs:label "external employee hourly rate" ;
+  rdfs:comment "The question concerns the contracted hourly rate of an external employee" .
+c3po:C3PO_0000301 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000107 ; rdfs:range xsd:decimal ; rdfs:label "hours worked" ;
+  rdfs:comment "The question concerns hours worked or logged" .
+c3po:C3PO_0000304 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000103 ; rdfs:range xsd:decimal ; rdfs:label "person month allocated" ;
+  rdfs:comment "The question concerns the person-months allocated to a work package" .
+c3po:C3PO_0000305 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000108 ; rdfs:range xsd:string ; rdfs:label "travel country" .
+c3po:C3PO_0000306 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000108 ; rdfs:range xsd:string ; rdfs:label "travel city" .
+c3po:C3PO_0000308 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000102 ; rdfs:range xsd:date ; rdfs:label "invoice date" .
+c3po:C3PO_0000309 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000102 ; rdfs:range xsd:string ; rdfs:label "supplier name" .
+c3po:C3PO_0000310 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000102 ; rdfs:range xsd:decimal ; rdfs:label "invoice amount" ;
+  rdfs:comment "The question concerns the amount of an invoice" .
+c3po:C3PO_0000312 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000105 ; rdfs:range xsd:integer ; rdfs:label "annual productive hours" ;
+  rdfs:comment "The question concerns annual productive hours" .
+c3po:C3PO_0000313 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000111 ; rdfs:range xsd:decimal ; rdfs:label "gross monthly salary" ;
+  rdfs:comment "The question concerns gross monthly salary" .
+c3po:C3PO_0000314 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000111 ; rdfs:range xsd:decimal ; rdfs:label "employer social contribution" ;
+  rdfs:comment "The question concerns employer (patronal) social contributions" .
+c3po:C3PO_0000316 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000114 ; rdfs:range xsd:decimal ; rdfs:label "hourly rate" ;
+  rdfs:comment "The question concerns an employee's hourly rate" .
+c3po:C3PO_0000318 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000108 ; rdfs:range xsd:string ; rdfs:label "travel purpose" .
+c3po:C3PO_0000319 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000102 ; rdfs:range xsd:decimal ; rdfs:label "exchange rate" ;
+  rdfs:comment "The question concerns a currency exchange rate" .
+c3po:C3PO_0000321 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000103 ; rdfs:range xsd:decimal ; rdfs:label "person month spent" ;
+  rdfs:comment "The question concerns person-months spent or consumed" .
+c3po:C3PO_0000322 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000101 ; rdfs:range xsd:integer ; rdfs:label "project duration" ;
+  rdfs:comment "The question concerns the duration of the project in months" .
+c3po:C3PO_0000323 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000114 ; rdfs:range xsd:gYear ; rdfs:label "for year" .
+c3po:C3PO_0000324 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000114 ; rdfs:range xsd:decimal ; rdfs:label "total gross salary" ;
+  rdfs:comment "The question concerns the annual total of gross salary" .
+c3po:C3PO_0000325 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000114 ; rdfs:range xsd:decimal ; rdfs:label "total employer social contribution" ;
+  rdfs:comment "The question concerns the annual total of employer social contributions" .
+c3po:C3PO_0000326 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000114 ; rdfs:range xsd:decimal ; rdfs:label "annual personnel cost" ;
+  rdfs:comment "The question concerns the annual personnel cost of an employee, gross salary plus employer contributions" .
+c3po:C3PO_0000327 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000112 ; rdfs:range xsd:decimal ; rdfs:label "cost amount" ;
+  rdfs:comment "The question concerns the amount of a personnel cost" .
+c3po:C3PO_0000328 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000105 ; rdfs:range xsd:decimal ; rdfs:label "monthly productive hours" ;
+  rdfs:comment "The question concerns monthly productive hours" .
+c3po:C3PO_0000330 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000111 ; rdfs:range xsd:gYearMonth ; rdfs:label "payslip calendar year month" .
+c3po:C3PO_0000331 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000101 ; rdfs:range xsd:date ; rdfs:label "project start date" .
+c3po:C3PO_0000332 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000104 ; rdfs:range xsd:date ; rdfs:label "reporting period start date" .
+c3po:C3PO_0000333 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000108 ; rdfs:range xsd:date ; rdfs:label "travel start date" .
+c3po:C3PO_0000334 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000101 ; rdfs:range xsd:date ; rdfs:label "project end date" .
+c3po:C3PO_0000335 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000104 ; rdfs:range xsd:date ; rdfs:label "reporting period end date" .
+c3po:C3PO_0000336 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000108 ; rdfs:range xsd:date ; rdfs:label "travel end date" .
+c3po:C3PO_0000337 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000101 ; rdfs:range xsd:string ; rdfs:label "project display name" .
+c3po:C3PO_0000338 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000103 ; rdfs:range xsd:string ; rdfs:label "work package display name" .
+c3po:C3PO_0000339 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000106 ; rdfs:range xsd:string ; rdfs:label "task display name" .
+c3po:C3PO_0000340 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000018 ; rdfs:range xsd:string ; rdfs:label "employee display name" .
+c3po:C3PO_0000341 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000104 ; rdfs:range xsd:string ; rdfs:label "reporting period display name" .
+c3po:C3PO_0000342 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000018 ; rdfs:range xsd:string ; rdfs:label "contract working-time kind" .
+c3po:C3PO_0000343 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000018 ; rdfs:range xsd:string ; rdfs:label "employee contract note" .
+c3po:C3PO_0000347 a owl:DatatypeProperty ; rdfs:domain c3po:C3PO_0000107 ; rdfs:range xsd:date ; rdfs:label "timesheet calendar date" .

@@ -12,8 +12,9 @@ csv/*.csv ─┘  (data: one file per class, one row per individual)
 There is **no mapping file**. The TBOX IRIs are opaque (`ex:C06`, `ex:P14`, `ex:I02`: numbered classes, properties
 and individuals, no meaning in the local name) and the name of a term is its `rdfs:label`. CSV names are those
 labels, compared as slugs (`tags.slug`: lower case, camelCase split, non-alphanumerics to `-`), so the column
-`expenseDate` matches the label `expense date` and `EuropeanProject.csv` matches `European project`. The `ex:`
-namespace (`https://example.org/eu-expense#`) is read from the `ex` prefix of `tbox.ttl`. The TBOX is the schema and
+`expenseDate` matches the label `expense date` and `EuropeanProject.csv` matches `European project`. The namespace and
+its prefix are those of the classes of `tbox.ttl` (`ex:` = `https://example.org/eu-expense#` here, `c3po:` in
+`profile/c3po`); the ABOX ids are minted in it and `abox.ttl` is serialised with it. The TBOX is the schema and
 decides how each cell becomes RDF.
 
 ## The mapping rules
@@ -95,8 +96,9 @@ drift. The queries walk the stored direction with an explicit join, plain graph 
 Written project-first and spelled out rather than as the path `ex:P04/ex:P02`: the query text is what the routing
 fallback reads, and the path form cost it two questions (README, "Fallback"). The committed `.rq` files carry no such
 comments: the fallback gets the text with each opaque term replaced by its label in camelCase (`Profile.readable`:
-`?expense a ex:Expense ; ex:chargedToWorkPackage ?workPackage ; ex:amount ?amount`), the wording that was measured
-before the IRIs became opaque (README, "Current score").
+`?expense a ex:Expense ; ex:chargedToWorkPackage ?workPackage ; ex:amount ?amount`), without its indentation and
+blank lines (one choice over every query has to fit the model's context; the PREFIX lines stay, the model leans on
+them), the wording that was measured before the IRIs became opaque (README, "Current score").
 
 ### References to TBOX individuals
 
@@ -145,4 +147,6 @@ reads their name through `rdfs:label`.
 `abox.ttl` is derived but committed. `make test` (`test_csv_round_trip_equals_the_committed_abox`) rebuilds the graph
 from the CSVs and compares it with the committed file, so a CSV edit without `make abox` fails the tests. The
 current data is 29 rows in 6 files, which produce 179 triples (the same count as with the named IRIs of profile 1.3.0:
-only the terms were renamed).
+only the terms were renamed). The second profile, `profile/c3po`, was converted the other way round: its 11 CSV files
+(347 rows) were written once from a curated Turtle A-Box and `make abox` rebuilds 2016 of its 2030 triples (see its
+README for the two typing differences with the source and the two derived relations left out).

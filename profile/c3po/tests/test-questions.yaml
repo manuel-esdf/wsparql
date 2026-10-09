@@ -1,0 +1,32 @@
+# expected_query: catalog id, or none = "no suitable query". Absent = ambiguous (no single catalog query), skipped by `make eval`.
+# The 29 competency questions of DRAFT/C3PO/cq, one per query.
+questions:
+  - {q_id: 1, question: "What is the total personnel cost for the project FAIR-IMPACT in ERP3?", expected_query: q01-personnel-cost-in-reporting-period}
+  - {q_id: 2, question: "How many person-months were spent in WP4 during ERP1 for the project FAIR-IMPACT?", expected_query: q02-person-months-of-work-package-in-period}
+  - {q_id: 3, question: "List all travel events in ERP2 with their date, cost, destination and purpose for FAIR-IMPACT.", expected_query: q03-travel-events-in-period-with-cost}
+  - {q_id: 4, question: "What is the total travel cost for ERP1 for the project FAIR-IMPACT?", expected_query: q04-travel-cost-in-reporting-period}
+  - {q_id: 5, question: "How many person-months have been used in each work package during CRP5 for project FAIR-IMPACT?", expected_query: q05-person-months-by-work-package-in-period}
+  - {q_id: 6, question: "What is the hourly rate for each employee?", expected_query: q06-hourly-rate-by-employee-and-year}
+  - {q_id: 7, question: "What is the total project expenditure (personnel + travel invoices) per reporting period?", expected_query: q07-expenditure-by-reporting-period}
+  - {q_id: 8, question: "Who is working on the project FAIR-IMPACT in ERP3?", expected_query: q08-employees-on-project-in-period}
+  - {q_id: 9, question: "Who is working on project FAIR-IMPACT?", expected_query: q09-employees-on-project}
+  - {q_id: 10, question: "How many timesheet entries and total hours has Employee1 logged on FAIR-IMPACT?", expected_query: q10-timesheets-and-hours-of-employee}
+  - {q_id: 11, question: "What is the hourly rate of employee named \"Employe2\" in 2022?", expected_query: q11-hourly-rate-of-employee-in-year}
+  - {q_id: 12, question: "What is the annual personnel cost of Employee 1 in 2025?", expected_query: q12-annual-personnel-cost-of-employee}
+  - {q_id: 13, question: "What are the annual productive hours of Employee 3?", expected_query: q13-annual-productive-hours-of-employee}
+  - {q_id: 14, question: "What is the duration of ERP1 on project FAIR-IMPACT?", expected_query: q14-reporting-period-dates}
+  - {q_id: 15, question: "List all ERP of project FAIR-IMPACT.", expected_query: q15-european-reporting-periods-of-project}
+  - {q_id: 16, question: "What are the monthly productive hours of Employee 2?", expected_query: q16-monthly-productive-hours-of-employee}
+  - {q_id: 17, question: "What is the list of work packages on project FAIR-IMPACT?", expected_query: q17-work-packages-of-project}
+  - {q_id: 18, question: "What is the list of travel events for project FAIR-IMPACT?", expected_query: q18-travel-events-of-project}
+  - {q_id: 19, question: "What is the travel cost of travel event \"Dagstuhl Workshop 2023\" for FAIR-IMPACT?", expected_query: q19-travel-cost-of-event}
+  - {q_id: 20, question: "What is the travel destination of travel event \"Dagstuhl Workshop 2023\" for FAIR-IMPACT?", expected_query: q20-travel-destination-of-event}
+  - {q_id: 21, question: "What is the travel purpose of travel event \"Dagstuhl Workshop 2023\" for FAIR-IMPACT?", expected_query: q21-travel-purpose-of-event}
+  - {q_id: 22, question: "List all travel events in ERP2 of project FAIR-IMPACT.", expected_query: q22-travel-events-in-period}
+  - {q_id: 23, question: "List all reporting periods of project FAIR-IMPACT.", expected_query: q23-reporting-periods-of-project}
+  - {q_id: 24, question: "What is the salary gross of employee 1 in 2023?", expected_query: q24-gross-salary-of-employee-in-year}
+  - {q_id: 25, question: "What is the patronal contribution to the salary of employee 1 in 2023?", expected_query: q25-employer-contribution-of-employee-in-year}
+  - {q_id: 26, question: "List all employees working for the company.", expected_query: q26-all-employees}
+  - {q_id: 27, question: "What is the list of projects?", expected_query: q27-all-projects}
+  - {q_id: 28, question: "How many working hours has each employee logged in May 2025?", expected_query: q28-hours-by-employee-in-month}
+  - {q_id: 29, question: "How many person-months were spent in Task 1.1 during ERP1 for FAIR-IMPACT?", expected_query: q29-person-months-of-task-in-period}

@@ -1,8 +1,11 @@
-"""Offline checks (no Ollaya): run with `make test`."""
+"""Offline checks (no Ollaya): run with `make test`. The profile-specific tests pin their profile; the generic ones
+(ETL round trip, expected query values) run on every profile/* directory."""
+import json
 import os
 import shutil
 import tempfile
 import unittest
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from rdflib import Graph
@@ -13,6 +16,8 @@ from wsparql.pipeline import answer, candidates, extract_params, extract_period,
 from wsparql.profile import Profile
 from wsparql.tags import generate, slug
 
+EU = "profile/eu-expense-poc"
+PROFILES = sorted(p.parent for p in Path("profile").glob("*/csv"))
 CATALOG = {
     "q01-total-expenses-by-project": {"description": "d", "tags": ["expense", "project", "total", "comparison"]},
     "q05-budget-vs-spent": {"description": "d", "tags": ["project", "budget", "expense", "remaining", "comparison"]},
@@ -83,7 +88,7 @@ class ParamsTest(unittest.TestCase):
 
 class BindingsTest(unittest.TestCase):
     def test_q10_runs_with_bound_params(self):
-        prof = Profile(os.environ["PROFILE"])
+        prof = Profile(EU)
         q = "q10-project-expenses-in-period"
         self.assertEqual(prof.acronyms, ["GRAPHIA", "LUMEN", "OPENSCIENCE"])
         self.assertEqual(len(prof.run(q, {"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"})[1]), 6)  # the old hard-coded query
@@ -100,7 +105,7 @@ class AnswerTest(unittest.TestCase):
         return lambda question, questions: {k: {"choice": answers[k], "confidence": 0.9, "probabilities": {}} for k in questions}
 
     def test_select_params_run(self):
-        prof = Profile(os.environ["PROFILE"])
+        prof = Profile(EU)
         for q in prof.catalog.values():  # query tags come from profile.db query_tags (make query-tags), not the catalog file
             q["tags"] = ["expense"]
         prof.catalog[self.Q10]["tags"] = list(self.PROBS)
@@ -113,10 +118,10 @@ class AnswerTest(unittest.TestCase):
         self.assertEqual((out["selected"], out["params"], out["result"], out["via"]), (None, {}, None, "fallback"))
 
     def test_fallback_when_the_tag_route_says_none(self):
-        prof = Profile(os.environ["PROFILE"])
+        prof = Profile(EU)
         for q in prof.catalog.values():
             q["tags"] = ["expense"]
-        def ask(question, questions):  # none over descriptions, Q10 over the raw SPARQL
+        def ask(question, questions):  # none over descriptions, Q10 over the SPARQL text
             if "select" in questions:
                 raw = any(v.startswith("PREFIX") for v in questions["select"]["criteria"].values())
                 return {"select": {"choice": self.Q10 if raw else "none", "confidence": 0.9, "probabilities": {}}}
@@ -126,22 +131,25 @@ class AnswerTest(unittest.TestCase):
 
 
     def test_direct_baseline(self):
-        prof, seen = Profile(os.environ["PROFILE"]), {}
+        prof, seen = Profile(EU), {}
         def ask(question, questions):
             seen.update(questions)
             return {k: {"choice": {"select": self.Q10, "acronym": "LUMEN"}[k], "confidence": 0.9, "probabilities": {}} for k in questions}
         out = answer("List LUMEN expenses for Q1 2026", {}, prof, ask, direct=True)
         self.assertEqual(list(seen["select"]["criteria"]), [*prof.catalog, "none"])
-        self.assertTrue(seen["select"]["criteria"][self.Q10].startswith("PREFIX"))  # the .rq text, labels for the opaque IRIs
-        self.assertIn("?project a ex:EuropeanProject ; ex:acronym ?acronym", seen["select"]["criteria"][self.Q10])
+        text = seen["select"]["criteria"][self.Q10]  # the .rq text without indentation or blank lines, labels for the opaque IRIs
+        self.assertTrue(text.startswith("PREFIX ex:"))
+        self.assertNotIn("\n ", text)
+        self.assertNotIn("\n\n", text)
+        self.assertIn("?project a ex:EuropeanProject ; ex:acronym ?acronym", text)
         self.assertIn("ex:chargedToWorkPackage ?workPackage", seen["select"]["criteria"][self.Q10])
         self.assertNotIn("ex:P", seen["select"]["criteria"][self.Q10])
         self.assertEqual(([q for q, _ in out["candidates"]], out["selected"], out["via"], len(out["result"][1])), (list(prof.catalog), self.Q10, "direct", 6))
 
 
 class TagsGenTest(unittest.TestCase):
-    def test_profile_dictionary(self):
-        rows = generate(os.environ["PROFILE"])
+    def test_eu_expense_dictionary(self):
+        rows = generate(EU)
         self.assertEqual([t for t, _, _ in rows], [  # each rule in IRI order (opaque IRIs, numbered in declaration order)
             "european-project", "work-package", "employee", "supplier", "expense", "expense-category",  # R1, Company skipped
             "personnel", "travel", "equipment", "subcontracting", "other-goods-and-services",  # R2
@@ -150,6 +158,22 @@ class TagsGenTest(unittest.TestCase):
         self.assertTrue(all(d for _, d, _ in rows))
         self.assertEqual({t: s for t, _, s in rows}["travel"], "individual ex:I02")
         self.assertEqual(slug("EuropeanProject"), "european-project")
+
+    def test_c3po_dictionary(self):
+        rows = generate("profile/c3po")
+        self.assertEqual([t for t, _, _ in rows], [
+            # R1: a class counts the individuals of its TBOX subclasses (employee 5, reporting period 9);
+            # external employee (1), European project (1) and the personnel cost classes (0) skipped
+            "employee", "invoice", "work-package", "reporting-period", "internal-employee", "task", "timesheet", "travel",
+            "european-reporting-period", "coordinator-reporting-period", "payslip",
+            # R2: no TBOX individuals. R3: 21 numeric properties, the dates as `time`
+            "total-travel-cost", "budget-spent", "budget-remaining", "total-budget", "total-personnel-cost",
+            "external-employee-hourly-rate", "hours-worked", "person-month-allocated", "time", "invoice-amount",
+            "annual-productive-hours", "gross-monthly-salary", "employer-social-contribution", "hourly-rate", "exchange-rate",
+            "person-month-spent", "project-duration", "total-gross-salary", "total-employer-social-contribution",
+            "annual-personnel-cost", "cost-amount", "monthly-productive-hours",
+            "total", "breakdown", "comparison", "ranking", "list", "trend", "month", "date-range"])  # R4
+        self.assertEqual({t: s for t, _, s in rows}["employee"], "class c3po:C3PO_0000018")
 
 
 class DbTest(unittest.TestCase):
@@ -186,13 +210,14 @@ class DbTest(unittest.TestCase):
 
 class EtlTest(unittest.TestCase):
     def test_csv_round_trip_equals_the_committed_abox(self):
-        path = os.environ["PROFILE"]
-        committed = set(Graph().parse(os.path.join(path, "abox.ttl")))  # no blank nodes: set equality is graph equality
-        self.assertEqual(set(etl.build(path)), committed, "csv/ and abox.ttl differ -> make abox")
+        for path in PROFILES:
+            with self.subTest(profile=path.name):
+                committed = set(Graph().parse(path / "abox.ttl"))  # no blank nodes: set equality is graph equality
+                self.assertEqual(set(etl.build(path)), committed, "csv/ and abox.ttl differ -> make abox")
 
     def test_rejects_bad_value_unknown_column_and_dangling_reference(self):
         with tempfile.TemporaryDirectory() as d:
-            shutil.copy(os.path.join(os.environ["PROFILE"], "tbox.ttl"), d)
+            shutil.copy(os.path.join(EU, "tbox.ttl"), d)
             os.mkdir(os.path.join(d, "csv"))
             expense = lambda text: Path(d, "csv", "Expense.csv").write_text(text)
             expense("id,amount,expenseDate\nE1,10.00,2026-13-01\n")
@@ -204,3 +229,25 @@ class EtlTest(unittest.TestCase):
             self.assertRaisesRegex(ValueError, "Nobody", etl.build, d)
             expense("id,amount,category\nE1,10.00,Travel\n")  # TBOX individuals are valid references
             self.assertEqual(len(etl.build(d)), 3)
+
+
+class ExpectedRowsTest(unittest.TestCase):
+    @staticmethod
+    def norm(v):
+        """Numbers at 6 decimals (the ETL types `0` as `0.0`; summation order moves the 28th digit of a SUM), else as is."""
+        try:
+            return f"{Decimal(v):.6f}"
+        except InvalidOperation:
+            return v
+
+    def test_every_query_reproduces_the_expected_values(self):
+        """profile/*/tests/expected.json = {query id: the cell values of its rows, flattened} (c3po: the draft's
+        cq/expected.json re-keyed, verbatim). Compared as sets: the draft deduplicated two of its lists (q03, q07).
+        Raw graph.query, so IRIs compare in full."""
+        for f in sorted(Path("profile").glob("*/tests/expected.json")):
+            prof, expected = Profile(f.parent.parent), json.load(f.open())
+            self.assertEqual(sorted(expected), sorted(prof.catalog), f"{f}: one entry per catalog query")
+            for qid, values in expected.items():
+                with self.subTest(profile=prof.name, query=qid):
+                    got = {self.norm(str(c)) for row in prof.graph.query(prof.queries[qid]) for c in row if c is not None}
+                    self.assertEqual(got, {self.norm(v) for v in values})

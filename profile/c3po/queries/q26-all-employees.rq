@@ -1,0 +1,10 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+
+SELECT ?employeeName WHERE {
+  {
+    ?employee a c3po:C3PO_0000105 .
+  } UNION {
+    ?employee a c3po:C3PO_0000014 .
+  }
+  ?employee c3po:C3PO_0000340 ?employeeName .
+}

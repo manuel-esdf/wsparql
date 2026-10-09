@@ -1,0 +1,14 @@
+PREFIX c3po: <http://www.esciencedatafactory.com/C3PO/c3po.owl#>
+
+SELECT (SUM(?amount) AS ?totalTravelCost)
+WHERE {
+  ?project a c3po:C3PO_0000101 ; c3po:C3PO_0000337 "FAIR-IMPACT" .
+  ?travel a c3po:C3PO_0000108 ;
+          c3po:C3PO_0000214 ?project ;
+          c3po:C3PO_0000318 ?purpose .
+  FILTER(?purpose = "Dagstuhl Workshop 2023")
+
+  ?invoice a c3po:C3PO_0000102 ;
+           c3po:C3PO_0000208 ?travel ;
+           c3po:C3PO_0000310 ?amount .
+}

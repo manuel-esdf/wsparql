@@ -90,7 +90,7 @@ Generic, applied in order; the first rule to produce a name wins. `tbox` is the 
 
 | | Rule | Extraction (rdflib) | On this profile |
 |---|---|---|---|
-| R1 | one tag per `owl:Class` with at least 2 individuals in the data | `tbox.subjects(RDF.type, OWL.Class)`, count `g.subjects(RDF.type, c)` | 6 classes; `ex:C01` Company (1 individual) skipped: it cannot discriminate questions |
+| R1 | one tag per `owl:Class` with at least 2 individuals in the data, those of its `rdfs:subClassOf` descendants included (a row is typed by its leaf class only, no inference) | `tbox.subjects(RDF.type, OWL.Class)`, count `g.subjects(RDF.type, sub)` over `tbox.transitive_subjects(RDFS.subClassOf, c)` | 6 classes; `ex:C01` Company (1 individual) skipped: it cannot discriminate questions. No hierarchy here; in `profile/c3po` it gives `employee` (5, all typed internal or external) and `reporting period` (9) |
 | R2 | one tag per individual declared in the TBOX: they are controlled vocabulary, not data | `tbox.subject_objects(RDF.type)` whose object is an `owl:Class` | the 5 `ex:C07` Expense category values |
 | R3 | one tag per `xsd:boolean` or numeric datatype property; all `xsd:date` properties collapse into one `time` tag; `xsd:string` skipped | `tbox.subjects(RDF.type, OWL.DatatypeProperty)`, `rdfs:range` | `eligible`, `budget`, `amount`, `time`; `name`, `acronym`, `grantAgreement`, `description`, `country` skipped |
 | R4 | fixed intent tags, the same for every profile | `INTENT` dict in `wsparql/tags.py` | the 8 intents above |
@@ -257,7 +257,77 @@ the 23 tags come out the same (one renamed by its label, `other-goods-and-servic
 identical to run 3, the 109 question tag rows are identical for 107 questions (q_id 12 and 48 differ, no routing
 change) and `make eval` gives the same **76/87** tag route alone with the same 62 answers. Only the fallback moved,
 86/87 → 85/87 when it read the opaque SPARQL as-is, back to **86/87** with the labels rendered in place of the IRIs
-(`Profile.readable`; `make eval-direct` 81 → 82/87), see the README, "Fallback".
+(`Profile.readable`; `make eval-direct` 81 → 82/87, then 80/87 once the text lost its indentation so that the 29
+c3po queries fit the model's context), see the README, "Fallback".
+
+## Result on c3po
+
+The second profile (`profile/c3po`, 1.0.0: the C3PO European Reporting Ontology, 17 classes, 61 properties, 347 rows
+in 11 classes, 29 competency queries with their constants in the text, no `params`) runs the same rules unchanged.
+`make PROFILE=profile/c3po tags-gen` (41 tags; the descriptions are the `rdfs:comment`s written in its `tbox.ttl`):
+
+    tag                                source                      description
+    employee                           class c3po:C3PO_0000018     The question concerns an employee or staff member
+    invoice                            class c3po:C3PO_0000102     The question concerns invoices or receipts submitted for reimbursement
+    work-package                       class c3po:C3PO_0000103     The question concerns a work package
+    reporting-period                   class c3po:C3PO_0000104     The question concerns a reporting period
+    internal-employee                  class c3po:C3PO_0000105     The question concerns an internal employee on the payroll
+    task                               class c3po:C3PO_0000106     The question concerns a task of a work package
+    timesheet                          class c3po:C3PO_0000107     The question concerns timesheets or the hours an employee recorded
+    travel                             class c3po:C3PO_0000108     The question concerns a business trip or travel event
+    european-reporting-period          class c3po:C3PO_0000109     The question concerns a european reporting period (ERP) reported to the European Commission
+    coordinator-reporting-period       class c3po:C3PO_0000110     The question concerns a coordinator reporting period (CRP) internal to the consortium
+    payslip                            class c3po:C3PO_0000111     The question concerns payslips or monthly salary
+    total-travel-cost                  property c3po:C3PO_0000002  The question concerns the total cost of a travel event
+    budget-spent                       property c3po:C3PO_0000003  The question concerns the budget already spent on the project
+    budget-remaining                   property c3po:C3PO_0000004  The question concerns the budget remaining on the project
+    total-budget                       property c3po:C3PO_0000009  The question concerns the total budget of the project
+    total-personnel-cost               property c3po:C3PO_0000013  The question concerns the total personnel cost charged to the project over a reporting period
+    external-employee-hourly-rate      property c3po:C3PO_0000015  The question concerns the contracted hourly rate of an external employee
+    hours-worked                       property c3po:C3PO_0000301  The question concerns hours worked or logged
+    person-month-allocated             property c3po:C3PO_0000304  The question concerns the person-months allocated to a work package
+    time                               property xsd:date           The question includes a temporal dimension
+    invoice-amount                     property c3po:C3PO_0000310  The question concerns the amount of an invoice
+    annual-productive-hours            property c3po:C3PO_0000312  The question concerns annual productive hours
+    gross-monthly-salary               property c3po:C3PO_0000313  The question concerns gross monthly salary
+    employer-social-contribution       property c3po:C3PO_0000314  The question concerns employer (patronal) social contributions
+    hourly-rate                        property c3po:C3PO_0000316  The question concerns an employee's hourly rate
+    exchange-rate                      property c3po:C3PO_0000319  The question concerns a currency exchange rate
+    person-month-spent                 property c3po:C3PO_0000321  The question concerns person-months spent or consumed
+    project-duration                   property c3po:C3PO_0000322  The question concerns the duration of the project in months
+    total-gross-salary                 property c3po:C3PO_0000324  The question concerns the annual total of gross salary
+    total-employer-social-contribution property c3po:C3PO_0000325  The question concerns the annual total of employer social contributions
+    annual-personnel-cost              property c3po:C3PO_0000326  The question concerns the annual personnel cost of an employee, gross salary plus employer contributions
+    cost-amount                        property c3po:C3PO_0000327  The question concerns the amount of a personnel cost
+    monthly-productive-hours           property c3po:C3PO_0000328  The question concerns monthly productive hours
+    total                              intent                      The user wants a total amount
+    breakdown                          intent                      The user wants a breakdown by dimension
+    comparison                         intent                      The user wants to compare several entities or values
+    ranking                            intent                      The user wants entities ordered by amount
+    list                               intent                      The user wants individual records listed
+    trend                              intent                      The user wants evolution over time
+    month                              intent                      The question concerns monthly aggregation
+    date-range                         intent                      The question specifies or implies a period
+
+R1 keeps 11 of the 17 classes. `employee` (5 individuals) and `reporting-period` (9) are tags because the rule counts
+the individuals of the TBOX subclasses too, the data typing each row by its leaf class only (4 internal and 1 external
+employee, 3 european and 6 coordinator reporting periods); `external-employee` and `european-project` have one
+individual each and the four personnel-cost classes none (the ontology's cost grains carry no rows), so they get no tag.
+R2 finds no TBOX individuals. R3 gives the 21 numeric properties and `time` for the `xsd:date` ones; the string,
+`xsd:gYear` and `xsd:gYearMonth` properties get none. The 8 intents close the list.
+
+`make PROFILE=profile/c3po query-tags` (run_id 11, 29 descriptions): 210 tags in all, from 1 (q27 "List the European
+projects": `list` alone, the project class has one individual and no tag) to 13 (q28, hours by employee in May 2025);
+`time` is on 24 queries, `date-range` on 21, `reporting-period` on 20, `internal-employee` on 14. Six tags land on no
+query: `budget-remaining`, `total-budget`, `external-employee-hourly-rate`, `gross-monthly-salary`, `exchange-rate`
+(properties no competency query reads) and `ranking`. The single-tag q27 is the plain mean's artefact seen the other way
+round from the q02 dilution above: its score is the probability of `list`, so it tops the candidates of every "List ..."
+question (0.83 for "Who is working on the project FAIR-IMPACT in ERP3?", 0.90 for "List all travel events in ERP2 of
+project FAIR-IMPACT.") without ever being chosen. `make PROFILE=profile/c3po tags-cache` (run_id 12) tags the 29
+competency questions; `make PROFILE=profile/c3po eval` then scores **25/29** with the fallback and **22/29** for the tag
+route alone, `make PROFILE=profile/c3po eval-direct` **26/29**, every miss a sibling query whose rows contain the
+expected ones (the four questions are in the README, "Current score on `profile/c3po`"). The fallback's one `choice` over
+the 29 rendered queries is what made `Profile.readable` drop the indentation (8213 tokens against winnow's 8192).
 
 ## Storage
 
@@ -290,8 +360,9 @@ Adding a catalog query = description + `.rq`, then `make query-tags`.
 
 ## Limits
 
-- `rdfs:subClassOf`: none in this TBOX. With a hierarchy, R1 would emit the parent tag as well and `candidates`
-  could expand a detected child tag to its parents before ranking.
+- `rdfs:subClassOf`: R1 emits the parent tag when its subclasses hold the individuals (`profile/c3po`), but
+  `candidates` does not expand a detected child tag to its parents before ranking: `internal-employee` detected on a
+  question does not raise a query tagged `employee`.
 - Large enumerations: R2 emits one tag per TBOX individual; above a few dozen values they should become a
   parameter (a `choice` over the values, like `acronym`), not tags.
 - Ontologies without `rdfs:label` or `rdfs:comment` fall back to local names and templates; expect to tune the

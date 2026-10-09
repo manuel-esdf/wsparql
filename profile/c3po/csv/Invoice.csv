@@ -1,0 +1,97 @@
+id,reimbursedAgainstProject,incurredByEmployee,incurredDuringTravel,invoiceDate,supplierName,invoiceAmount
+invoice1,FAIR-IMPACT,Employee1,travel_KoM_Kick_-_Off_Meeting,2022-06-08,SNCF,164.0
+invoice2,FAIR-IMPACT,Employee1,travel_KoM_Kick_-_Off_Meeting,2022-06-08,AIRFRANCE,255.05
+invoice3,FAIR-IMPACT,Employee1,travel_KoM_Kick_-_Off_Meeting,2022-06-26,NS Schipol,28.0
+invoice4,FAIR-IMPACT,Employee1,travel_KoM_Kick_-_Off_Meeting,2022-06-26,Hôtel Citiez,337.32
+invoice5,FAIR-IMPACT,Employee1,travel_KoM_Kick_-_Off_Meeting,2022-06-26,Hôtel Citiez - Repas,33.0
+invoice6,FAIR-IMPACT,Employee1,travel_KoM_Kick_-_Off_Meeting,2022-06-26,Red Elephant,25.25
+invoice7,FAIR-IMPACT,Employee1,travel_KoM_Kick_-_Off_Meeting,2022-06-27,InDeWaag,53.45
+invoice8,FAIR-IMPACT,Employee1,travel_KoM_Kick_-_Off_Meeting,2022-06-28,Bird Restaurant,25.5
+invoice9,FAIR-IMPACT,Employee1,travel_KoM_Kick_-_Off_Meeting,2022-06-29,RAPT métro,1.9
+invoice10,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2023,2023-09-18,SNCF,216.0
+invoice11,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2023,2023-09-18,SNCF,283.0
+invoice12,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2023,2023-09-28,Retrait Bancaire,100.0
+invoice13,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2023,2023-10-01,Relay,12.2
+invoice14,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2023,2023-10-05,Schloss Dagstuhl,420.0
+invoice15,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2023,2023-10-06,Brioche Dorée,12.0
+invoice16,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2023,2023-10-06,UBER,19.7
+invoice17,FAIR-IMPACT,Employee3,travel_All_Hands_Meeting,2023-07-20,Moxy Hôtel,382.5
+invoice18,FAIR-IMPACT,Employee3,travel_All_Hands_Meeting,2023-07-20,Easy Jet,126.0
+invoice19,FAIR-IMPACT,Employee3,travel_All_Hands_Meeting,2023-08-12,KLM,113.65
+invoice20,FAIR-IMPACT,Employee3,travel_All_Hands_Meeting,2023-10-03,Schipol Airport Bus,10.8
+invoice21,FAIR-IMPACT,Employee3,travel_All_Hands_Meeting,2023-10-06,Moxy Hôtel,16.05
+invoice22,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-07,AIRFRANCE,319.67
+invoice23,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-26,Valk Hotel Leiden,543.65
+invoice24,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-22,Resto Verboden Toegang,78.25
+invoice25,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-23,Resto Crabbetje,100.0
+invoice26,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-25,Resto Siri Thai,55.0
+invoice27,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-22,TAXI,12.9
+invoice28,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-22,UBER,14.0
+invoice29,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-21,SNCF,6.9
+invoice30,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-25,SNCF,6.9
+invoice31,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-21,UBER,25.34
+invoice32,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-21,UBER,19.35
+invoice33,FAIR-IMPACT,Employee1,travel_Lorentz_Workshop,2024-01-25,UBER,24.17
+invoice34,FAIR-IMPACT,Employee1,travel_SemanticsRoche_2024,2024-05-07,SNCF,150.2
+invoice35,FAIR-IMPACT,Employee1,travel_SemanticsRoche_2024,2024-05-06,SNCF,119.6
+invoice36,FAIR-IMPACT,Employee1,travel_SemanticsRoche_2024,2024-05-28,Hôtel,243.0
+invoice37,FAIR-IMPACT,Employee1,travel_SemanticsRoche_2024,2024-05-28,Hôtel,13.50
+invoice38,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-06-07,Inscription,650.0
+invoice39,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-06-23,AIRFRANCE,312.65
+invoice40,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-14,UBER,26.13
+invoice41,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-14,SNCF,28.84
+invoice42,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-15,TAXI,26.52
+invoice43,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-15,TAXI,22.5
+invoice44,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-16,BUS,2.6
+invoice45,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-17,BUS,2.6
+invoice46,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-17,BUS,2.6
+invoice47,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-18,IntercityHotel,20.7
+invoice48,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-18,BUS,2.6
+invoice49,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-18,SNCF,28.79
+invoice50,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-19,IntercityHotel,652.5
+invoice51,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-19,IntercityHotel,14.5
+invoice52,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-19,UBER,24.63
+invoice53,FAIR-IMPACT,Employee1,travel_FOIS_2024,2024-07-19,TAXI,21.92
+invoice54,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2024,2024-09-14,SNCF,386.0
+invoice55,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2024,2024-10-12,Bus - DB,10.2
+invoice56,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2024,2024-10-13,Restaurant - JOMY,29.5
+invoice57,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2024,2024-10-14,Bus - DB,8.7
+invoice58,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2024,2024-10-14,Alimentation - Paul,16.7
+invoice59,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2024,2024-10-17,Inscription,445.6
+invoice60,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2024,2024-10-18,Alimentation - Prêt à Manger,26.25
+invoice61,FAIR-IMPACT,Employee1,travel_Dagstuhl_Workshop_2024,2024-10-18,UBER,23.9
+invoice62,FAIR-IMPACT,Employee1,travel_FAIRFest_Festival,2025-02-06,AIRFRANCE,645.4
+invoice63,FAIR-IMPACT,Employee1,travel_FAIRFest_Festival,2025-02-06,AIRFRANCE,98.0
+invoice64,FAIR-IMPACT,Employee1,travel_FAIRFest_Festival,2025-02-19,AIRFRANCE,25.97
+invoice65,FAIR-IMPACT,Employee1,travel_FAIRFest_Festival,2025-02-19,AIRFRANCE,37.0
+invoice66,FAIR-IMPACT,Employee1,travel_FAIRFest_Festival,2025-02-19,AIRFRANCE,10.6
+invoice67,FAIR-IMPACT,Employee1,travel_FAIRFest_Festival,2025-02-21,Hotel Radisson -Transport aéroport,22.88
+invoice68,FAIR-IMPACT,Employee1,travel_FAIRFest_Festival,2025-02-21,AIRFRANCE,194.4
+invoice69,FAIR-IMPACT,Employee1,travel_FAIRFest_Festival,2025-02-21,Alimentation - Cafeteria Kraco,10.6
+invoice70,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-09-14,AIRFRANCE,1184.38
+invoice71,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-09-26,AIRFRANCE,11.0
+invoice72,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-09-26,AIRFRANCE,30.99
+invoice73,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-09-26,AIRFRANCE,26.99
+invoice74,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-09-26,AIRFRANCE,11.0
+invoice75,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-08,Hotel Radisson -Transport aéroport,32.68
+invoice76,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-10,AIRFRANCE,75.0
+invoice77,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-11,Alimentation - Cafeteria Kraco,17.71
+invoice78,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-12,Restaurant - Ciros,14.51
+invoice79,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-12,UBER,5.15
+invoice80,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-12,UBER,4.43
+invoice81,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-12,UBER,0.92
+invoice82,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-12,UBER,0.92
+invoice83,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-13,UBER,5.5
+invoice84,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-13,UBER,5.0
+invoice85,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-13,UBER,0.93
+invoice86,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-13,UBER,0.93
+invoice87,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-14,Alimentation - Caoccios Latina,7.72
+invoice88,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-15,Restaurant - Nuestra ti,39.75
+invoice89,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-15,UBER,7.35
+invoice90,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-15,UBER,3.01
+invoice91,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-15,UBER,0.94
+invoice92,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-15,UBER,0.94
+invoice93,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-15,VIP LOUNGE AIRPORT,32.24
+invoice94,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-15,Hotel Radisson,531.91
+invoice95,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-16,UBER,29.57
+invoice96,FAIR-IMPACT,Employee1,travel_RDA_P23,2024-11-16,Alimentation - Paul,17.0

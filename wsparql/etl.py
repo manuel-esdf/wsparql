@@ -18,16 +18,17 @@ def build(path):
     an ill-typed value or a dangling reference."""
     path = Path(path)
     tbox = Graph().parse(path / "tbox.ttl")
-    ns = Namespace(dict(tbox.namespaces())["ex"])  # ponytail: the profile prefix is ex in queries and ontology alike
     name = lambda nodes: {slug(words(n, tbox)): n for n in nodes}  # label -> term; opaque IRIs carry no name
     classes = name(tbox.subjects(RDF.type, OWL.Class))
+    prefix, ns, _ = tbox.compute_qname(next(iter(classes.values())))  # the profile prefix is the one the TBOX classes use (ex, c3po)
+    ns = Namespace(ns)
     objs = set(tbox.subjects(RDF.type, OWL.ObjectProperty))
     rng = {p: tbox.value(p, RDFS.range) for p in tbox.subjects(RDF.type, OWL.DatatypeProperty)}
     props = name(objs | set(rng))
     # ponytail: a CSV row id that slugs like a TBOX individual label (a supplier called Travel) resolves to the individual
     individuals = name(i for i, c in tbox.subject_objects(RDF.type) if (c, RDF.type, OWL.Class) in tbox)
     g = Graph(bind_namespaces="core")
-    g.bind("ex", ns)
+    g.bind(prefix, ns)
     for f in sorted((path / "csv").glob("*.csv")):
         if (cls := classes.get(slug(f.stem))) is None:
             raise ValueError(f"{f.name}: no class of tbox.ttl is labeled {f.stem}")

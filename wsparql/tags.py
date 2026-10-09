@@ -45,9 +45,10 @@ def generate(path):
     def add(tag, node, default, source):
         out.setdefault(tag, (str(tbox.value(node, RDFS.comment) or default), source))
 
-    # R1: classes with enough individuals in TBOX + ABOX
+    # R1: classes with enough individuals in TBOX + ABOX, those of their TBOX subclasses included (a row is typed by its
+    # leaf class only, no inference: employee counts the internal and external employees)
     for c in sorted(tbox.subjects(RDF.type, OWL.Class)):
-        if len(set(g.subjects(RDF.type, c))) >= MIN_INDIVIDUALS:
+        if len({s for sub in tbox.transitive_subjects(RDFS.subClassOf, c) for s in g.subjects(RDF.type, sub)}) >= MIN_INDIVIDUALS:
             add(slug(words(c, tbox)), c, f"The question concerns: {words(c, tbox)}", f"class {qn(c)}")
     # R2: individuals declared in the TBOX are controlled vocabulary (ABOX individuals are parameter values, not tags)
     for i, c in sorted(tbox.subject_objects(RDF.type)):
