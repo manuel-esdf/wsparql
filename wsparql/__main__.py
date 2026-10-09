@@ -123,7 +123,7 @@ def main():
     sub.add_parser("tags-gen", help="derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya")
     sub.add_parser("query-tags", help="Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5")
     sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag of the dictionary)").add_argument("question", nargs="?", help=default_q)
-    sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 3); question tags from the cache when the question is cached, else Ollaya; query tags from the latest query-tags run").add_argument("question", nargs="?", help=default_q)
+    sub.add_parser("candidates", help="rank catalog queries by tag overlap (top 5); question tags from the cache when the question is cached, else Ollaya; query tags from the latest query-tags run").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("select", help="rank candidates, then Ollaya picks the best query or none (choice question)").add_argument("question", nargs="?", help=default_q)
     pa = sub.add_parser("params", help="extract the query parameters found in a question: acronym (Ollaya choice over ABOX projects + none), from/to (regex); lists every catalog parameter and the queries needing it")
     pa.add_argument("question", nargs="?", help="no question = run on every test question whose expected query takes parameters")
@@ -132,7 +132,7 @@ def main():
     sub.add_parser("eval", help="full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-cache run_id: expected query selected and returns rows, none answers no suitable query; rows stored in profile/profile.db eval_result; exit 1 on any mismatch")
     sub.add_parser("eval-direct", help="baseline without tags: for each tests/test-questions.yaml question that has an expected_query, one Ollaya choice over the raw SPARQL of all catalog queries + none, then parameters and run; exit 1 on any mismatch")
     sub.add_parser("tags-cache", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
-    sub.add_parser("abox", help="ETL: build abox.ttl from tbox.ttl + csv/*.csv; file = class, column = property, id = IRI local name, | separates values; the TBOX types the values, owl:inverseOf pairs are materialised")
+    sub.add_parser("abox", help="ETL: build abox.ttl from tbox.ttl + csv/*.csv; file = class, column = property, id = IRI local name, | separates values; the TBOX types the values; no inference")
     args = p.parse_args()
     if args.cmd == "abox":  # before Profile(), which parses the file being generated
         out, n = etl.write(args.profile)

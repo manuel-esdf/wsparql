@@ -1,12 +1,13 @@
 PREFIX ex: <https://example.org/eu-expense#>
 SELECT ?expense ?description ?date ?amount
 WHERE {
+  ?project a ex:EuropeanProject ; ex:acronym ?acronym .
+  ?workPackage ex:belongsToProject ?project .
   ?expense a ex:Expense ;
-           ex:chargedToProject ?project ;
+           ex:chargedToWorkPackage ?workPackage ;
            ex:description ?description ;
            ex:expenseDate ?date ;
            ex:amount ?amount .
-  ?project ex:acronym ?acronym .
   FILTER(?date >= ?from && ?date <= ?to)
 }
 ORDER BY ?date

@@ -27,7 +27,7 @@ names are free to differ from the old ones.
 | Tag dictionary | `make tags-gen` | `tbox.ttl` + `abox.ttl`, rules below, no Ollaya | table `tags` |
 | Query tags | `make query-tags` | Ollaya `noul` per tag on each catalog query `description` | table `query_tags` |
 | Question tags | `make tags-cache`, `make ask` | Ollaya `noul` per tag on the question | table `tag_cache` |
-| Candidates | `make candidates` | unchanged: mean question-tag probability over the query's tags, top 3 | |
+| Candidates | `make candidates` | unchanged: mean question-tag probability over the query's tags, top 5 (3 until profile 1.3.0) | |
 | Baseline without tags | `make eval-direct` | one Ollaya `choice` over the raw SPARQL text of all 10 queries + `none`, then parameters and run | printed only |
 | Fallback | `make ask`, `make eval` | the same direct `choice`, run only when the tag route answers `none`; its answer is final | `eval_result` (the `via` column of `make eval` says which route answered) |
 
@@ -59,10 +59,10 @@ file: the TBOX is the schema, and the CSV names are the ontology names.
 | file stem `Expense.csv` | `ex:E003 a ex:Expense` | must be an `owl:Class` of the TBOX |
 | column `id` | the IRI local name | convention |
 | column `amount`, `expenseDate`, `eligible`, `name` | typed literal `680.00`, `"2026-02-12"^^xsd:date`, `true`, plain string | `owl:DatatypeProperty`, its `rdfs:range` (`xsd:string` → plain literal, as hand-written Turtle has it) |
-| column `chargedToProject`, `category`, `supplier` | reference `ex:LUMEN`, `ex:Travel`, `ex:Eurostar` | `owl:ObjectProperty` |
+| column `chargedToWorkPackage`, `category`, `supplier` | reference `ex:LUMEN-WP4`, `ex:Travel`, `ex:Eurostar` | `owl:ObjectProperty` |
 | cell `LUMEN\|GRAPHIA\|OPENSCIENCE` | three triples | `\|` separates values |
 | empty cell | no triple | `E001` has no supplier |
-| `WorkPackage.csv` column `belongsToProject` | both `ex:belongsToProject` and `ex:hasWorkPackage` | `owl:inverseOf` in the TBOX (the one axiom added for this), both directions materialised |
+| no `chargedToProject` column, no `hasWorkPackage` property | nothing: the queries join `?workPackage ex:belongsToProject ?project . ?expense ex:chargedToWorkPackage ?workPackage` | no inference: a relation is stored once, in one direction; no `owl:inverseOf`, no derived triples |
 
 The build fails, naming file, row and column, on an unknown file or column, an empty `id`, a value that does not
 parse as its range (`2026-13-01`, rdflib's `Literal.ill_typed`) and on a reference to an IRI that is neither a CSV
@@ -70,10 +70,12 @@ row nor a TBOX subject. The TBOX individuals are the controlled vocabulary of R2
 their ids (`Personnel`, `OtherGoodsServices`) and resolve without a lookup; the ABOX individuals that R1 counts and
 that `extract_params` offers as parameter values are the CSV rows. Same split as in the tag rules.
 
-Result: 196 triples, the same set as the hand-written `abox.ttl` (no blank nodes, so set equality is graph equality);
+Result: 179 triples (196 before `ex:chargedToProject` and `ex:hasWorkPackage` were dropped, then the same set as the hand-written `abox.ttl`; no blank nodes, so set equality is graph equality);
 `make test` rebuilds the graph from the CSV files and compares it with the committed file, so an edited csv without
 `make abox` fails the tests and prints the differing triple. Queries (same row counts), the 23 tags, the caches and the
-eval (40/40 with the fallback, 35/40 tag route alone, same as the previous eval) are unchanged, `VERSION` stays 1.1.0.
+eval (40/40 with the fallback, 35/40 tag route alone) were unchanged by the ETL step (`VERSION` stayed 1.1.0). Dropping
+`ex:chargedToProject` and `ex:hasWorkPackage` is profile 1.2.0: it reworded the six project queries, which the fallback
+reads, see the README section "Fallback" for the wording that keeps 40/40.
 The committed `abox.ttl` is now rdflib's serialisation, sorted by subject; the CSV files are the readable form.
 
 Limits: headers equal ontology names (a mapping file is the upgrade when real exports differ); one file per class, no
@@ -180,19 +182,19 @@ and the closest off-topic call, "Write a SPARQL query to list all suppliers.", m
 `pipeline.answer` therefore falls back to the direct choice whenever the tag route answers `none`. `make eval` with the
 fallback (the `via` column says which route answered; the 28 lines answered by the tag route are omitted):
 
-    tags: query tags run_id 9, question tags cache run_id 3
-    ok   [ 2] q01-total-expenses-by-project    q01-total-expenses-by-project    0.94 3 rows     fallback | What is the total amount spent on LUMEN so far?
-    ok   [ 5] q02-project-expense-breakdown    q02-project-expense-breakdown    0.70 3 rows     fallback | What did OPENSCIENCE spend on equipment?
-    ok   [ 6] q03-travel-expenses-by-project   q03-travel-expenses-by-project   0.95 3 rows     fallback | Compare travel costs between LUMEN and GRAPHIA.
-    ok   [16] q04-expenses-by-work-package     q04-expenses-by-work-package     0.99 5 rows     fallback | Which work package of GRAPHIA is the most expensive?
-    ok   [19] q05-budget-vs-spent              q05-budget-vs-spent              0.91 3 rows     fallback | What is the budget of each European project?
+    tags: query tags run_id 1, question tags cache run_id 2
+    ok   [ 2] q01-total-expenses-by-project    q01-total-expenses-by-project    0.95 3 rows     fallback | What is the total amount spent on LUMEN so far?
+    ok   [ 5] q02-project-expense-breakdown    q02-project-expense-breakdown    0.98 3 rows     fallback | What did OPENSCIENCE spend on equipment?
+    ok   [ 6] q03-travel-expenses-by-project   q03-travel-expenses-by-project   0.83 3 rows     fallback | Compare travel costs between LUMEN and GRAPHIA.
+    ok   [16] q04-expenses-by-work-package     q04-expenses-by-work-package     0.98 5 rows     fallback | Which work package of GRAPHIA is the most expensive?
+    ok   [19] q05-budget-vs-spent              q05-budget-vs-spent              0.86 3 rows     fallback | What is the budget of each European project?
     ok   [37] none                             none                             0.98 -          fallback | List every expense above 5000 euros.
-    ok   [45] none                             none                             0.94 -          fallback | Which German suppliers have we worked with?
-    ok   [46] none                             none                             1.00 -          fallback | When does the LUMEN grant agreement end?
+    ok   [45] none                             none                             0.93 -          fallback | Which German suppliers have we worked with?
+    ok   [46] none                             none                             0.99 -          fallback | When does the LUMEN grant agreement end?
     ok   [47] none                             none                             1.00 -          fallback | How many employees work on OPENSCIENCE?
     ok   [48] none                             none                             1.00 -          fallback | What is the weather like in Brussels today?
     ok   [49] none                             none                             1.00 -          fallback | Can you book me a train to Paris next Monday?
-    ok   [50] none                             none                             0.63 -          fallback | Write a SPARQL query to list all suppliers.
+    ok   [50] none                             none                             0.81 -          fallback | Write a SPARQL query to list all suppliers.
     40/40 with the direct fallback, 35/40 tag route alone (skipped 19 questions without expected_query)
 
 - **40/40**: the fallback runs 12 times, on the 5 tag misses and the 7 off-topic questions, gets all 5 misses right and
@@ -201,15 +203,16 @@ fallback (the `via` column says which route answered; the 28 lines answered by t
   question carries neither `european-project` nor `breakdown`, so q02 is not among its 3 candidates and `none` is the
   right answer over q05, q06 and q01), and the raw SPARQL of q02 names no category (`?category ex:name ?categoryName`).
   The "computes or contains among its rows" clause above is what lets a breakdown answer a one-category question.
-- The closest call is "Write a SPARQL query to list all suppliers.", `none` at 0.63: a question that talks about SPARQL
-  while Ollaya reads raw SPARQL is the weak spot of this route.
+- The closest call is "Write a SPARQL query to list all suppliers.", `none` at 0.81 (0.63 before profile 1.2.0): a
+  question that talks about SPARQL while Ollaya reads raw SPARQL is the weak spot of this route, and the raw text of
+  every query moves it (README, "Fallback").
 - Cost: one extra `choice` over the 10 raw queries per `none` answer, so the off-topic questions are now the most
   expensive ones (two choices). The 35/40 of the tag route alone stays visible on the summary line, so the tag wording
   can still be tuned without the fallback masking it.
 - The fallback only helps while the tag misses are `none` rather than a wrong query: a wrong selection is final.
 
 The tag stage therefore buys no accuracy here; it buys explainability (tag and candidate tables) and a choice over
-3 short descriptions instead of 10 full queries, which matters once the catalog outgrows one `choice`.
+5 short descriptions instead of 10 full queries, which matters once the catalog outgrows one `choice`.
 
 Tried after that, no gain: an acronym hint to the tagger. The tag route cannot see q02 for q_id 5 because OPENSCIENCE
 is not recognized as a project (`european-project` 0.28). Appending "(LUMEN, GRAPHIA or OPENSCIENCE)" to the
@@ -220,6 +223,28 @@ and q08: the expected query is in the top 3 for 30/33 instead of 31/33 (q_id 15 
 40/40 with the fallback. Adding `european-project` to the tags of q03, q04, q05 and q10 by hand does not restore it
 (candidate misses 16, 17, 57), and putting the hint in the question state instead changes every tag and drops the top 3
 to 24/33. Not adopted; the `make eval` numbers above are without it.
+
+Tried after that, no gain: tags for object properties (profile 1.2.0 → scratch 1.3.0, a rule R3b between R3 and R4,
+one tag per `owl:ObjectProperty` with the template description). 5 new tags, `belongs-to-project`,
+`charged-to-work-package`, `related-employee`, `incurred-by`, `participates-in` (the labels of `ex:supplier` and
+`ex:category` clash with the class tags and are dropped by first-rule-wins), 28 in all. They are relation tags, and
+relations do not discriminate: `incurred-by` holds on every expense and Ollaya detects it on all 10 query descriptions
+and on 43 of the 59 questions, `belongs-to-project` on 7 queries and 31 questions; every query grows by 2–3 tags
+(q04: 6 → 9) and the plain mean dilutes exactly as with the 11-tag q02. Result: the expected query is in the top 3 for
+31/33 with the same two misses (q_id 5 and 16: for "Which work package of GRAPHIA is the most expensive?"
+`charged-to-work-package` fires at 0.96 but so do `belongs-to-project` and `budget`, which lift q05 above q04), 35/40
+tag route alone, 40/40 with the fallback, and no question changes its selected query or moves its confidence by more
+than 0.1. Not adopted; `rdfs:comment`s on the properties would change the wording, not the fact that a relation shared
+by every expense cannot rank them.
+
+On the 109-question set (profile 1.3.0, query tags run_id 3, question tags run_id 4; 87 labeled, 73 in-domain) the
+baseline with the same 23 tags is 86/87 with the fallback, 71/87 tag route alone, 81/87 direct alone, and the experiments
+above were rerun there. Object-property tags: again 71/87 (the expected query reaches the top 5 for 73/73 instead of
+71/73, but no choice converts; stacked on the two changes below they give 77/87 alone and the first wrong-query
+selection, 85/87 combined). The "of each European project" descriptions: 66/87 alone, 85/87 combined. What moved the
+tag route: 5 candidates instead of 3 (74/87) and the fallback's "computes or contains among its rows" phrase in
+`pipeline.select` too (72/87), together **76/87** alone and 86/87 with the fallback. Both adopted, table in the README
+"Current score".
 
 ## Storage
 

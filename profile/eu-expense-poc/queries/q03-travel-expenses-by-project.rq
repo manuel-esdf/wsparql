@@ -1,8 +1,9 @@
 PREFIX ex: <https://example.org/eu-expense#>
 SELECT ?acronym (SUM(?amount) AS ?travelTotal)
 WHERE {
-  ?expense a ex:Expense ; ex:chargedToProject ?project ; ex:category ex:Travel ; ex:amount ?amount .
-  ?project ex:acronym ?acronym .
+  ?project a ex:EuropeanProject ; ex:acronym ?acronym .
+  ?workPackage ex:belongsToProject ?project .
+  ?expense a ex:Expense ; ex:chargedToWorkPackage ?workPackage ; ex:category ex:Travel ; ex:amount ?amount .
 }
 GROUP BY ?acronym
 ORDER BY DESC(?travelTotal)

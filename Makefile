@@ -44,7 +44,7 @@ query-tags: profile-check ## Ollaya assesses every tag of the dictionary against
 tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"; no Q = first tests/test-questions.yaml question
 	@$(RUN) tags "$(Q)"
 
-candidates: profile-check ## rank top 3 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
+candidates: profile-check ## rank top 5 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
 	@$(RUN) candidates "$(Q)"
 
 select: profile-check ## rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question

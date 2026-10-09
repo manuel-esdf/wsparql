@@ -1,8 +1,9 @@
 PREFIX ex: <https://example.org/eu-expense#>
 SELECT ?project ?acronym (SUM(?amount) AS ?total)
 WHERE {
-  ?expense a ex:Expense ; ex:chargedToProject ?project ; ex:amount ?amount .
-  ?project ex:acronym ?acronym .
+  ?project a ex:EuropeanProject ; ex:acronym ?acronym .
+  ?workPackage ex:belongsToProject ?project .
+  ?expense a ex:Expense ; ex:chargedToWorkPackage ?workPackage ; ex:amount ?amount .
 }
 GROUP BY ?project ?acronym
 ORDER BY DESC(?total)

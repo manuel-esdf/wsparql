@@ -26,10 +26,6 @@ ex:participatesIn a owl:ObjectProperty ;
   rdfs:domain ex:Company ; rdfs:range ex:EuropeanProject ;
   rdfs:label "participates in" .
 
-ex:hasWorkPackage a owl:ObjectProperty ;
-  rdfs:domain ex:EuropeanProject ; rdfs:range ex:WorkPackage ;
-  rdfs:label "has work package" ; owl:inverseOf ex:belongsToProject .
-
 ex:belongsToProject a owl:ObjectProperty ;
   rdfs:domain ex:WorkPackage ; rdfs:range ex:EuropeanProject ;
   rdfs:label "belongs to project" .
@@ -37,10 +33,6 @@ ex:belongsToProject a owl:ObjectProperty ;
 ex:incurredBy a owl:ObjectProperty ;
   rdfs:domain ex:Expense ; rdfs:range ex:Company ;
   rdfs:label "incurred by" .
-
-ex:chargedToProject a owl:ObjectProperty ;
-  rdfs:domain ex:Expense ; rdfs:range ex:EuropeanProject ;
-  rdfs:label "charged to project" .
 
 ex:chargedToWorkPackage a owl:ObjectProperty ;
   rdfs:domain ex:Expense ; rdfs:range ex:WorkPackage ;

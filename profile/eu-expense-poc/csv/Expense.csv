@@ -1,13 +1,13 @@
-id,description,amount,expenseDate,eligible,incurredBy,chargedToProject,chargedToWorkPackage,category,employee,supplier
-E001,Alice - January personnel cost,8200.00,2026-01-31,true,ESDF,LUMEN,LUMEN-WP2,Personnel,AliceMartin,
-E002,Bob - January personnel cost,7600.00,2026-01-31,true,ESDF,LUMEN,LUMEN-WP4,Personnel,BobDurand,
-E003,Trip to Brussels consortium meeting,680.00,2026-02-12,true,ESDF,LUMEN,LUMEN-WP4,Travel,AliceMartin,Eurostar
-E004,Semantic architecture consultancy,12500.00,2026-03-15,true,ESDF,LUMEN,LUMEN-WP2,Subcontracting,,SemanticConsulting
-E005,Development laptop,2900.00,2026-03-20,true,ESDF,LUMEN,LUMEN-WP2,Equipment,AliceMartin,TechStore
-E006,Team dinner during project meeting,240.00,2026-03-21,false,ESDF,LUMEN,LUMEN-WP2,OtherGoodsServices,,
-E007,Claire - February personnel cost,7900.00,2026-02-28,true,ESDF,GRAPHIA,GRAPHIA-WP3,Personnel,ClaireRoux,
-E008,Flight to Vienna review meeting,920.00,2026-04-03,true,ESDF,GRAPHIA,GRAPHIA-WP3,Travel,ClaireRoux,AirFrance
-E009,Cloud hosting for graph pipeline,3600.00,2026-04-30,true,ESDF,GRAPHIA,GRAPHIA-WP1,OtherGoodsServices,,CloudHost
-E010,Bob - May personnel cost,7600.00,2026-05-31,true,ESDF,OPENSCIENCE,OPENSCIENCE-WP2,Personnel,BobDurand,
-E011,Travel to Paris interoperability workshop,410.00,2026-06-14,true,ESDF,OPENSCIENCE,OPENSCIENCE-WP2,Travel,BobDurand,Eurostar
-E012,External API subscription,1200.00,2026-06-30,true,ESDF,OPENSCIENCE,OPENSCIENCE-WP2,OtherGoodsServices,,CloudHost
+id,description,amount,expenseDate,eligible,incurredBy,chargedToWorkPackage,category,employee,supplier
+E001,Alice - January personnel cost,8200.00,2026-01-31,true,ESDF,LUMEN-WP2,Personnel,AliceMartin,
+E002,Bob - January personnel cost,7600.00,2026-01-31,true,ESDF,LUMEN-WP4,Personnel,BobDurand,
+E003,Trip to Brussels consortium meeting,680.00,2026-02-12,true,ESDF,LUMEN-WP4,Travel,AliceMartin,Eurostar
+E004,Semantic architecture consultancy,12500.00,2026-03-15,true,ESDF,LUMEN-WP2,Subcontracting,,SemanticConsulting
+E005,Development laptop,2900.00,2026-03-20,true,ESDF,LUMEN-WP2,Equipment,AliceMartin,TechStore
+E006,Team dinner during project meeting,240.00,2026-03-21,false,ESDF,LUMEN-WP2,OtherGoodsServices,,
+E007,Claire - February personnel cost,7900.00,2026-02-28,true,ESDF,GRAPHIA-WP3,Personnel,ClaireRoux,
+E008,Flight to Vienna review meeting,920.00,2026-04-03,true,ESDF,GRAPHIA-WP3,Travel,ClaireRoux,AirFrance
+E009,Cloud hosting for graph pipeline,3600.00,2026-04-30,true,ESDF,GRAPHIA-WP1,OtherGoodsServices,,CloudHost
+E010,Bob - May personnel cost,7600.00,2026-05-31,true,ESDF,OPENSCIENCE-WP2,Personnel,BobDurand,
+E011,Travel to Paris interoperability workshop,410.00,2026-06-14,true,ESDF,OPENSCIENCE-WP2,Travel,BobDurand,Eurostar
+E012,External API subscription,1200.00,2026-06-30,true,ESDF,OPENSCIENCE-WP2,OtherGoodsServices,,CloudHost

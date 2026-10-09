@@ -2,7 +2,10 @@ PREFIX ex: <https://example.org/eu-expense#>
 SELECT ?project ?acronym ?budget (SUM(?amount) AS ?spent) (?budget - SUM(?amount) AS ?remaining)
 WHERE {
   ?project a ex:EuropeanProject ; ex:acronym ?acronym ; ex:budget ?budget .
-  OPTIONAL { ?expense a ex:Expense ; ex:chargedToProject ?project ; ex:amount ?amount . }
+  OPTIONAL {
+    ?workPackage ex:belongsToProject ?project .
+    ?expense a ex:Expense ; ex:chargedToWorkPackage ?workPackage ; ex:amount ?amount .
+  }
 }
 GROUP BY ?project ?acronym ?budget
 ORDER BY ?acronym

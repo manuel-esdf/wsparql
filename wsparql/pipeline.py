@@ -8,9 +8,10 @@ from wsparql import ollaya
 TAG_THRESHOLD = 0.5  # ponytail: a query's tags = those Ollaya detected at >= 0.5 on its description; the probabilities stay in query_tags
 
 
-def candidates(tag_probs, catalog, k=3):
+def candidates(tag_probs, catalog, k=5):
     """Rank catalog queries by the mean detected probability of their tags; returns the top k as [(qid, score)]."""
     # ponytail: plain mean; a query with a wide tag list is diluted: tighten its description (IDF weighting tested offline, no gain)
+    # k=5: on the 109-question set the expected query is in the top 3 for 66/73 in-domain questions, in the top 5 for 71/73
     scored = [(qid, sum(tag_probs.get(t, 0.0) for t in q["tags"]) / len(q["tags"])) for qid, q in catalog.items()]
     return sorted(scored, key=lambda x: -x[1])[:k]
 
@@ -19,7 +20,7 @@ MIN_CONFIDENCE = 0.4  # ponytail: fixed threshold; tune after `make eval` if it 
 NONE = "none"
 SELECT_INSTRUCTIONS = ("The queries are templates: the project, employee, supplier and dates named in the question are filled in "
                        "afterwards. Which query computes the answer? Pick none only for an off-topic question or an answer no "
-                       "query can compute.")
+                       "query computes or contains among its rows.")
 
 
 NONE_CRITERION = "Off-topic, or none of these queries computes the requested answer even with its parameters filled in"

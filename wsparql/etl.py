@@ -1,7 +1,7 @@
 """Minimal ETL: csv/*.csv + tbox.ttl -> abox.ttl. Convention, the TBOX is the schema: file stem = class, column = property
 local name, `id` = IRI local name, `|` separates several values in a cell, empty cell = no triple. The TBOX decides whether
-a column is a reference (owl:ObjectProperty) or a literal and its datatype (rdfs:range); owl:inverseOf pairs are
-materialised so a relation is stored once."""
+a column is a reference (owl:ObjectProperty) or a literal and its datatype (rdfs:range). No inference: a relation is
+stored once, in one direction, and queries walk it with property paths."""
 import csv
 from pathlib import Path
 
@@ -46,10 +46,6 @@ def build(path):
                             if lit.ill_typed:
                                 raise ValueError(f"{f.name} {rid}.{col}: {v!r} is not a valid {rng[p].fragment}")
                             g.add((s, p, lit))
-    for p, q in list(tbox.subject_objects(OWL.inverseOf)):
-        for a, b in (p, q), (q, p):
-            for s, o in list(g.subject_objects(a)):
-                g.add((o, b, s))
     known = set(g.subjects()) | set(tbox.subjects())  # TBOX individuals (expense categories) are valid references
     if dangling := {o for p in objs for o in g.objects(None, p)} - known:
         raise ValueError("unknown references: " + ", ".join(sorted(o.fragment for o in dangling)))

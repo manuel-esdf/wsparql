@@ -59,3 +59,53 @@ questions:
   - {q_id: 57, question: "Which suppliers cost us the most?", expected_query: q08-expenses-by-supplier}
   - {q_id: 58, question: "How have our expenses evolved month by month?", expected_query: q09-monthly-expenses}
   - {q_id: 59, question: "List LUMEN expenses for Q1 2026", expected_query: q10-project-expenses-in-period}
+  - {q_id: 60, question: "Rank European projects from highest to lowest total spending.", expected_query: q01-total-expenses-by-project}
+  - {q_id: 61, question: "How much has each project spent altogether?", expected_query: q01-total-expenses-by-project}
+  - {q_id: 62, question: "What is GRAPHIA's cumulative expenditure?", expected_query: q01-total-expenses-by-project}
+  - {q_id: 63, question: "Compare the overall costs of LUMEN and OPENSCIENCE.", expected_query: q01-total-expenses-by-project}
+  - {q_id: 64, question: "Split LUMEN expenditure by cost category.", expected_query: q02-project-expense-breakdown}
+  - {q_id: 65, question: "How much did GRAPHIA spend in each expense category?", expected_query: q02-project-expense-breakdown}
+  - {q_id: 66, question: "What were LUMEN's subcontracting costs?", expected_query: q02-project-expense-breakdown}
+  - {q_id: 67, question: "Show the personnel expenditure for OPENSCIENCE.", expected_query: q02-project-expense-breakdown}
+  - {q_id: 68, question: "Which project has the largest travel bill?", expected_query: q03-travel-expenses-by-project}
+  - {q_id: 69, question: "Give the travel expenditure total for every project.", expected_query: q03-travel-expenses-by-project}
+  - {q_id: 70, question: "How much did LUMEN spend on travel?", expected_query: q03-travel-expenses-by-project}
+  - {q_id: 71, question: "Compare GRAPHIA and OPENSCIENCE travel spending.", expected_query: q03-travel-expenses-by-project}
+  - {q_id: 72, question: "Rank work packages by their total costs.", expected_query: q04-expenses-by-work-package}
+  - {q_id: 73, question: "Give me the spending total for each work package.", expected_query: q04-expenses-by-work-package}
+  - {q_id: 74, question: "Which work package accounts for the most expenditure?", expected_query: q04-expenses-by-work-package}
+  - {q_id: 75, question: "Show a cost breakdown by work package.", expected_query: q04-expenses-by-work-package}
+  - {q_id: 76, question: "Show allocated budget, actual expenditure and unspent funds for each project.", expected_query: q05-budget-vs-spent}
+  - {q_id: 77, question: "What is LUMEN's remaining budget?", expected_query: q05-budget-vs-spent}
+  - {q_id: 78, question: "How much of GRAPHIA's budget is still available?", expected_query: q05-budget-vs-spent}
+  - {q_id: 79, question: "Compare project budgets with spending to date.", expected_query: q05-budget-vs-spent}
+  - {q_id: 80, question: "Which costs have been marked not eligible?", expected_query: q06-ineligible-expenses}
+  - {q_id: 81, question: "List the descriptions and amounts of ineligible expenses.", expected_query: q06-ineligible-expenses}
+  - {q_id: 82, question: "Show all expenses whose eligibility flag is false.", expected_query: q06-ineligible-expenses}
+  - {q_id: 83, question: "Which project was charged for the ineligible expenses?", expected_query: q06-ineligible-expenses}
+  - {q_id: 84, question: "Rank employees by their associated expense totals.", expected_query: q07-expenses-by-employee}
+  - {q_id: 85, question: "How much expenditure is associated with Alice Martin?", expected_query: q07-expenses-by-employee}
+  - {q_id: 86, question: "Compare total expenses for Bob Durand and Claire Roux.", expected_query: q07-expenses-by-employee}
+  - {q_id: 87, question: "Give a spending total for every employee.", expected_query: q07-expenses-by-employee}
+  - {q_id: 88, question: "Rank external providers by total expenditure.", expected_query: q08-expenses-by-supplier}
+  - {q_id: 89, question: "What is our total spending with CloudHost Europe?", expected_query: q08-expenses-by-supplier}
+  - {q_id: 90, question: "Compare the amounts paid to Eurostar and Air France.", expected_query: q08-expenses-by-supplier}
+  - {q_id: 91, question: "Show aggregate costs for each supplier.", expected_query: q08-expenses-by-supplier}
+  - {q_id: 92, question: "Show total expenditure grouped by year and month.", expected_query: q09-monthly-expenses}
+  - {q_id: 93, question: "How much did we spend in March 2026?", expected_query: q09-monthly-expenses}
+  - {q_id: 94, question: "Give me a month-by-month spending summary.", expected_query: q09-monthly-expenses}
+  - {q_id: 95, question: "Which month had the highest total expenditure?", expected_query: q09-monthly-expenses}
+  - {q_id: 96, question: "List GRAPHIA expenses for the second quarter of 2026.", expected_query: q10-project-expenses-in-period}
+  - {q_id: 97, question: "Show OPENSCIENCE expense records for June 2026.", expected_query: q10-project-expenses-in-period}
+  - {q_id: 98, question: "List LUMEN expenses during March 2026.", expected_query: q10-project-expenses-in-period}
+  - {q_id: 99, question: "Show GRAPHIA expenses between February and April 2026.", expected_query: q10-project-expenses-in-period}
+  - {q_id: 100, question: "What is the average expense amount across all projects?", expected_query: none}
+  - {q_id: 101, question: "How many invoices did each supplier issue?", expected_query: none}
+  - {q_id: 102, question: "List the start and end dates of every project.", expected_query: none}
+  - {q_id: 103, question: "Which suppliers are based in France?", expected_query: none}
+  - {q_id: 104, question: "Convert the project budgets from euros to US dollars.", expected_query: none}
+  - {q_id: 105, question: "Send the expense report to Alice by email.", expected_query: none}
+  - {q_id: 106, question: "Predict next year's travel spending.", expected_query: none}
+  - {q_id: 107, question: "Show employee travel costs by month."}
+  - {q_id: 108, question: "Give me a detailed report on GRAPHIA."}
+  - {q_id: 109, question: "Show supplier expenses for LUMEN in Q1 2026."}

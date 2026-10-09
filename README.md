@@ -30,7 +30,7 @@ each query are detected by Ollaya from the query description. Both live in `prof
 | Query tags (once per profile version) | `make query-tags` | one `noul` question per tag on each catalog query description; a query's tags = probability ≥ 0.5 |
 | Natural language question | `make ask Q="..."` | |
 | Detect relevant tags with Ollaya | `make tags` | one `noul` question per tag in a single `/v1/systemone` call, probability per tag |
-| Identify the most relevant SPARQL queries | `make candidates` | pure Python: mean detected probability over each query's tags, top 3 |
+| Identify the most relevant SPARQL queries | `make candidates` | pure Python: mean detected probability over each query's tags, top 5 |
 | Ollaya selects the best candidate | `make select` | one `choice` question over the 3 candidate descriptions plus `none`; `none` or confidence below 0.4 = no suitable query |
 | Fallback when that answer is `none` | `make ask` | one more `choice` over the raw SPARQL text of all 10 queries plus `none`; its answer is final |
 | Extract query parameters | `make params` | `acronym`: `choice` over the ABOX project acronyms plus `none`; `from`/`to`: regex on quarter, month name or year |
@@ -71,7 +71,7 @@ Ollaya only decides (probabilities, choices); it never generates or extracts fre
     tags-gen             derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya, instant. See GENERATE-TAGS-FROM-ONTOLOGY.md
     query-tags           Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5 (seconds per query on winnow)
     tags                 detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"; no Q = first tests/test-questions.yaml question
-    candidates           rank top 3 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
+    candidates           rank top 5 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
     select               rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question
     params               extract the query parameters found in Q (acronym: Ollaya choice over ABOX projects + none; from/to: regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
     ask                  answer Q end to end: tags, candidates, selected query (fallback: direct choice over the raw SPARQL when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
@@ -126,11 +126,38 @@ It reads the tags of one `run_id` only (never Ollaya) and stores one row per (pr
 `eval_result`, replaced on each run, so an eval is reproducible for a given `run_id` and the summary line says
 whether it matches the previous one.
 
-Current score on `profile/eu-expense-poc` with `winnow`, query tags run_id 9, question tags run_id 3: **40/40** with the
-direct fallback, **35/40** for the tag route alone, both printed by `make eval` (19 ambiguous questions are unlabeled
-and skipped; the hand-written tags scored 34/40).
-All 7 off-topic questions are answered "no suitable query" and every correctly selected query returns rows, including the
-parameterised ones. Three wordings got there:
+Current score on `profile/eu-expense-poc` with `winnow`, profile 1.3.0 (109 test questions, 87 labeled: 73 in-domain
+and 14 `none`; 22 ambiguous ones are unlabeled and skipped), query tags run_id 3, question tags run_id 4:
+**86/87** with the direct fallback, **76/87** for the tag route alone, both printed by `make eval`; `make eval-direct`
+**81/87**. The one shared miss is "Show the personnel expenditure for OPENSCIENCE." (expected q02): both routes answer
+`none` at 0.90, "personnel" reads as the employee query (its tags rank q07, q01, q05). The explored variants were rerun
+on this set against the 1.3.0 baseline, every one a scratch run with the files restored afterwards:
+
+| variant | with fallback | tag route alone | in-domain questions through the fallback |
+|---|---|---|---|
+| baseline: top 3 candidates, "no query can compute" | 86/87 | 71/87 | 16 |
+| top 5 candidates | 86/87 | 74/87 | 13 |
+| "computes or contains among its rows" in the tag-route choice too | 86/87 | 72/87 | 15 |
+| **both (adopted)** | **86/87** | **76/87** | 11 |
+| object-property tags (scratch 1.3.1, 28 tags) | 86/87 | 71/87 | 16 |
+| object-property tags + both | 85/87 | 77/87 | 9, and the first wrong query: "What is the total amount spent on LUMEN so far?" → q05 at 0.51 with rows, final |
+| q01, q03, q05 described as "... of each European project" (scratch 1.3.2) | 85/87 | 66/87 | 21 |
+| catalog description prepended to the raw SPARQL in `select_direct` | eval-direct 80/87 | | |
+
+Top 5 is the ranking fix: the expected query is in the top 3 for 66 of the 73 in-domain questions and in the top 5 for
+71 ("How much did GRAPHIA spend in each expense category?" and "What were LUMEN's subcontracting costs?" stay out, their
+tags rank q03 and q08 first). The 11 remaining tag-route `none` answers sit on the "Compare ..." descriptions of q01,
+q03 and q05 (q_id 2, 6, 19, 61, 62, 63, 71), on q02 one-category questions (65, 66, 67) and on 92. Rewording those
+descriptions is the variant that lost most: "of each European project" adds `european-project`, `list` and `breakdown`
+to the three queries (q03 6 → 10 tags) and the plain mean pushes 11 questions out of the top 3. The direct route's 6
+misses are still "one figure" questions whose answer is a row or a sum of the rows (percentage consumed, remaining
+budget, ineligible total, the personnel one above) plus "What is our total spending with CloudHost Europe?" at `none` 0.46.
+
+On the first test set (59 questions, 40 labeled, profile 1.2.0, query tags run_id 1, question tags run_id 2) the score
+was **40/40** with the direct fallback and **35/40** for the tag route alone (19 ambiguous questions unlabeled and
+skipped; the hand-written tags scored 34/40).
+All 7 off-topic questions were answered "no suitable query" and every correctly selected query returned rows, including
+the parameterised ones. Three wordings got there:
 
 - the q02 description: "Break down a project's expenses by cost category" made Ollaya tag it with every category plus
   `budget`, 11 tags, and the plain mean of `pipeline.candidates` diluted it out of the top 3 (IDF weighting was tested
@@ -146,18 +173,51 @@ parameterised ones. Three wordings got there:
 
 The 5 misses of the tag route are all `none` answers, so the fallback takes them: the direct choice over the raw SPARQL
 gets all 5 right and the 7 off-topic questions still get `none` (the closest call is "Write a SPARQL query to list all
-suppliers.", `none` at 0.63). The `via` column of `make eval` says which route answered each question.
+suppliers.", `none` at 0.81). The `via` column of `make eval` says which route answered each question.
+
+The fallback reads the raw query text, so the wording of the `.rq` files is part of the routing. Dropping the stored
+`ex:chargedToProject` (profile 1.2.0, no inference: the project of an expense is reached through its work package)
+first went through the path `ex:chargedToWorkPackage/ex:belongsToProject`: 38/40 (33/40 for the direct route alone),
+the equipment question falling to `none` 0.89 and the "Write a SPARQL query" question to q08 0.69, with the tag route
+untouched at 35/40 (it reads descriptions, not queries). The wording that restored 40/40, with wider margins than
+before, is an explicit join written project-first in all six project queries, `?project a ex:EuropeanProject ;
+ex:acronym ?acronym . ?workPackage ex:belongsToProject ?project . ?expense ... ex:chargedToWorkPackage ?workPackage`,
+plus `?acronym` in the SELECT of q02: q02 at 0.98 for the equipment question, `none` at 0.81 for the SPARQL one.
+Tried on the way, no gain: the same join expense-first (q02 0.83 → `none`), a `#` comment on q02 (worse, as before),
+and the join without the `a ex:EuropeanProject` type on `?project` (q5 `none` 0.89).
+Tried after that, no gain: the catalog description prepended to the raw SPARQL in `select_direct`. `make eval-direct`
+stays at 36/40 with a different miss: "Which project has the smallest remaining budget?" passes (q05 0.50) but the
+equipment question goes to `none` 0.91, and since the fallback shares `select_direct` that would cost 40/40 (the
+equipment question is one of the 5 the tag route misses). Not adopted.
+Also tried, no gain: the same "computes or contains among its rows" phrase in the tag route's `pipeline.select`
+instructions. `make eval` unchanged, 40/40 and 35/40, the same 5 questions through the fallback, 14 tag-route confidences
+move by at most 0.14 and no selection changes. The 3 tag-route `none` answers that are not ranking misses all land on a
+"Compare ..." description with the expected query among the candidates: "What is the total amount spent on LUMEN so
+far?" (`none` 0.59 against q01 0.39), "Compare travel costs between LUMEN and GRAPHIA." (`none` 0.88 against q03 0.11)
+and "What is the budget of each European project?" (`none` 0.92 against q05 0.07). The lever there is the description
+wording of q01, q03 and q05, not the instructions.
+Tried next, worse: those three descriptions reworded to what the rows hold, "Total expenses of each European project",
+"Travel expenses of each European project", "Budget, spent amount and remaining budget of each European project"
+(scratch profile 1.3.0, query tags run_id 3, question tags run_id 4): **39/40** with the fallback, **32/40** tag route
+alone. "of each European project" made Ollaya add `european-project`, `list` and `breakdown` to the three (q03 6 → 10
+tags, q05 4 → 8, q01 6 → 7) and the plain mean diluted again, as with the first q02 description: the budget-of-each-project
+question is won, but four others fall to `none` on the tag route ("How much budget is left on OPENSCIENCE?", "Compare
+the budget and the actual spending of every project.", "Rank the projects by travel spending." and the percentage
+question, which the fallback cannot answer either, hence 39/40), while the LUMEN total and the LUMEN/GRAPHIA travel
+comparison still get `none`. Not adopted; the 1.2.0 descriptions stay.
 An acronym hint to the tagger, "(LUMEN, GRAPHIA or OPENSCIENCE)" appended to the `european-project` tag description,
 was tried after that: it lets the tag route answer the equipment question but costs two others at the candidate stage,
 34/40 alone and 40/40 with the fallback, so it is not adopted (numbers in GENERATE-TAGS-FROM-ONTOLOGY.md).
 
 `make eval-direct` is the baseline without tags: for each labeled question, one `choice` over the raw SPARQL text of all
 10 queries plus `none`, then the same parameter extraction and run. It scores **36/40** on its own, with other misses than
-the tag route (all 4 are "one figure" questions on q05 and q06, "How much budget remains on each project?", "How much
-ineligible spending do we have in total?"); no question fails in both, which is why the two routes combined reach 40/40. On this catalog the tag stage does not buy
+the tag route (all 4 are "one figure" questions on q04, q05 and q06, "How is the LUMEN spending split across work
+packages?", "What percentage of the GRAPHIA budget has already been consumed?", "How much ineligible spending do we have
+in total?"); no question fails in both, which is why the two routes combined reach 40/40. On this catalog the tag stage does not buy
 accuracy by itself. It buys explainability (the tag and
-candidate tables) and a choice over 3 short descriptions instead of 10 full queries, which is what matters once the
-catalog grows past what one `choice` can hold.
+candidate tables) and a choice over 5 short descriptions instead of 10 full queries, which is what matters once the
+catalog grows past what one `choice` can hold. On the 109-question set the tag route does buy accuracy where the
+direct route cannot: 5 of its 6 misses are answered by the tag route (table above).
 
 ## Role of the Ontology
 

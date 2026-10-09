@@ -1,12 +1,13 @@
 PREFIX ex: <https://example.org/eu-expense#>
-SELECT ?categoryName (SUM(?amount) AS ?total)
+SELECT ?acronym ?categoryName (SUM(?amount) AS ?total)
 WHERE {
+  ?project a ex:EuropeanProject ; ex:acronym ?acronym .
+  ?workPackage ex:belongsToProject ?project .
   ?expense a ex:Expense ;
-           ex:chargedToProject ?project ;
+           ex:chargedToWorkPackage ?workPackage ;
            ex:category ?category ;
            ex:amount ?amount .
-  ?project ex:acronym ?acronym .
   ?category ex:name ?categoryName .
 }
-GROUP BY ?categoryName
+GROUP BY ?acronym ?categoryName
 ORDER BY DESC(?total)
