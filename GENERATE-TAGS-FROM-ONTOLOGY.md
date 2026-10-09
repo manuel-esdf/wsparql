@@ -23,6 +23,7 @@ names are free to differ from the old ones.
 
 | Stage | Command | Source | Stored in |
 |---|---|---|---|
+| Source data | `make abox` | `tbox.ttl` + `csv/*.csv`, the ETL below, no Ollaya | `abox.ttl` (derived, committed) |
 | Tag dictionary | `make tags-gen` | `tbox.ttl` + `abox.ttl`, rules below, no Ollaya | table `tags` |
 | Query tags | `make query-tags` | Ollaya `noul` per tag on each catalog query `description` | table `query_tags` |
 | Question tags | `make tags-cache`, `make ask` | Ollaya `noul` per tag on the question | table `tag_cache` |
@@ -46,6 +47,38 @@ and are untouched by this change.
 | remaining | none: q05 computes `budget - spent`; q05 keeps `budget` and `comparison` | dropped |
 
 11 tags are in the ontology, 8 are intents that no ontology contains, 1 is neither.
+
+## Source data: TBOX + CSV → ABOX (`wsparql/etl.py`)
+
+The ABOX is not an input any more. `make abox` builds `abox.ttl` from `tbox.ttl` and `csv/*.csv`, one file per class
+(`Company`, `EuropeanProject`, `WorkPackage`, `Employee`, `Supplier`, `Expense`, 29 rows in all). There is no mapping
+file: the TBOX is the schema, and the CSV names are the ontology names.
+
+| CSV | RDF | decided by |
+|---|---|---|
+| file stem `Expense.csv` | `ex:E003 a ex:Expense` | must be an `owl:Class` of the TBOX |
+| column `id` | the IRI local name | convention |
+| column `amount`, `expenseDate`, `eligible`, `name` | typed literal `680.00`, `"2026-02-12"^^xsd:date`, `true`, plain string | `owl:DatatypeProperty`, its `rdfs:range` (`xsd:string` → plain literal, as hand-written Turtle has it) |
+| column `chargedToProject`, `category`, `supplier` | reference `ex:LUMEN`, `ex:Travel`, `ex:Eurostar` | `owl:ObjectProperty` |
+| cell `LUMEN\|GRAPHIA\|OPENSCIENCE` | three triples | `\|` separates values |
+| empty cell | no triple | `E001` has no supplier |
+| `WorkPackage.csv` column `belongsToProject` | both `ex:belongsToProject` and `ex:hasWorkPackage` | `owl:inverseOf` in the TBOX (the one axiom added for this), both directions materialised |
+
+The build fails, naming file, row and column, on an unknown file or column, an empty `id`, a value that does not
+parse as its range (`2026-13-01`, rdflib's `Literal.ill_typed`) and on a reference to an IRI that is neither a CSV
+row nor a TBOX subject. The TBOX individuals are the controlled vocabulary of R2 below, so `category` cells hold
+their ids (`Personnel`, `OtherGoodsServices`) and resolve without a lookup; the ABOX individuals that R1 counts and
+that `extract_params` offers as parameter values are the CSV rows. Same split as in the tag rules.
+
+Result: 196 triples, the same set as the hand-written `abox.ttl` (no blank nodes, so set equality is graph equality);
+`make test` rebuilds the graph from the CSV files and compares it with the committed file, so an edited csv without
+`make abox` fails the tests and prints the differing triple. Queries (same row counts), the 23 tags, the caches and the
+eval (40/40 with the fallback, 35/40 tag route alone, same as the previous eval) are unchanged, `VERSION` stays 1.1.0.
+The committed `abox.ttl` is now rdflib's serialisation, sorted by subject; the CSV files are the readable form.
+
+Limits: headers equal ontology names (a mapping file is the upgrade when real exports differ); one file per class, no
+joins or lookups (a label column such as `Other goods and services` would need a `ex:name` lookup); datatype
+properties without `rdfs:range` are not handled.
 
 ## Rules (`wsparql/tags.py`)
 
@@ -201,11 +234,12 @@ to 24/33. Not adopted; the `make eval` numbers above are without it.
 
 `run_id` is one counter over the two Ollaya tables, so a run number identifies one command invocation anywhere in
 the file. Every reader takes the latest run for the profile `VERSION` and model; `make eval` prints the two run_ids it
-used. Bump `VERSION` when `tbox.ttl`, `abox.ttl` or the catalog change:
+used. Bump `VERSION` when the tags, the data graph (`csv/`) or the catalog change:
 rows of the old version are then ignored, never mixed with the new vocabulary.
 
 ## Workflow
 
+    make abox            # csv -> abox.ttl (instant), only after editing a csv; committed
     make tags-gen        # ontology -> tags (instant)
     make query-tags      # Ollaya reads the 10 descriptions with the 23 tags (seconds each)
     make tags-cache      # Ollaya reads the 59 test questions (minutes)
