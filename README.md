@@ -30,11 +30,49 @@ Each profile contains `tbox.ttl`, source `csv/*.csv`, derived `abox.ttl`, `query
 ## Decision process
 
 1. Render catalog SPARQL for the model: replace opaque ontology IRIs with their `rdfs:label`, remove indentation and blank lines, retain PREFIX declarations. The executable query files remain unchanged.
-2. Ask Ollaya one `choice` over every rendered query plus `none`. The instructions explain that parameters are filled in afterwards. `none` or confidence below 0.4 means no suitable query.
+2. Ask Ollaya one `choice` over every rendered query plus `none`. The instructions explain that parameters are filled in afterwards. `none` or confidence below the profile’s `min-confidence` means no suitable query.
 3. Extract declared parameters: use a value named in the question, otherwise a constrained choice over ABOX values plus `none`. Dates come from a named reporting period or quarter/month/year parsing. Missing required values stop execution; absent optional values leave variables unbound.
 4. Execute the original catalog query with rdflib `initBindings` and show the result table.
 
 This is the former direct-fallback path, now the only routing mode. The ontology provides the ETL schema, readable query labels and property values for parameter extraction.
+
+## Confidence threshold
+
+Set the top-level `min-confidence` in each profile's `query-catalog.yaml`:
+
+```yaml
+min-confidence: 0.4             # Query selection
+parameter-min-confidence: 0.4   # Model-based parameter choices
+parameters:
+  # existing parameter definitions
+queries:
+  # existing query definitions
+```
+
+Both values must be numbers between 0 and 1. `min-confidence` defaults to 0.4; omitted `parameter-min-confidence` inherits the query cutoff. Confidence equal to the applicable threshold is accepted. Explicitly named values and parsed dates do not require model confidence; a `none` choice is always rejected.
+
+After changing it, run `make PROFILE=profile/c3po eval`. No rebuild is needed. New evaluation rows store the threshold and compare with previous runs at the same pair of cutoffs.
+
+To compare cutoffs using identical model responses, from the repository root:
+
+```sh
+set -a
+source .env
+set +a
+uv run python scripts/confidence-sweep.py --profile profile/c3po --profile profile/eu-expense-poc
+```
+
+The script uses `OLLAYA_MODEL` from the environment. Add `--thresholds 0.2 0.4 0.6 0.8` to choose values. It runs the complete selection/parameter/execution path at each cutoff, reusing each identical model request within the experiment. Results, model responses and a summary are written to `results/confidence-sweep/`; profile files and the normal evaluation database are not changed. See the [Decider confidence experiment](results/confidence-sweep/REPORT.md) for measured results.
+
+To run the independent query/parameter grid on saved responses:
+
+```sh
+uv run python scripts/confidence-sweep.py --profile profile/eu-expense-poc \
+  --thresholds 0.25 0.30 0.35 0.40 --parameter-thresholds 0.40 0.50 0.60 \
+  --replay results/confidence-sweep --output results/confidence-grid
+```
+
+Use the same model as the saved responses (`OLLAYA_MODEL=decider` for the recorded experiment). Replay makes no model calls and fails if an exact request is missing. Omit `--replay` for fresh model responses. Without `--parameter-thresholds`, the script tests matching query/parameter cutoffs as in the original sweep. See the [grid results](results/confidence-grid/REPORT.md).
 
 ## Commands
 
@@ -76,7 +114,7 @@ A rejected choice prints `no suitable query`. If a query is selected but require
 
 ## Evaluation history
 
-`make eval` needs only the profile files and a running Ollaya model. It evaluates every question with `expected_query`, stores the completed run atomically in `profile/profile.db` table `direct_eval`, and compares selections, rounded confidences, row counts and correctness with the previous run for the same profile/model/version. Interrupted runs store no evaluation rows. Each completed invocation gets an independent run ID. Existing legacy benchmark tables are left untouched and are not used by the application.
+`make eval` needs only the profile files and a running Ollaya model. It evaluates every question with `expected_query`, stores the completed run atomically in `profile/profile.db` table `direct_eval`, and compares selections, rounded confidences, row counts and correctness with the previous run for the same profile/model/version and both thresholds. Interrupted runs store no evaluation rows. Each completed invocation gets an independent run ID. Existing legacy benchmark tables are left untouched and are not used by the application.
 
 A question passes when its expected query is selected and returns rows, or an expected `none` produces no result. This is a routing score; it does not validate exact extracted parameters or answer values. `make expected` separately checks query execution with supplied parameters. `make eval` exits 1 when any scored question fails.
 

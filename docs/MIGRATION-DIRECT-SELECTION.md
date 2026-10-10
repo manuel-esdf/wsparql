@@ -1,6 +1,6 @@
 # Migrating to direct selection
 
-The former direct fallback is now the only routing path: one Ollaya choice over every catalog SPARQL query plus `none`, followed by parameter extraction and execution. The choice prompt, readable query rendering and confidence threshold of 0.4 are retained.
+The former direct fallback is now the only routing path: one Ollaya choice over every catalog SPARQL query plus `none`, followed by parameter extraction and execution. The choice prompt and readable query rendering are retained. The confidence threshold is now configured by `min-confidence` in the profile catalog, with the previous value 0.4 as its default. `parameter-min-confidence` sets an independent parameter cutoff; when omitted, it inherits `min-confidence`.
 
 ## Command changes
 
@@ -29,7 +29,7 @@ Evaluation starts with the model, profile version and a new run ID. Each questio
 
 ## Evaluation history
 
-New evaluations are stored in `profile/profile.db` table `direct_eval`. Their run IDs are independent of old assessment IDs. The CLI compares each completed evaluation with the latest direct evaluation for the same profile, model and version.
+New evaluations are stored in `profile/profile.db` table `direct_eval`. Their run IDs are independent of old assessment IDs. The CLI compares each completed evaluation with the latest direct evaluation for the same profile, model, version and both confidence thresholds.
 
 Existing database tables and historical results remain on disk but are not used by current commands. No database cleanup or migration command is required. `make clean` removes the shared database and its history as well as the configured ABOX; rebuilding is unnecessary for this migration.
 

@@ -22,7 +22,7 @@ def print_selection(prof, qid, conf, prob):
                 + [[pipeline.NONE, f"{prob[pipeline.NONE]:.2f}", "no suitable query"]])
     best = max(prob, key=prob.get)
     print(f"selected: {qid} (confidence {conf:.2f})" if qid
-          else f"no suitable query (choice {best} {conf:.2f}, min confidence {pipeline.MIN_CONFIDENCE})")
+          else f"no suitable query (choice {best} {conf:.2f}, min confidence {prof.min_confidence})")
 
 
 def print_answer(prof, out):
@@ -150,16 +150,16 @@ def main():
             print_answer(prof, call_ollaya(pipeline.answer, d["question"], prof))
     elif args.cmd == "eval":
         db = ProfileDb(prof.db_path)
-        prev = db.prev_eval(prof.name, ollaya.MODEL, prof.version)
+        prev = db.prev_eval(prof.name, ollaya.MODEL, prof.version, prof.min_confidence, prof.parameter_min_confidence)
         run_id = db.next_run_id()
         date, rows = datetime.now().isoformat(timespec="seconds"), []
-        print(f"direct selection: {ollaya.MODEL}, {prof.name} {prof.version}, run_id {run_id}", flush=True)
+        print(f"direct selection: {ollaya.MODEL}, {prof.name} {prof.version}, run_id {run_id}, min-confidence {prof.min_confidence}, parameter-min-confidence {prof.parameter_min_confidence}", flush=True)
         for d in labeled:
             out = call_ollaya(pipeline.answer, d["question"], prof)
             got, n, hit = eval_line(d, out)
             rows.append((prof.name, d["q_id"], d["question"], d["expected_query"], got, out["confidence"], json.dumps(out["params"]),
                          ", ".join(out["missing"]), n, int(hit), ollaya.MODEL, prof.version, run_id, date))
-        db.put_evals(rows)
+        db.put_evals(rows, prof.min_confidence, prof.parameter_min_confidence)
         ok = sum(r[9] for r in rows)
         print(f"{ok}/{len(labeled)} direct selection (skipped {len(prof.test_questions) - len(labeled)} questions without expected_query)")
         now = {r[1]: (r[4], round(r[5], 2), r[8], r[9]) for r in rows}

@@ -18,6 +18,38 @@ from wsparql.profile import Profile
 
 EU = "profile/eu-expense-poc"
 PROFILES = sorted(p.parent for p in Path("profile").glob("*/csv"))
+
+
+class ProfileConfidenceTest(unittest.TestCase):
+    def test_parameter_cutoff_is_independent_and_defaults_to_query_cutoff(self):
+        import yaml
+        catalog = yaml.safe_load(Path(EU, "query-catalog.yaml").read_text())
+        catalog.pop("parameter-min-confidence")
+        with patch("wsparql.profile.yaml.safe_load", side_effect=[{**catalog, "min-confidence": 0.3}, {"questions": []}]):
+            self.assertEqual(Profile(EU).parameter_min_confidence, 0.3)
+        with patch("wsparql.profile.yaml.safe_load", side_effect=[{**catalog, "min-confidence": 0.3, "parameter-min-confidence": 0.6}, {"questions": []}]):
+            profile = Profile(EU)
+            self.assertEqual((profile.min_confidence, profile.parameter_min_confidence), (0.3, 0.6))
+        for value in (-0.1, 1.1, True, "0.4", None, float("nan")):
+            with patch("wsparql.profile.yaml.safe_load", side_effect=[{**catalog, "parameter-min-confidence": value}]):
+                with self.assertRaisesRegex(ValueError, "parameter-min-confidence"):
+                    Profile(EU)
+
+    def test_configured_default_and_invalid_values(self):
+        import yaml
+        catalog = yaml.safe_load(Path(EU, "query-catalog.yaml").read_text())
+        for value in (0, 0.65, 1):
+            with self.subTest(value=value), patch("wsparql.profile.yaml.safe_load", side_effect=[{**catalog, "min-confidence": value}, {"questions": []}]):
+                self.assertEqual(Profile(EU).min_confidence, value)
+        catalog.pop("min-confidence")
+        with patch("wsparql.profile.yaml.safe_load", side_effect=[catalog, {"questions": []}]):
+            self.assertEqual(Profile(EU).min_confidence, 0.4)
+        for value in (-0.1, 1.1, True, "0.4", None, float("nan"), float("inf")):
+            with self.subTest(value=value), patch("wsparql.profile.yaml.safe_load", side_effect=[{**catalog, "min-confidence": value}, {"questions": []}]):
+                with self.assertRaisesRegex(ValueError, "min-confidence"):
+                    Profile(EU)
+
+
 class SelectTest(unittest.TestCase):
     def ask(self, choice, confidence):
         """Stub for ollaya.decide: records the criteria sent, answers with a fixed choice."""
@@ -39,6 +71,15 @@ class SelectTest(unittest.TestCase):
         self.assertIsNone(select("q", prof, self.ask("none", 0.9))[0])
         self.assertIsNone(select("q", prof, self.ask(qid, 0.3))[0])
 
+    def test_profile_threshold_is_inclusive_and_none_is_always_rejected(self):
+        prof = Profile(EU)
+        prof.min_confidence = 0.65
+        qid = "q06-ineligible-expenses"
+        self.assertEqual(select("q", prof, self.ask(qid, 0.65))[0], qid)
+        self.assertIsNone(select("q", prof, self.ask(qid, 0.649))[0])
+        prof.min_confidence = 0
+        self.assertIsNone(select("q", prof, self.ask("none", 1))[0])
+
 
 class PeriodTest(unittest.TestCase):
     def test_quarter_months_year(self):
@@ -52,6 +93,8 @@ class PeriodTest(unittest.TestCase):
 
 class FakeProfile:
     """What extract_params reads: the parameter kinds, the ABOX values of a property, what they name, the reporting periods."""
+    min_confidence = 0.4
+    parameter_min_confidence = 0.4
     parameters = {"acronym": "acronym", "from": "date", "to": "date", "kind": ["ERP", "CRP"]}
     periods = {"ERP1": ("2022-06-01", "2023-05-31")}
     values = staticmethod(lambda label: ["GRAPHIA", "LUMEN"])
@@ -63,6 +106,14 @@ class ParamsTest(unittest.TestCase):
 
     def ask(self, choice, confidence):
         return lambda question, questions: {"acronym": {"choice": choice, "confidence": confidence, "probabilities": {}}}
+
+    def test_profile_threshold_applies_to_model_parameters_only(self):
+        prof = FakeProfile()
+        prof.min_confidence = 0.1
+        prof.parameter_min_confidence = 0.65
+        self.assertEqual(extract_params("q", ["acronym"], prof, self.ask("LUMEN", 0.65))[0], {"acronym": "LUMEN"})
+        self.assertEqual(extract_params("q", ["acronym"], prof, self.ask("LUMEN", 0.64))[0], {})
+        self.assertEqual(extract_params("LUMEN", ["acronym"], prof, self.ask("none", 1))[0], {"acronym": "LUMEN"})
 
     def test_found_and_missing(self):
         never = lambda question, questions: self.fail("a value written in the question needs no Ollaya")
@@ -123,6 +174,57 @@ class AnswerTest(unittest.TestCase):
 
 
 class DbTest(unittest.TestCase):
+    def test_parameter_cutoff_has_separate_history(self):
+        db = ProfileDb(":memory:")
+        self.addCleanup(db.conn.close)
+        row = ("p", 1, "q?", "none", "none", 1.0, "{}", "", None, 1, "decider", "1", 1, "d1")
+        db.put_evals([row], 0.3, 0.4)
+        db.put_evals([row[:12] + (2, "d2")], 0.3, 0.6)
+        self.assertEqual(db.prev_eval("p", "decider", "1", 0.3, 0.4)[0], "d1")
+        self.assertEqual(db.prev_eval("p", "decider", "1", 0.3, 0.6)[0], "d2")
+        self.assertIsNone(db.prev_eval("p", "decider", "1", 0.3, 0.5))
+
+    def test_shared_threshold_history_migrates_to_both_cutoffs(self):
+        import sqlite3
+        from wsparql.db import SCHEMA, EVAL_COLS
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "profile.db"
+            conn = sqlite3.connect(path)
+            conn.executescript(SCHEMA.replace("    parameter_min_confidence REAL NOT NULL DEFAULT 0.4,\n", ""))
+            conn.execute(f"INSERT INTO direct_eval ({EVAL_COLS}, min_confidence) VALUES ({', '.join('?' * 15)})",
+                         ("p", 1, "q?", "none", "none", 1.0, "{}", "", None, 1, "decider", "1", 1, "d", 0.65))
+            conn.commit()
+            conn.close()
+            db = ProfileDb(path)
+            self.addCleanup(db.conn.close)
+            self.assertEqual(db.conn.execute("SELECT min_confidence, parameter_min_confidence FROM direct_eval").fetchone(), (0.65, 0.65))
+            self.assertIsNotNone(db.prev_eval("p", "decider", "1", 0.65, 0.65))
+
+    def test_thresholds_have_separate_comparison_history(self):
+        db = ProfileDb(":memory:")
+        self.addCleanup(db.conn.close)
+        row = ("p", 1, "q?", "none", "none", 1.0, "{}", "", None, 1, "winnow", "1", 1, "d1")
+        db.put_evals([row], 0.4)
+        db.put_evals([row[:12] + (2, "d2")], 0.6)
+        self.assertEqual(db.prev_eval("p", "winnow", "1", 0.4)[0], "d1")
+        self.assertEqual(db.prev_eval("p", "winnow", "1", 0.6)[0], "d2")
+        self.assertIsNone(db.prev_eval("p", "winnow", "1", 0.8))
+
+    def test_existing_database_gains_default_threshold(self):
+        import sqlite3
+        from wsparql.db import SCHEMA, EVAL_COLS
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "profile.db"
+            with sqlite3.connect(path) as conn:
+                conn.executescript(SCHEMA.replace("    min_confidence REAL NOT NULL DEFAULT 0.4,\n", "").replace("    parameter_min_confidence REAL NOT NULL DEFAULT 0.4,\n", ""))
+                conn.execute(f"INSERT INTO direct_eval ({EVAL_COLS}) VALUES ({', '.join('?' * 14)})",
+                             ("p", 1, "q?", "none", "none", 1.0, "{}", "", None, 1, "winnow", "1", 1, "d"))
+            conn.close()
+            db = ProfileDb(path)
+            self.addCleanup(db.conn.close)
+            self.assertEqual(db.conn.execute("SELECT min_confidence FROM direct_eval").fetchone()[0], 0.4)
+            self.assertIsNotNone(db.prev_eval("p", "winnow", "1", 0.4))
+
     def test_independent_runs_and_previous_model_version(self):
         db = ProfileDb(":memory:")
         self.addCleanup(db.conn.close)
@@ -152,6 +254,8 @@ class EvalCliTest(unittest.TestCase):
     def test_eval_runs_without_preprocessing_and_preserves_history(self):
         from wsparql import __main__ as cli
         prof = Profile(EU)
+        prof.min_confidence = 0.65
+        prof.parameter_min_confidence = 0.75
         prof.test_questions = [
             {"q_id": 1, "question": "List LUMEN expenses for Q1 2026", "expected_query": AnswerTest.Q10},
             {"q_id": 2, "question": "Weather?", "expected_query": "none"},
@@ -173,6 +277,8 @@ class EvalCliTest(unittest.TestCase):
             db = ProfileDb(prof.db_path)
             self.addCleanup(db.conn.close)
             self.assertEqual(db.conn.execute("SELECT run_id, COUNT(*) FROM direct_eval GROUP BY run_id").fetchall(), [(1, 2), (2, 2)])
+            self.assertEqual(db.conn.execute("SELECT DISTINCT min_confidence FROM direct_eval").fetchall(), [(0.65,)])
+            self.assertEqual(db.conn.execute("SELECT DISTINCT parameter_min_confidence FROM direct_eval").fetchall(), [(0.75,)])
             self.assertEqual(db.conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall(), [("direct_eval",)])
             self.assertIn("same as previous evaluation", output.getvalue())
             self.assertIn("skipped 1", output.getvalue())

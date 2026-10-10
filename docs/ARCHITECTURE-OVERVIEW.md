@@ -4,7 +4,7 @@ A natural-language question is sent to Ollaya with a choice over all predefined 
 
 After selection, the pipeline finds named parameter values or asks constrained choices over ABOX values. Named reporting periods and date parsing supply date boundaries. Missing required parameters stop execution; absent optional parameters leave variables free.
 
-rdflib executes the selected query using bound parameters and displays the rows. A `none` choice or confidence below 0.4 produces “no suitable query.”
+rdflib executes the selected query using bound parameters and displays the rows. A `none` choice or confidence below the profile’s `min-confidence` (default 0.4) produces “no suitable query.”
 
 The ontology and CSV source data produce the committed ABOX through a deterministic ETL. There is no model preprocessing before answering questions.
 

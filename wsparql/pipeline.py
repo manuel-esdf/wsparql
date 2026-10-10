@@ -5,7 +5,6 @@ import re
 from wsparql import ollaya
 
 
-MIN_CONFIDENCE = 0.4  # ponytail: fixed threshold; tune after `make eval` if it misroutes
 NONE = "none"
 NONE_CRITERION = "Off-topic, or none of these queries computes the requested answer even with its parameters filled in"
 # ponytail: "or contains among its rows" lets a breakdown answer a one-category question; without it selection says none
@@ -19,18 +18,18 @@ def direct_instructions(names):
             + "Pick none only for an off-topic question or an answer no query computes or contains among its rows.")
 
 
-def choose(question, instructions, criteria, ask):
+def choose(question, instructions, criteria, ask, min_confidence):
     """One Ollaya choice question over `criteria` plus `none`.
     Returns (qid or None for "no suitable query", confidence, {label: probability})."""
     criteria[NONE] = NONE_CRITERION
     a = ask(question, {"select": {"type": "choice", "instructions": instructions, "criteria": criteria}})["select"]
-    qid = None if a["choice"] == NONE or a["confidence"] < MIN_CONFIDENCE else a["choice"]
+    qid = None if a["choice"] == NONE or a["confidence"] < min_confidence else a["choice"]
     return qid, a["confidence"], a["probabilities"]
 
 
 def select(question, prof, ask=ollaya.decide):
     """Choose over every catalog query, with ontology labels replacing opaque IRIs."""
-    return choose(question, direct_instructions(prof.parameters), {qid: prof.readable[qid] for qid in prof.catalog}, ask)
+    return choose(question, direct_instructions(prof.parameters), {qid: prof.readable[qid] for qid in prof.catalog}, ask, prof.min_confidence)
 
 
 MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_name) if m}
@@ -83,11 +82,11 @@ def extract_params(question, names, prof, ask=ollaya.decide):
         criteria = {v: f"The question is about the {noun} {v}" for v in values}
         criteria[NONE] = f"The question names no specific {noun}"
         a = ask(question, {n: {"type": "choice", "instructions": f"Which {noun} is the question about?", "criteria": criteria}})[n]
-        if a["choice"] != NONE and a["confidence"] >= MIN_CONFIDENCE:
+        if a["choice"] != NONE and a["confidence"] >= prof.parameter_min_confidence:
             found[n] = a["choice"]
             how[n] = f"Ollaya choice over {len(values)} ABOX values + none, confidence {a['confidence']:.2f}"
         else:
-            how[n] = f"Ollaya choice over {len(values)} ABOX values + none: {a['choice']} ({a['confidence']:.2f}, min {MIN_CONFIDENCE})"
+            how[n] = f"Ollaya choice over {len(values)} ABOX values + none: {a['choice']} ({a['confidence']:.2f}, min {prof.parameter_min_confidence})"
     if {"from", "to"} & set(names):
         periods = named(prof.periods, question)
         period = prof.periods[periods[0]] if periods else extract_period(text)

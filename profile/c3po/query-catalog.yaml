@@ -8,6 +8,9 @@
 # quarter, month or year written in it. Per query, `params` are required (none found = the query is not run) and
 # `optional` ones leave their variable free when not found (no filter, the whole set); the values are the examples that
 # `make sparql` runs without ARGS.
+# Confidence cutoffs (0..1, inclusive): query selection, then model-based parameter choices.
+min-confidence: 0.4
+parameter-min-confidence: 0.4
 parameters:
   projectName: project display name
   period: reporting period display name

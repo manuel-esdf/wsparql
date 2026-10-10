@@ -38,6 +38,12 @@ class Profile:
         self.graph.parse(path / "tbox.ttl")
         self.graph.parse(path / "abox.ttl")
         catalog = yaml.safe_load((path / "query-catalog.yaml").read_text())
+        self.min_confidence = catalog.get("min-confidence", 0.4)
+        self.parameter_min_confidence = catalog.get("parameter-min-confidence", self.min_confidence)
+        for name, value in (("min-confidence", self.min_confidence),
+                            ("parameter-min-confidence", self.parameter_min_confidence)):
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 <= value <= 1:
+                raise ValueError(f"{path}/query-catalog.yaml: {name} must be a number between 0 and 1")
         self.catalog = catalog["queries"]
         # {param: what fills it}: a property label (one of its ABOX values), a list (one of those words) or date (from/to)
         self.parameters = catalog.get("parameters", {})
