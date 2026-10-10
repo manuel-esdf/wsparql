@@ -1,5 +1,5 @@
-# competency-question: the question a query answers, one per query. Ollaya reads this text twice: `make cq-tag-assessment`
-# detects the query's tags on it, and `make query-selection` offers it as the choice criterion of a candidate.
+# competency-question: display text describing the question a query answers, one per query.
+# Ollaya selects using the readable SPARQL of every query.
 # parameters: what fills each query parameter: a property label = one of its ABOX values (written in the question, else an
 # Ollaya choice over them plus none), date = from/to from the quarter, month or year written in the question. Per query,
 # `params` are required (none found = the query is not run); the values are the examples `make sparql` runs without ARGS.

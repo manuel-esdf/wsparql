@@ -37,17 +37,16 @@ class Profile:
         self.graph = Graph()
         self.graph.parse(path / "tbox.ttl")
         self.graph.parse(path / "abox.ttl")
-        self.tags = None  # {tag: description} from profile.db table ontology_tags (make ontology-tags-gen), set by __main__.load_tags
         catalog = yaml.safe_load((path / "query-catalog.yaml").read_text())
         self.catalog = catalog["queries"]
         # {param: what fills it}: a property label (one of its ABOX values), a list (one of those words) or date (from/to)
         self.parameters = catalog.get("parameters", {})
         self.queries = {p.stem: p.read_text() for p in sorted((path / "queries").glob("*.rq"))}
-        # ponytail: the fallback reads the SPARQL text and the IRIs are opaque, so it gets the labels in their place
+        # ponytail: selection reads the SPARQL text and the IRIs are opaque, so it gets the labels in their place
         # (ex:P14 -> ex:amount, ex:C02 -> ex:EuropeanProject); labeled subjects are the TBOX terms, ABOX rows have none.
         # Indentation and blank lines are dropped: one choice over every query must fit the model's context (winnow:
         # 8192 tokens; the 29 c3po queries came to 8213 as written). The PREFIX lines stay: dropping them instead cost
-        # eu-expense 3 fallback answers. A bigger catalog needs a fallback that reads fewer queries
+        # eu-expense 3 answers. A bigger catalog may require selecting among fewer queries
         nm = self.graph.namespace_manager
         names = {nm.normalizeUri(s): nm.normalizeUri(s).split(":")[0] + ":" + camel(str(l)) for s, l in self.graph.subject_objects(RDFS.label)}
         term = re.compile("|".join(map(re.escape, names)) + r"\b")
@@ -65,7 +64,7 @@ class Profile:
         # [{q_id, query, params, rows, expected}]: the draft's expected values per competency question, [] when absent
         exp = path / "tests/expected.json"
         self.expected = json.loads(exp.read_text()) if exp.exists() else []
-        self.db_path = path.parent / "profile.db"  # shared tag cache, one folder up, git-ignored
+        self.db_path = path.parent / "profile.db"  # shared evaluation results, one folder up, git-ignored
 
     def property(self, label):
         p = self.graph.value(predicate=RDFS.label, object=Literal(label))

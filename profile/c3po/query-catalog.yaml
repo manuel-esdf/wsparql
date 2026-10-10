@@ -1,8 +1,7 @@
 # competency-question: the question a query answers, as the draft wrote it (the `# CQn:` first line of
 # DRAFT/C3PO/cq/Qn_sparql.txt): one per query, the most generic of the sibling questions a merged query answers; the
-# other siblings (the same query with other parameters) are in tests/test-questions.yaml. Ollaya reads this text twice:
-# `make cq-tag-assessment` detects the query's tags on it, and `make query-selection` offers it as the choice criterion
-# of a candidate.
+# other siblings (the same query with other parameters) are in tests/test-questions.yaml.
+# Competency questions are display text; Ollaya selects using the readable SPARQL of every query.
 # parameters: what fills each query parameter (bound with rdflib initBindings, never templated). A property label = one
 # of its ABOX values, taken when written in the question, else by an Ollaya choice over them plus none; a list = one of
 # those words written in the question; date = from/to, the dates of a reporting period named in the question, else the

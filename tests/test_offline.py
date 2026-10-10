@@ -1,51 +1,24 @@
 """Offline checks (no Ollaya): run with `make test`. The profile-specific tests pin their profile; the generic ones
 (ETL round trip, expected query values) run on every profile/* directory."""
+import io
 import os
 import shutil
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from rdflib import Graph
 
 from wsparql import etl
 from wsparql.db import ProfileDb
-from wsparql.pipeline import answer, candidates, extract_params, extract_period, select
-from wsparql.profile import Profile, literal
-from wsparql.tags import generate, slug
+from wsparql.pipeline import answer, extract_params, extract_period, select
+from wsparql.profile import Profile
 
 EU = "profile/eu-expense-poc"
 PROFILES = sorted(p.parent for p in Path("profile").glob("*/csv"))
-CATALOG = {
-    "q01-total-expenses-by-project": {"competency-question": "d", "tags": ["expense", "project", "total", "comparison"]},
-    "q05-budget-vs-spent": {"competency-question": "d", "tags": ["project", "budget", "expense", "remaining", "comparison"]},
-    "q06-ineligible-expenses": {"competency-question": "d", "tags": ["expense", "eligibility", "list"]},
-}
-
-
-class CandidatesTest(unittest.TestCase):
-    def test_query_without_detected_tags_scores_zero(self):
-        catalog = {"untagged": {"tags": []}, "tagged": {"tags": ["expense"]}}
-        self.assertEqual(candidates({"expense": 0.9}, catalog), [("tagged", 0.9), ("untagged", 0.0)])
-
-    def test_ranks_by_mean_tag_probability(self):
-        probs = {"expense": 0.9, "project": 0.9, "budget": 0.95, "remaining": 0.9, "comparison": 0.5, "total": 0.2}
-        ranked = candidates(probs, CATALOG, k=2)
-        self.assertEqual([q for q, _ in ranked], ["q05-budget-vs-spent", "q01-total-expenses-by-project"])
-        self.assertAlmostEqual(ranked[0][1], (0.9 + 0.95 + 0.9 + 0.9 + 0.5) / 5)
-
-    def test_undetected_tags_count_as_zero_and_k_limits(self):
-        ranked = candidates({"eligibility": 1.0}, CATALOG, k=1)
-        self.assertEqual(ranked, [("q06-ineligible-expenses", 1.0 / 3)])
-
-
-if __name__ == "__main__":
-    unittest.main()
-
-
 class SelectTest(unittest.TestCase):
-    RANKED = [("q06-ineligible-expenses", 0.9), ("q01-total-expenses-by-project", 0.5)]
-
     def ask(self, choice, confidence):
         """Stub for ollaya.decide: records the criteria sent, answers with a fixed choice."""
         def _ask(question, questions):
@@ -53,14 +26,18 @@ class SelectTest(unittest.TestCase):
             return {"select": {"choice": choice, "confidence": confidence, "probabilities": {}}}
         return _ask
 
-    def test_criteria_are_candidates_plus_none(self):
-        select("q", self.RANKED, CATALOG, self.ask("none", 0.9))
-        self.assertEqual(list(self.criteria), ["q06-ineligible-expenses", "q01-total-expenses-by-project", "none"])
+    def test_criteria_are_all_readable_queries_plus_none(self):
+        prof = Profile(EU)
+        select("q", prof, self.ask("none", 0.9))
+        self.assertEqual(list(self.criteria), [*prof.catalog, "none"])
+        self.assertEqual(self.criteria["q01-total-expenses-by-project"], prof.readable["q01-total-expenses-by-project"])
 
     def test_none_or_low_confidence_means_no_query(self):
-        self.assertEqual(select("q", self.RANKED, CATALOG, self.ask("q06-ineligible-expenses", 0.9))[0], "q06-ineligible-expenses")
-        self.assertIsNone(select("q", self.RANKED, CATALOG, self.ask("none", 0.9))[0])
-        self.assertIsNone(select("q", self.RANKED, CATALOG, self.ask("q06-ineligible-expenses", 0.3))[0])
+        prof = Profile(EU)
+        qid = "q06-ineligible-expenses"
+        self.assertEqual(select("q", prof, self.ask(qid, 0.9))[0], qid)
+        self.assertIsNone(select("q", prof, self.ask("none", 0.9))[0])
+        self.assertIsNone(select("q", prof, self.ask(qid, 0.3))[0])
 
 
 class PeriodTest(unittest.TestCase):
@@ -112,7 +89,6 @@ class BindingsTest(unittest.TestCase):
 
 class AnswerTest(unittest.TestCase):
     Q10 = "q10-project-expenses-in-period"
-    PROBS = {t: 1.0 for t in ["expense", "project", "time", "date-range", "list"]}
 
     def ask(self, choice, acronym="LUMEN"):
         """Stub for ollaya.decide answering whichever choice question is asked."""
@@ -121,36 +97,20 @@ class AnswerTest(unittest.TestCase):
 
     def test_select_params_run(self):
         prof = Profile(EU)
-        for q in prof.catalog.values():  # query tags come from profile.db cq_tag_assessment (make cq-tag-assessment), not the catalog file
-            q["tags"] = ["expense"]
-        prof.catalog[self.Q10]["tags"] = list(self.PROBS)
-        out = answer("List LUMEN expenses for Q1 2026", self.PROBS, prof, self.ask(self.Q10))
+        out = answer("List LUMEN expenses for Q1 2026", prof, self.ask(self.Q10))
         self.assertEqual((out["selected"], out["params"], out["missing"]), (self.Q10, {"acronym": "LUMEN", "from": "2026-01-01", "to": "2026-03-31"}, []))
         self.assertEqual(len(out["result"][1]), 6)
-        out = answer("List LUMEN expenses", self.PROBS, prof, self.ask(self.Q10))
+        out = answer("List LUMEN expenses", prof, self.ask(self.Q10))
         self.assertEqual((out["missing"], out["result"]), (["from", "to"], None))
-        out = answer("What is the weather in Brussels?", self.PROBS, prof, self.ask("none"))
-        self.assertEqual((out["selected"], out["params"], out["result"], out["via"]), (None, {}, None, "fallback"))
+        out = answer("What is the weather in Brussels?", prof, self.ask("none"))
+        self.assertEqual((out["selected"], out["params"], out["result"]), (None, {}, None))
 
-    def test_fallback_when_the_tag_route_says_none(self):
-        prof = Profile(EU)
-        for q in prof.catalog.values():
-            q["tags"] = ["expense"]
-        def ask(question, questions):  # none over competency questions, Q10 over the SPARQL text
-            if "select" in questions:
-                raw = any(v.startswith("PREFIX") for v in questions["select"]["criteria"].values())
-                return {"select": {"choice": self.Q10 if raw else "none", "confidence": 0.9, "probabilities": {}}}
-            return {"acronym": {"choice": "LUMEN", "confidence": 0.9, "probabilities": {}}}
-        out = answer("List LUMEN expenses for Q1 2026", self.PROBS, prof, ask)
-        self.assertEqual((out["via"], out["tag_route"], out["selected"], len(out["result"][1])), ("fallback", (0.9, {}), self.Q10, 6))
-
-
-    def test_direct_baseline(self):
+    def test_direct_selection_uses_labeled_sparql(self):
         prof, seen = Profile(EU), {}
         def ask(question, questions):
             seen.update(questions)
             return {k: {"choice": {"select": self.Q10, "acronym": "LUMEN"}[k], "confidence": 0.9, "probabilities": {}} for k in questions}
-        out = answer("List LUMEN expenses for Q1 2026", {}, prof, ask, direct=True)
+        out = answer("List LUMEN expenses for Q1 2026", prof, ask)
         self.assertEqual(list(seen["select"]["criteria"]), [*prof.catalog, "none"])
         text = seen["select"]["criteria"][self.Q10]  # the .rq text without indentation or blank lines, labels for the opaque IRIs
         self.assertTrue(text.startswith("PREFIX ex:"))
@@ -159,70 +119,63 @@ class AnswerTest(unittest.TestCase):
         self.assertIn("?project a ex:EuropeanProject ; ex:acronym ?acronym", text)
         self.assertIn("ex:chargedToWorkPackage ?workPackage", seen["select"]["criteria"][self.Q10])
         self.assertNotIn("ex:P", seen["select"]["criteria"][self.Q10])
-        self.assertEqual(([q for q, _ in out["candidates"]], out["selected"], out["via"], len(out["result"][1])), (list(prof.catalog), self.Q10, "direct", 6))
-
-
-class OntologyTagsGenTest(unittest.TestCase):
-    def test_eu_expense_dictionary(self):
-        rows = generate(EU)
-        self.assertEqual([t for t, _, _ in rows], [  # each rule in IRI order (opaque IRIs, numbered in declaration order)
-            "european-project", "work-package", "employee", "supplier", "expense", "expense-category",  # R1, Company skipped
-            "personnel", "travel", "equipment", "subcontracting", "other-goods-and-services",  # R2
-            "time", "budget", "amount", "eligible",  # R3
-            "total", "breakdown", "comparison", "ranking", "list", "trend", "month", "date-range"])  # R4
-        self.assertTrue(all(d for _, d, _ in rows))
-        self.assertEqual({t: s for t, _, s in rows}["travel"], "individual ex:I02")
-        self.assertEqual(slug("EuropeanProject"), "european-project")
-
-    def test_c3po_dictionary(self):
-        rows = generate("profile/c3po")
-        self.assertEqual([t for t, _, _ in rows], [
-            # R1: a class counts the individuals of its TBOX subclasses (employee 5, reporting period 9);
-            # external employee (1), European project (1) and the personnel cost classes (0) skipped
-            "employee", "invoice", "work-package", "reporting-period", "internal-employee", "task", "timesheet", "travel",
-            "european-reporting-period", "coordinator-reporting-period", "payslip",
-            # R2: no TBOX individuals. R3: 21 numeric properties, the dates as `time`
-            "total-travel-cost", "budget-spent", "budget-remaining", "total-budget", "total-personnel-cost",
-            "external-employee-hourly-rate", "hours-worked", "person-month-allocated", "time", "invoice-amount",
-            "annual-productive-hours", "gross-monthly-salary", "employer-social-contribution", "hourly-rate", "exchange-rate",
-            "person-month-spent", "project-duration", "total-gross-salary", "total-employer-social-contribution",
-            "annual-personnel-cost", "cost-amount", "monthly-productive-hours",
-            "total", "breakdown", "comparison", "ranking", "list", "trend", "month", "date-range"])  # R4
-        self.assertEqual({t: s for t, _, s in rows}["employee"], "class c3po:C3PO_0000018")
+        self.assertEqual((out["selected"], len(out["result"][1])), (self.Q10, 6))
 
 
 class DbTest(unittest.TestCase):
-    KEY = ("p", "winnow", "1.0.0")
-
-    def test_tags_replaced_and_ollaya_runs_share_the_counter(self):
+    def test_independent_runs_and_previous_model_version(self):
         db = ProfileDb(":memory:")
         self.addCleanup(db.conn.close)
-        self.assertIsNone(db.ontology_tags("p", "1.0.0"))
-        db.put_ontology_tags("p", "1.0.0", "d1", [("a", "A", "intent"), ("c", "C", "intent")])
-        db.put_ontology_tags("p", "1.0.0", "d2", [("a", "A2", "intent"), ("b", "B", "class ex:B")])  # deterministic: replaced, no run_id
-        self.assertEqual(db.ontology_tags("p", "1.0.0"), {"a": "A2", "b": "B"})
-        self.assertIsNone(db.ontology_tags("p", "2.0.0"))
-        db.put("p", 1, "q?", {"a": 0.1}, "winnow", "1.0.0", "d1", db.next_run_id())
-        db.put_cq_tag_assessment("p", "winnow", "1.0.0", "d3", db.next_run_id(), [(1, "q01", "desc", {"a": 0.9})])
-        self.assertEqual(db.cq_tag_assessment("p", "winnow", "1.0.0"), ({"q01": {"a": 0.9}}, 2))  # one counter over cq_tag_assessment + question_tag_assessment
-        self.assertIsNone(db.cq_tag_assessment("p", "other", "1.0.0"))
+        self.assertIsNone(db.prev_eval("p", "winnow", "1.0.0"))
+        self.assertEqual(db.next_run_id(), 1)
+        row = ("p", 1, "q?", "q01", "q01", 0.987, '{"acronym": "LUMEN"}', "", 3, 1, "winnow", "1.0.0", 1, "e1")
+        db.put_evals([row])
+        self.assertEqual(db.next_run_id(), 2)
+        self.assertEqual(db.prev_eval("p", "winnow", "1.0.0"), ("e1", {1: ("q01", 0.99, 3, 1)}))
+        db.put_evals([row[:12] + (2, "e2")])
+        self.assertEqual(db.prev_eval("p", "winnow", "1.0.0")[0], "e2")
+        self.assertIsNone(db.prev_eval("p", "decider", "1.0.0"))
+        self.assertIsNone(db.prev_eval("p", "winnow", "2.0.0"))
+        self.assertEqual(db.conn.execute("SELECT COUNT(*) FROM direct_eval").fetchone()[0], 2)
 
-    def test_tag_runs_and_eval_rows(self):
+    def test_failed_write_is_atomic(self):
+        import sqlite3
         db = ProfileDb(":memory:")
         self.addCleanup(db.conn.close)
-        self.assertIsNone(db.last_run_id(*self.KEY))
-        db.put("p", 1, "q?", {"a": 0.1}, "winnow", "1.0.0", "d1", 1)
-        db.put("p", 1, "q?", {"a": 0.9}, "winnow", "1.0.0", "d2", 2)
-        self.assertEqual(db.get("p", "q?", "winnow", "1.0.0"), ({"a": 0.9}, 2))
-        self.assertEqual(db.get("p", "q?", "winnow", "1.0.0", run_id=1), ({"a": 0.1}, 1))
-        self.assertIsNone(db.get("p", "q?", "winnow", "1.0.0", run_id=3))
-        self.assertEqual((db.last_run_id(*self.KEY), db.last_run_id("p", "other", "1.0.0")), (2, None))
-        self.assertIsNone(db.prev_eval(*self.KEY, 2))
-        row = ("p", 1, "q?", "q01", "q01", 0.987, '{"acronym": "LUMEN"}', "", 3, 1, "winnow", "1.0.0", 2, "e1")
-        db.put_evals([row, ("p", 2, "w?", "none", "none", 1.0, "{}", "", None, 1, "winnow", "1.0.0", 2, "e1")])
-        self.assertEqual(db.prev_eval(*self.KEY, 2), ("e1", {1: ("q01", 0.99, 3, 1), 2: ("none", 1.0, None, 1)}))
-        db.put_evals([row[:-1] + ("e2",)])  # same (profile, q_id, run_id): replaced, not added
-        self.assertEqual(db.conn.execute("SELECT COUNT(*), MAX(date) FROM question_eval").fetchone(), (2, "e2"))
+        row = ("p", 1, "q?", "none", "none", 1.0, "{}", "", None, 1, "winnow", "1", 1, "d")
+        with self.assertRaises(sqlite3.IntegrityError):
+            db.put_evals([row, row])
+        self.assertEqual(db.conn.execute("SELECT COUNT(*) FROM direct_eval").fetchone()[0], 0)
+
+
+class EvalCliTest(unittest.TestCase):
+    def test_eval_runs_without_preprocessing_and_preserves_history(self):
+        from wsparql import __main__ as cli
+        prof = Profile(EU)
+        prof.test_questions = [
+            {"q_id": 1, "question": "List LUMEN expenses for Q1 2026", "expected_query": AnswerTest.Q10},
+            {"q_id": 2, "question": "Weather?", "expected_query": "none"},
+            {"q_id": 3, "question": "Ambiguous question"},
+        ]
+        def ask(question, questions):
+            choice = AnswerTest.Q10 if "LUMEN" in question else "none"
+            return {"select": {"choice": choice, "confidence": 0.9, "probabilities": {}}}
+        with tempfile.TemporaryDirectory() as directory:
+            prof.db_path = Path(directory) / "profile.db"
+            output = io.StringIO()
+            with patch.object(cli, "Profile", return_value=prof), \
+                 patch.object(cli.pipeline, "answer", side_effect=lambda question, profile: answer(question, profile, ask)), \
+                 patch("sys.argv", ["wsparql", "eval"]), redirect_stdout(output):
+                for _ in range(2):
+                    with self.assertRaises(SystemExit) as result:
+                        cli.main()
+                    self.assertEqual(result.exception.code, 0)
+            db = ProfileDb(prof.db_path)
+            self.addCleanup(db.conn.close)
+            self.assertEqual(db.conn.execute("SELECT run_id, COUNT(*) FROM direct_eval GROUP BY run_id").fetchall(), [(1, 2), (2, 2)])
+            self.assertEqual(db.conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall(), [("direct_eval",)])
+            self.assertIn("same as previous evaluation", output.getvalue())
+            self.assertIn("skipped 1", output.getvalue())
 
 
 class EtlTest(unittest.TestCase):
@@ -262,3 +215,7 @@ class ExpectedRowsTest(unittest.TestCase):
                 with self.subTest(profile=prof.name, q_id=c["q_id"]):
                     self.assertEqual(n, c["rows"])
                     self.assertEqual(missing, [])
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,35 +1,18 @@
-"""Decision pipeline: detected tags -> ranked candidate queries -> Ollaya selects one or none -> query parameters -> result."""
+"""Direct SPARQL query selection, parameter extraction and execution."""
 import calendar
 import re
 
 from wsparql import ollaya
 
 
-TAG_THRESHOLD = 0.5  # ponytail: a query's tags = those Ollaya detected at >= 0.5 on its competency question; the probabilities stay in cq_tag_assessment
-
-
-def candidates(tag_probs, catalog, k=5):
-    """Rank catalog queries by the mean detected probability of their tags; returns the top k as [(qid, score)]."""
-    # ponytail: plain mean; a query with a wide tag list is diluted: tighten its competency question (IDF weighting tested offline, no gain)
-    # k=5: on the 109-question set the expected query is in the top 3 for 66/73 in-domain questions, in the top 5 for 71/73
-    scored = [(qid, sum(tag_probs.get(t, 0.0) for t in q["tags"]) / len(q["tags"]) if q["tags"] else 0.0)
-              for qid, q in catalog.items()]
-    return sorted(scored, key=lambda x: -x[1])[:k]
-
-
 MIN_CONFIDENCE = 0.4  # ponytail: fixed threshold; tune after `make eval` if it misroutes
 NONE = "none"
-SELECT_INSTRUCTIONS = ("The queries are templates: the project, employee, supplier and dates named in the question are filled in "
-                       "afterwards. Which query computes the answer? Pick none only for an off-topic question or an answer no "
-                       "query computes or contains among its rows.")
-
-
 NONE_CRITERION = "Off-topic, or none of these queries computes the requested answer even with its parameters filled in"
-# ponytail: "or contains among its rows" lets a breakdown answer a one-category question; without it the fallback says none
+# ponytail: "or contains among its rows" lets a breakdown answer a one-category question; without it selection says none
 
 
 def direct_instructions(names):
-    """The fallback's instructions name the catalog's parameters ("?acronym, ?from and ?to are parameters filled in afterwards")."""
+    """The selection instructions name the catalog's parameters ("?acronym, ?from and ?to are parameters filled in afterwards")."""
     ps = [f"?{n}" for n in names]
     listed = f"{', '.join(ps[:-1])} and {ps[-1]}" if len(ps) > 1 else "".join(ps)
     return ("Which SPARQL query computes the answer to the question? " + (f"{listed} are parameters filled in afterwards. " if ps else "")
@@ -45,13 +28,8 @@ def choose(question, instructions, criteria, ask):
     return qid, a["confidence"], a["probabilities"]
 
 
-def select(question, ranked, catalog, ask=ollaya.decide):
-    """The ranked candidates, described by their catalog competency question."""
-    return choose(question, SELECT_INSTRUCTIONS, {qid: catalog[qid]["competency-question"] for qid, _ in ranked}, ask)
-
-
-def select_direct(question, prof, ask=ollaya.decide):
-    """Baseline without tags: every catalog query, described by its SPARQL text with the opaque IRIs rendered as labels."""
+def select(question, prof, ask=ollaya.decide):
+    """Choose over every catalog query, with ontology labels replacing opaque IRIs."""
     return choose(question, direct_instructions(prof.parameters), {qid: prof.readable[qid] for qid in prof.catalog}, ask)
 
 
@@ -121,25 +99,11 @@ def extract_params(question, names, prof, ask=ollaya.decide):
     return found, how
 
 
-def answer(question, tag_probs, prof, ask=ollaya.decide, direct=False):
-    """Rank, select, extract the selected query's parameters, run it. Returns the demo blocks:
-    {question, tags, candidates, selected, confidence, probabilities, via, tag_route, params, how, missing, result};
-    selected None = no suitable query; missing = required params not found (query not run; an optional one not found
-    leaves its variable unbound); result = (cols, rows) or None.
-    via: "tags" (ranked candidates, choice over competency questions), "fallback" (that choice answered none, then select_direct;
-    tag_route keeps the (confidence, probabilities) of the none answer) or "direct" (select_direct only, the baseline)."""
-    via, tag_route = "tags", None
-    if direct:
-        ranked, via = [(qid, 0.0) for qid in prof.catalog], "direct"
-        qid, conf, prob = select_direct(question, prof, ask)
-    else:
-        ranked = candidates(tag_probs, prof.catalog)
-        qid, conf, prob = select(question, ranked, prof.catalog, ask)
-        if not qid:  # ponytail: one more choice over the SPARQL (labels in place of the opaque IRIs); the tag route's misses are all `none` answers
-            via, tag_route = "fallback", (conf, prob)
-            qid, conf, prob = select_direct(question, prof, ask)
-    out = dict(question=question, tags=tag_probs, candidates=ranked, selected=qid, confidence=conf, probabilities=prob,
-               via=via, tag_route=tag_route, params={}, how={}, missing=[], result=None)
+def answer(question, prof, ask=ollaya.decide):
+    """Select a catalog query, extract parameters, and execute it when required values are present."""
+    qid, conf, prob = select(question, prof, ask)
+    out = dict(question=question, selected=qid, confidence=conf, probabilities=prob,
+               params={}, how={}, missing=[], result=None)
     if qid:
         required = list(prof.catalog[qid].get("params", {}))
         names = required + list(prof.catalog[qid].get("optional", {}))

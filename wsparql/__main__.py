@@ -6,9 +6,8 @@ import urllib.error
 from datetime import datetime
 
 from wsparql import etl, ollaya, pipeline
-from wsparql.db import ProfileDb, fill
+from wsparql.db import ProfileDb
 from wsparql.profile import Profile
-from wsparql.tags import generate
 
 
 def print_table(cols, rows):
@@ -17,29 +16,18 @@ def print_table(cols, rows):
         print("  ".join(x.ljust(w) for x, w in zip(r, widths)))
 
 
-def print_tags(probs, min_prob=0.0):
-    print_table(["tag", "prob"], [[t, f"{v:.2f}"] for t, v in probs.items() if v >= min_prob])
-
-
-def print_selection(prof, ranked, qid, conf, prob):
-    print_table(["candidate", "score", "prob", "competency question"],
-                [[q, f"{s:.2f}", f"{prob[q]:.2f}", prof.catalog[q]["competency-question"]] for q, s in ranked]
-                + [[pipeline.NONE, "", f"{prob[pipeline.NONE]:.2f}", "no suitable query"]])
+def print_selection(prof, qid, conf, prob):
+    print_table(["query", "prob", "competency question"],
+                [[q, f"{prob[q]:.2f}", prof.catalog[q]["competency-question"]] for q in prof.catalog]
+                + [[pipeline.NONE, f"{prob[pipeline.NONE]:.2f}", "no suitable query"]])
     best = max(prob, key=prob.get)
     print(f"selected: {qid} (confidence {conf:.2f})" if qid
           else f"no suitable query (choice {best} {conf:.2f}, min confidence {pipeline.MIN_CONFIDENCE})")
 
 
 def print_answer(prof, out):
-    """The README demo blocks after the question: tags, candidates + selection, parameters, result."""
-    print_tags(out["tags"], 0.5)
-    print()
-    if out["via"] == "fallback":
-        print_selection(prof, out["candidates"], None, *out["tag_route"])
-        print(f"fallback: direct choice over the SPARQL (labels in place of the opaque IRIs) of {len(prof.catalog)} queries -> "
-              + (f"{out['selected']} (confidence {out['confidence']:.2f})" if out["selected"] else f"no suitable query ({out['confidence']:.2f})"))
-    else:
-        print_selection(prof, out["candidates"], out["selected"], out["confidence"], out["probabilities"])
+    """Show query selection, extracted parameters and results."""
+    print_selection(prof, out["selected"], out["confidence"], out["probabilities"])
     if not out["selected"]:
         return
     print()
@@ -63,7 +51,7 @@ def eval_line(d, out):
     n = len(out["result"][1]) if out["result"] else None
     hit = expected == (got if n else pipeline.NONE)
     shown = f"{n} rows" if n is not None else f"missing {', '.join(out['missing'])}" if out["missing"] else "-"
-    print(f"{'ok  ' if hit else 'FAIL'} [{d['q_id']:>2}] {expected:<32} {got:<32} {out['confidence']:.2f} {shown:<10} {out['via']:<8} | {d['question']}", flush=True)
+    print(f"{'ok  ' if hit else 'FAIL'} [{d['q_id']:>2}] {expected:<32} {got:<32} {out['confidence']:.2f} {shown:<10} | {d['question']}", flush=True)
     return got, n, hit
 
 
@@ -83,35 +71,6 @@ def question_or_default(p, prof, question):
     return question
 
 
-def detect(prof, db, question, log=print):
-    """Tag probabilities: last cached run_id when available, else Ollaya. Returns (probs, run_id or None)."""
-    hit = db.get(prof.name, question, ollaya.MODEL, prof.version)
-    if hit:
-        log(f"tags: cache run_id {hit[1]}")
-        return hit
-    log("tags: Ollaya (not cached)")
-    return call_ollaya(ollaya.detect_tags, question, prof.tags), None
-
-
-NEED_CQ_TAG_ASSESSMENT = {"query-ranking", "query-selection", "answer", "demo", "eval"}
-
-
-def load_tags(prof, db, with_assessment=False):
-    """prof.tags = the tag dictionary of this profile version; with_assessment: each catalog query's tags = those detected
-    at >= TAG_THRESHOLD in the latest cq-tag-assessment run. Exits with the fix when something is missing. Returns the cq_tag_assessment run_id."""
-    prof.tags = db.ontology_tags(prof.name, prof.version)
-    if not prof.tags:
-        sys.exit(f"no tags for {prof.name} {prof.version} -> make ontology-tags-gen")
-    if not with_assessment:
-        return None
-    assessment = db.cq_tag_assessment(prof.name, ollaya.MODEL, prof.version)
-    if missing := [q for q in prof.catalog if not assessment or q not in assessment[0]]:
-        sys.exit(f"no query tags for {', '.join(missing)} ({prof.name} {prof.version} {ollaya.MODEL}) -> make cq-tag-assessment")
-    for qid in prof.catalog:
-        prof.catalog[qid]["tags"] = [t for t, p in assessment[0][qid].items() if p >= pipeline.TAG_THRESHOLD]
-    return assessment[1]
-
-
 def main():
     p = argparse.ArgumentParser(prog="wsparql")
     p.add_argument("--profile", default=os.environ["PROFILE"])
@@ -121,18 +80,12 @@ def main():
     s.add_argument("query_id", nargs="?")
     s.add_argument("bindings", nargs="*", help="param=value, e.g. acronym=GRAPHIA from=2026-01-01 to=2026-06-30; none = the catalog examples; with some, a required one not given = its example, an optional one stays unbound")
     sub.add_parser("expected", help="run every tests/expected.json case (query + params) and compare with the expected row count and values; exit 1 on any mismatch; no Ollaya")
-    sub.add_parser("ontology-tags-gen", help="derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db ontology_tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya")
-    sub.add_parser("cq-tag-assessment", help="Ollaya assesses every tag of the dictionary against each catalog query competency question (one noul per tag), store {tag: prob} per query in profile/profile.db cq_tag_assessment (new run_id); a query's tags = those >= 0.5")
-    sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag of the dictionary)").add_argument("question", nargs="?", help=default_q)
-    sub.add_parser("query-ranking", help="rank catalog queries by tag overlap (top 5); question tags from the cache when the question is cached, else Ollaya; query tags from the latest cq-tag-assessment run").add_argument("question", nargs="?", help=default_q)
-    sub.add_parser("query-selection", help="rank candidates, then Ollaya picks the best query or none (choice question)").add_argument("question", nargs="?", help=default_q)
+    sub.add_parser("query-selection", help="Ollaya chooses among all catalog SPARQL queries or none").add_argument("question", nargs="?", help=default_q)
     pa = sub.add_parser("param-extraction", help="extract the query parameters found in a question: an ABOX value written in the question, else an Ollaya choice over the property's values + none; from/to: the dates of a named reporting period, else a regex on quarter, month, year; lists every catalog parameter and the queries needing it")
     pa.add_argument("question", nargs="?", help="no question = run on every test question whose expected query takes parameters")
-    sub.add_parser("answer", help="answer a question end to end: tags, candidates, selected query (direct choice over the SPARQL (labels in place of the opaque IRIs) as fallback when the tag route says none), parameters, result rows or no suitable query").add_argument("question", nargs="?", help=default_q)
+    sub.add_parser("answer", help="select a query directly, extract parameters and execute, or report no suitable query").add_argument("question", nargs="?", help=default_q)
     sub.add_parser("demo", help="answer every tests/test-questions.yaml question that has an expected_query, off-topic ones included")
-    sub.add_parser("eval", help="full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest question-tag-assessment run_id: expected query selected and returns rows, none answers no suitable query; rows stored in profile/profile.db question_eval; exit 1 on any mismatch")
-    sub.add_parser("eval-direct", help="baseline without tags: for each tests/test-questions.yaml question that has an expected_query, one Ollaya choice over the SPARQL (labels in place of the opaque IRIs) of all catalog queries + none, then parameters and run; exit 1 on any mismatch")
-    sub.add_parser("question-tag-assessment", help="detect tags for every tests/test-questions.yaml question, store them in profile/profile.db (new run_id)")
+    sub.add_parser("eval", help="evaluate direct selection and execution on every labeled question; store a new evaluation run; exit 1 on any mismatch")
     sub.add_parser("abox", help="ETL: build abox.ttl from tbox.ttl + csv/*.csv; TBOX IRIs are opaque, rdfs:label is the name: file = class label, column = property label, id = IRI local name, | separates values; the TBOX types the values; no inference")
     args = p.parse_args()
     if args.cmd == "abox":  # before Profile(), which parses the file being generated
@@ -140,9 +93,7 @@ def main():
         print(f"wrote {out} ({n} triples)")
         return
     prof = Profile(args.profile)
-    db = ProfileDb(prof.db_path)
     labeled = [q for q in prof.test_questions if "expected_query" in q]
-    assessment_run = load_tags(prof, db, args.cmd in NEED_CQ_TAG_ASSESSMENT) if args.cmd not in ("sparql", "expected", "ontology-tags-gen", "eval-direct") else None
 
     takes = lambda q: {**q.get("params", {}), **q.get("optional", {})}  # required + optional, with their example values
     if args.cmd == "sparql":
@@ -171,20 +122,9 @@ def main():
         ok = sum(r[4] == "OK" for r in rows)
         print(f"\n{ok}/{len(rows)} cases reproduce the expected values")
         sys.exit(ok != len(rows))
-    elif args.cmd == "tags":
-        print_tags(call_ollaya(ollaya.detect_tags, question_or_default(p, prof, args.question), prof.tags))
-    elif args.cmd == "query-ranking":
-        question = question_or_default(p, prof, args.question)
-        probs, _ = detect(prof, db, question)
-        print_tags(probs, 0.5)
-        print()
-        print_table(["candidate", "score", "competency question", "query tags"],
-                    [[q, f"{s:.2f}", prof.catalog[q]["competency-question"], ", ".join(prof.catalog[q]["tags"])] for q, s in pipeline.candidates(probs, prof.catalog)])
     elif args.cmd == "query-selection":
         question = question_or_default(p, prof, args.question)
-        probs, _ = detect(prof, db, question)
-        ranked = pipeline.candidates(probs, prof.catalog)
-        print_selection(prof, ranked, *call_ollaya(pipeline.select, question, ranked, prof.catalog))
+        print_selection(prof, *call_ollaya(pipeline.select, question, prof))
     elif args.cmd == "param-extraction":
         needed_by = {n: [qid for qid, q in prof.catalog.items() if n in takes(q)] for n in prof.parameters}
         needed_by = {n: qids for n, qids in needed_by.items() if qids}
@@ -203,59 +143,32 @@ def main():
             print_table(["q_id", "question", "expected_query", *names], rows)
     elif args.cmd == "answer":
         question = question_or_default(p, prof, args.question)
-        probs, _ = detect(prof, db, question)
-        print_answer(prof, call_ollaya(pipeline.answer, question, probs, prof))
+        print_answer(prof, call_ollaya(pipeline.answer, question, prof))
     elif args.cmd == "demo":
         for d in labeled:
             print(f"\n--- [{d['q_id']}] expected {d['expected_query']}\nQ: {d['question']}", flush=True)
-            probs, _ = detect(prof, db, d["question"])
-            print_answer(prof, call_ollaya(pipeline.answer, d["question"], probs, prof))
+            print_answer(prof, call_ollaya(pipeline.answer, d["question"], prof))
     elif args.cmd == "eval":
-        run_id = db.last_run_id(prof.name, ollaya.MODEL, prof.version)
-        if not run_id:
-            sys.exit(f"no tags cached for {prof.name} {prof.version} {ollaya.MODEL} -> make question-tag-assessment")
-        tags = {d["q_id"]: db.get(prof.name, d["question"], ollaya.MODEL, prof.version, run_id) for d in labeled}
-        if absent := [i for i, t in tags.items() if not t]:
-            sys.exit(f"q_id {', '.join(map(str, absent))} not in question-tag-assessment run_id {run_id} -> make question-tag-assessment")
-        print(f"tags: cq-tag-assessment run_id {assessment_run}, question-tag-assessment run_id {run_id}", flush=True)
-        prev = db.prev_eval(prof.name, ollaya.MODEL, prof.version, run_id)
-        date, rows, tags_only = datetime.now().isoformat(timespec="seconds"), [], 0
+        db = ProfileDb(prof.db_path)
+        prev = db.prev_eval(prof.name, ollaya.MODEL, prof.version)
+        run_id = db.next_run_id()
+        date, rows = datetime.now().isoformat(timespec="seconds"), []
+        print(f"direct selection: {ollaya.MODEL}, {prof.name} {prof.version}, run_id {run_id}", flush=True)
         for d in labeled:
-            out = call_ollaya(pipeline.answer, d["question"], tags[d["q_id"]][0], prof)
+            out = call_ollaya(pipeline.answer, d["question"], prof)
             got, n, hit = eval_line(d, out)
-            tags_only += hit if out["via"] == "tags" else d["expected_query"] == pipeline.NONE  # fallback ran = the tag route said none
             rows.append((prof.name, d["q_id"], d["question"], d["expected_query"], got, out["confidence"], json.dumps(out["params"]),
                          ", ".join(out["missing"]), n, int(hit), ollaya.MODEL, prof.version, run_id, date))
         db.put_evals(rows)
         ok = sum(r[9] for r in rows)
-        print(f"{ok}/{len(labeled)} with the direct fallback, {tags_only}/{len(labeled)} tag route alone "
-              f"(skipped {len(prof.test_questions) - len(labeled)} questions without expected_query)")
+        print(f"{ok}/{len(labeled)} direct selection (skipped {len(prof.test_questions) - len(labeled)} questions without expected_query)")
         now = {r[1]: (r[4], round(r[5], 2), r[8], r[9]) for r in rows}
-        diff = [i for i in now if prev and now[i] != prev[1].get(i)]
-        print(f"stored {len(rows)} rows in {prof.db_path} question_eval (run_id {run_id}, {date}); "
-              + ("first eval of this run_id" if not prev else f"same as previous eval {prev[0]}" if not diff
-                 else f"differs from previous eval {prev[0]} on q_id {', '.join(map(str, diff))}"))
+        diff = sorted(i for i in now.keys() | (prev[1].keys() if prev else set()) if prev and now.get(i) != prev[1].get(i))
+        print(f"stored {len(rows)} rows in {prof.db_path} direct_eval (run_id {run_id}, {date}); "
+              + ("first direct evaluation" if not prev else f"same as previous evaluation {prev[0]}" if not diff
+                 else f"differs from previous evaluation {prev[0]} on q_id {', '.join(map(str, diff))}"))
+        db.conn.close()
         sys.exit(0 if ok == len(labeled) else 1)
-    elif args.cmd == "ontology-tags-gen":
-        rows = generate(args.profile)
-        db.put_ontology_tags(prof.name, prof.version, datetime.now().isoformat(timespec="seconds"), rows)
-        print_table(["tag", "source", "description"], [[t, s, d] for t, d, s in rows])
-        print(f"\nstored {len(rows)} tags in {prof.db_path} tags ({prof.name} {prof.version}, replaced)")
-    elif args.cmd == "cq-tag-assessment":
-        run_id, date, rows = db.next_run_id(), datetime.now().isoformat(timespec="seconds"), []
-        for i, (qid, q) in enumerate(prof.catalog.items(), 1):  # ponytail: q_id = catalog position, equals the qNN prefix here
-            probs = call_ollaya(ollaya.detect_tags, q["competency-question"], prof.tags)
-            rows.append((i, qid, q["competency-question"], probs))
-            print(f"[{i:>2}/{len(prof.catalog)}] {qid:<32} {', '.join(t for t, p in probs.items() if p >= pipeline.TAG_THRESHOLD)}", flush=True)
-        db.put_cq_tag_assessment(prof.name, ollaya.MODEL, prof.version, date, run_id, rows)
-        print(f"stored {len(rows)} rows in {prof.db_path} cq_tag_assessment (run_id {run_id})")
-    elif args.cmd == "eval-direct":  # ponytail: printed only; store in question_eval with a mode column if it becomes a tracked baseline
-        hits = [eval_line(d, call_ollaya(pipeline.answer, d["question"], {}, prof, ollaya.decide, True))[2] for d in labeled]
-        print(f"{sum(hits)}/{len(labeled)} direct: one choice over the SPARQL (labels in place of the opaque IRIs) of {len(prof.catalog)} queries + none, no tags")
-        sys.exit(0 if all(hits) else 1)
-    elif args.cmd == "question-tag-assessment":
-        run_id = call_ollaya(fill, prof, db, ollaya.MODEL)
-        print(f"cached {len(prof.test_questions)} questions in {prof.db_path} (run_id {run_id}, total rows {db.count()})")
 
 
 if __name__ == "__main__":

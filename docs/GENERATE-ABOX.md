@@ -11,7 +11,7 @@ csv/*.csv ─┘  (data: one file per class, one row per individual)
 
 There is **no mapping file**. The TBOX IRIs are opaque (`ex:C06`, `ex:P14`, `ex:I02`: numbered classes, properties
 and individuals, no meaning in the local name) and the name of a term is its `rdfs:label`. CSV names are those
-labels, compared as slugs (`tags.slug`: lower case, camelCase split, non-alphanumerics to `-`), so the column
+labels, compared as slugs (`etl.slug`: lower case, camelCase split, non-alphanumerics to `-`), so the column
 `expenseDate` matches the label `expense date` and `EuropeanProject.csv` matches `European project`. The namespace and
 its prefix are those of the classes of `tbox.ttl` (`ex:` = `https://example.org/eu-expense#` here, `c3po:` in
 `profile/c3po`); the ABOX ids are minted in it and `abox.ttl` is serialised with it. The TBOX is the schema and
@@ -94,11 +94,11 @@ drift. The queries walk the stored direction with an explicit join, plain graph 
 ```
 
 Written project-first and spelled out rather than as the path `ex:P04/ex:P02`: the query text is what the routing
-fallback reads, and the path form cost it two questions. The committed `.rq` files carry no such
-comments: the fallback gets the text with each opaque term replaced by its label in camelCase (`Profile.readable`:
+selection reads, and the path form cost it two questions. The committed `.rq` files carry no such
+comments: selection gets the text with each opaque term replaced by its label in camelCase (`Profile.readable`:
 `?expense a ex:Expense ; ex:chargedToWorkPackage ?workPackage ; ex:amount ?amount`), without its indentation and
 blank lines (one choice over every query has to fit the model's context; the PREFIX lines stay, the model leans on
-them), the wording that was measured before the IRIs became opaque (README, "Current score").
+them). See the historical benchmark report for measurements from the earlier routing implementation.
 
 ### References to TBOX individuals
 
@@ -112,7 +112,7 @@ reads their name through `rdfs:label`.
 
 1. Parse `tbox.ttl`. Index the classes, the properties (`owl:ObjectProperty` set plus an
    `owl:DatatypeProperty → rdfs:range` map) and the TBOX individuals by the slug of their `rdfs:label`
-   (`tags.words`, which falls back to the local name when a term has no label).
+   (`etl.words`, which falls back to the local name when a term has no label).
 2. For each `csv/*.csv`, in sorted order:
    1. look the stem up among the class labels, check that an `id` column exists and that every other column is a
       known property label;

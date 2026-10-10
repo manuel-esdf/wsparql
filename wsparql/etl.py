@@ -4,13 +4,23 @@ class label, column = property label, a reference cell = TBOX individual label o
 The TBOX decides whether a column is a reference (owl:ObjectProperty) or a literal and its datatype (rdfs:range).
 No inference: a relation is stored once, in one direction, and queries walk it with an explicit join."""
 import csv
+import re
 from pathlib import Path
 
 from rdflib import OWL, RDF, RDFS, XSD, Graph, Literal, Namespace
 
-from wsparql.tags import slug, words
-
 SEP = "|"
+
+
+def words(node, g):
+    """Human words for a node: rdfs:label, else the IRI local name split on camelCase ('OtherGoodsServices' -> 'other goods services')."""
+    label = g.value(node, RDFS.label) or re.split(r"[#/]", str(node))[-1]
+    return re.sub(r"(?<=[a-z])(?=[A-Z])", " ", str(label)).lower()
+
+
+def slug(text):
+    """'European project' / 'EuropeanProject' -> 'european-project'."""
+    return re.sub(r"[^a-z0-9]+", "-", re.sub(r"(?<=[a-z])(?=[A-Z])", " ", text).lower()).strip("-")
 
 
 def build(path):

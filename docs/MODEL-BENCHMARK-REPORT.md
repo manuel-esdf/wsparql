@@ -1,3 +1,5 @@
+> Historical benchmark: recorded before routing was simplified to direct selection only. Combined-route scores below describe the former implementation. Direct-baseline scores correspond to the current selection path.
+
 # Ollaya model benchmark — C3PO 1.2.0
 
 Measured 2026-10-10 against the local Ollaya server: Laya and Winnow first, then Decider and Kev. Same 29 labeled questions, 13 catalog queries, 41 ontology-derived tags, prompts, top-5 ranking, tag threshold 0.5 and selection confidence threshold 0.4. Each model has freshly generated catalog and question tags. Model calls ran sequentially. No prompts, thresholds or source code were changed for the Decider/Kev extension; `.env` remains unchanged.
@@ -24,11 +26,9 @@ Installed Laya variants were `laya:en` and `laya:multilingual`; this comparison 
 | Full evaluation, cached tags | 5.19 s | 177.47 s | 36.55 s | 421.25 s |
 | Direct baseline evaluation | 3.42 s | 347.77 s | 255.50 s | 810.96 s |
 
-Winnow has the highest full-pipeline routing score (27/29). Decider scores 25/29 with a 36.55-second cached-tag evaluation, about 4.9 times faster than Winnow's 177.47 seconds. Decider's direct baseline gains one correct answer but takes 255.50 seconds, about seven times its full evaluation time. Laya remains the fastest model, with a lower routing score (22/29).
+For the current direct-only path, Winnow scored 27/29, Decider 26/29, Laya 21/29 and Kev 11/29. Decider's listed size is 3.8 GB versus Winnow's 13 GB, with one fewer correct routing answer on this small C3PO sample. These are historical direct-baseline measurements, not a fresh evaluation of the simplified CLI.
 
-Kev scores 20/29 with tags and fallback, versus 11/29 directly. Its 885.30-second tag preparation and 421.25-second full evaluation are the slowest in this comparison. Its direct baseline takes 810.96 seconds; low-confidence rejections account for many failures at the existing 0.4 threshold. These results do not support choosing Kev for this profile and configuration.
-
-These are single-run wall-clock measurements, including server/model loading effects, rather than controlled latency benchmarks. All questions are in-domain; rejection of unrelated questions was not tested. No thresholds were tuned to these results.
+These are single-run wall-clock measurements, including server/model loading effects. Some runs used CPU instead of GPU, so timing ratios do not establish relative model performance. Use accuracy and installed model size when interpreting this comparison. All questions are in-domain; rejection of unrelated questions was not tested. No thresholds were tuned to these results.
 
 ## Failed question IDs
 
@@ -59,7 +59,7 @@ Every model misses question 15, "List all ERP of project FAIR-IMPACT." Laya answ
 
 ## Validation and interpretation
 
-Laya originally assigned no tags above threshold to catalog queries q03 (travel events) and q12 (all projects), exposing a division by zero in `pipeline.candidates`. Queries with an empty tag list now receive score zero and remain eligible as candidates or through direct fallback. All four models were evaluated with this fix. The regression test and existing offline suite pass (18 tests). All 29 independent expected-SPARQL cases passed before the original benchmark; execution code and profile data were unchanged for the extension.
+Laya originally assigned no tags above threshold to catalog queries q03 (travel events) and q12 (all projects), exposing a division by zero in `pipeline.candidates`. At benchmark time, queries with an empty tag list were given score zero and remained eligible as candidates or through direct fallback. All four models were evaluated with that fix; the then-current 18 offline tests passed. Tag ranking and its tests have since been removed. All 29 independent expected-SPARQL cases passed before the original benchmark; execution code and profile data were unchanged for the extension.
 
 The evaluation metric checks that the expected query is selected and returns at least one row. It does not validate extracted parameters or exact returned answers per natural-language question. For example, Laya question 13 passes the routing metric while returning four rows versus Winnow's one row. The separate expected-SPARQL cases validate execution with supplied parameters, not model extraction. Evaluation exit code 1 means at least one scored question failed; all evaluations completed and produced 29 question results.
 
@@ -72,17 +72,32 @@ SQLite runs:
 | Decider | 8 | 9 |
 | Kev | 10 | 11 |
 
-Full logs and `timings.json` are in this directory. The directory retains its original `laya-vs-winnow` name to preserve existing links.
+This report was copied from the original experiment output. Its raw logs and timing files are not included alongside this document; the run IDs above refer to the historical local database, whose contents depend on whether it has been retained.
 
-## Reproduce
+## Forced-fallback experiments
 
-From the repository root, run these stages sequentially for each model (`laya`, `winnow`, `decider`, `kev`):
+These experiments retried only questions whose expected answers showed that the combined route had failed. They do not measure direct selection on the complete question set.
+
+| Profile | Model | Original combined score | Failed questions retried | Recovered | Hypothetical score after replacing known failures |
+|---|---|---:|---:|---:|---:|
+| c3po 1.2.0 | Winnow | 27/29 | 2 | 0 | 27/29 |
+| c3po 1.2.0 | Decider | 25/29 | 4 | 1 | 26/29 |
+| eu-expense-poc 1.5.0 | Winnow | 86/87 | 1 | 0 | 86/87 |
+| eu-expense-poc 1.5.0 | Decider | 70/87 | 17 | 6 | 76/87 |
+
+On eu-expense-poc, 87 questions were scored (73 in-domain and 14 off-topic), with 22 unscored questions skipped. Winnow's only failure was question 67, "Show the personnel expenditure for OPENSCIENCE." Forced fallback repeated the original `none` decision. Decider recovered IDs 1, 26, 61, 69, 70 and 98; five off-topic questions remained incorrectly accepted (45, 50, 101, 103, 106). The original tag route alone scored 74/87 for Winnow and 71/87 for Decider.
+
+The hypothetical scores use expected labels to identify failures. They are not production routing-policy scores and do not prove that direct selection alone is more accurate. The eu-expense forced-retry experiment did not evaluate the direct route on every scored question, so its direct-only score is not available from that experiment.
+
+## Evaluate the current direct-only implementation
+
+From the repository root, with `.env` configured:
 
 ```sh
-make PROFILE=profile/c3po OLLAYA_MODEL=decider cq-tag-assessment
-make PROFILE=profile/c3po OLLAYA_MODEL=decider question-tag-assessment
+make PROFILE=profile/c3po OLLAYA_MODEL=winnow eval
 make PROFILE=profile/c3po OLLAYA_MODEL=decider eval
-make PROFILE=profile/c3po OLLAYA_MODEL=decider eval-direct
+make PROFILE=profile/eu-expense-poc OLLAYA_MODEL=winnow eval
+make PROFILE=profile/eu-expense-poc OLLAYA_MODEL=decider eval
 ```
 
-Replace `decider` with the desired model. Each evaluation intentionally exits nonzero if any answer fails.
+Each command now performs direct selection on all labeled questions, extracts parameters, executes the chosen query and stores a new run in `direct_eval`. No preprocessing is required. Exit code 1 means at least one scored answer failed. Historical combined-route experiments require the earlier implementation; its commands are not supported by the current code. See [migration notes](MIGRATION-DIRECT-SELECTION.md).
