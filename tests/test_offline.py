@@ -194,6 +194,7 @@ class DbTest(unittest.TestCase):
 
     def test_tags_replaced_and_ollaya_runs_share_the_counter(self):
         db = ProfileDb(":memory:")
+        self.addCleanup(db.conn.close)
         self.assertIsNone(db.tags("p", "1.0.0"))
         db.put_tags("p", "1.0.0", "d1", [("a", "A", "intent"), ("c", "C", "intent")])
         db.put_tags("p", "1.0.0", "d2", [("a", "A2", "intent"), ("b", "B", "class ex:B")])  # deterministic: replaced, no run_id
@@ -206,6 +207,7 @@ class DbTest(unittest.TestCase):
 
     def test_tag_runs_and_eval_rows(self):
         db = ProfileDb(":memory:")
+        self.addCleanup(db.conn.close)
         self.assertIsNone(db.last_run_id(*self.KEY))
         db.put("p", 1, "q?", {"a": 0.1}, "winnow", "1.0.0", "d1", 1)
         db.put("p", 1, "q?", {"a": 0.9}, "winnow", "1.0.0", "d2", 2)
