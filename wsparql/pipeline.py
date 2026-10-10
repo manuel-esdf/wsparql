@@ -12,7 +12,8 @@ def candidates(tag_probs, catalog, k=5):
     """Rank catalog queries by the mean detected probability of their tags; returns the top k as [(qid, score)]."""
     # ponytail: plain mean; a query with a wide tag list is diluted: tighten its competency question (IDF weighting tested offline, no gain)
     # k=5: on the 109-question set the expected query is in the top 3 for 66/73 in-domain questions, in the top 5 for 71/73
-    scored = [(qid, sum(tag_probs.get(t, 0.0) for t in q["tags"]) / len(q["tags"])) for qid, q in catalog.items()]
+    scored = [(qid, sum(tag_probs.get(t, 0.0) for t in q["tags"]) / len(q["tags"]) if q["tags"] else 0.0)
+              for qid, q in catalog.items()]
     return sorted(scored, key=lambda x: -x[1])[:k]
 
 

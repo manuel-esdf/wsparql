@@ -24,6 +24,10 @@ CATALOG = {
 
 
 class CandidatesTest(unittest.TestCase):
+    def test_query_without_detected_tags_scores_zero(self):
+        catalog = {"untagged": {"tags": []}, "tagged": {"tags": ["expense"]}}
+        self.assertEqual(candidates({"expense": 0.9}, catalog), [("tagged", 0.9), ("untagged", 0.0)])
+
     def test_ranks_by_mean_tag_probability(self):
         probs = {"expense": 0.9, "project": 0.9, "budget": 0.95, "remaining": 0.9, "comparison": 0.5, "total": 0.2}
         ranked = candidates(probs, CATALOG, k=2)
