@@ -1,11 +1,9 @@
 """Offline checks (no Ollaya): run with `make test`. The profile-specific tests pin their profile; the generic ones
 (ETL round trip, expected query values) run on every profile/* directory."""
-import json
 import os
 import shutil
 import tempfile
 import unittest
-from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from rdflib import Graph
@@ -247,26 +245,16 @@ class EtlTest(unittest.TestCase):
 
 
 class ExpectedRowsTest(unittest.TestCase):
-    @staticmethod
-    def norm(v):
-        """Numbers at 6 decimals (the ETL types `0` as `0.0`; summation order moves the 28th digit of a SUM), else as is."""
-        try:
-            return f"{Decimal(v):.6f}"
-        except InvalidOperation:
-            return v
-
     def test_every_case_reproduces_the_expected_values(self):
         """profile/*/tests/expected.json = [{q_id, query, params, rows, expected}]: the draft's cq/expected.json values
         (the cells of each competency query, flattened; CQ3's "city, country" split, the merged query returns them apart)
         with the query and parameters that answer the competency question since the siblings merged. Every expected value
         must be among the returned cells (a merged query returns more columns) and the row count must match. Sets: the
-        draft deduplicated two of its lists (CQ3, CQ7). Raw graph.query, so IRIs compare in full."""
+        draft deduplicated two of its lists (CQ3, CQ7). See make expected."""
         for f in sorted(Path("profile").glob("*/tests/expected.json")):
-            prof, cases = Profile(f.parent.parent), json.loads(f.read_text())
-            self.assertEqual(sorted({c["query"] for c in cases}), sorted(prof.catalog), f"{f}: every catalog query has a case")
-            for c in cases:
+            prof = Profile(f.parent.parent)
+            self.assertEqual(sorted({c["query"] for c in prof.expected}), sorted(prof.catalog), f"{f}: every catalog query has a case")
+            for c, n, missing in prof.check_expected():
                 with self.subTest(profile=prof.name, q_id=c["q_id"]):
-                    rows = list(prof.graph.query(prof.queries[c["query"]], initBindings={k: literal(v) for k, v in c["params"].items()}))
-                    got = {self.norm(str(x)) for row in rows for x in row if x is not None}
-                    self.assertEqual(len(rows), c["rows"])
-                    self.assertEqual({self.norm(v) for v in c["expected"]} - got, set())
+                    self.assertEqual(n, c["rows"])
+                    self.assertEqual(missing, [])

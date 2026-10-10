@@ -1,5 +1,7 @@
 """Load a POC profile directory: ontology + data graph, catalog, queries, test questions."""
+import json
 import re
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 import yaml
@@ -17,6 +19,14 @@ def literal(value):
     # ponytail: typed by value shape; declare types in the catalog if a non-date typed param appears
     value = str(value)
     return Literal(value, datatype=XSD.date) if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value) else Literal(value)
+
+
+def norm(v):
+    """Numbers at 6 decimals (the ETL types `0` as `0.0`; summation order moves the 28th digit of a SUM), else as is."""
+    try:
+        return f"{Decimal(v):.6f}"
+    except InvalidOperation:
+        return v
 
 
 class Profile:
@@ -52,6 +62,9 @@ class Profile:
         self._values = {}
         # [{q_id, question, expected_query?}]; expected_query = catalog id or "none", absent = not evaluated
         self.test_questions = yaml.safe_load((path / "tests/test-questions.yaml").read_text())["questions"]
+        # [{q_id, query, params, rows, expected}]: the draft's expected values per competency question, [] when absent
+        exp = path / "tests/expected.json"
+        self.expected = json.loads(exp.read_text()) if exp.exists() else []
         self.db_path = path.parent / "profile.db"  # shared tag cache, one folder up, git-ignored
 
     def property(self, label):
@@ -80,3 +93,11 @@ class Profile:
         nm = self.graph.namespace_manager
         cell = lambda c: "" if c is None else c.n3(nm) if isinstance(c, URIRef) else str(c)
         return [str(v) for v in res.vars], [[cell(c) for c in row] for row in res]
+
+    def check_expected(self):
+        """Run every tests/expected.json case; yields (case, row count, expected values not among the returned cells).
+        Raw graph.query, so IRIs compare in full; a merged query may return more columns than the draft's."""
+        for c in self.expected:
+            rows = list(self.graph.query(self.queries[c["query"]], initBindings={k: literal(v) for k, v in c["params"].items()}))
+            got = {norm(str(x)) for row in rows for x in row if x is not None}
+            yield c, len(rows), sorted({norm(v) for v in c["expected"]} - got)

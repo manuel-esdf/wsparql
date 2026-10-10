@@ -1,0 +1,218 @@
+[
+ {
+  "q_id": 1,
+  "query": "q01-total-expenses-by-project",
+  "params": {},
+  "rows": 3,
+  "expected": [
+   "https://example.org/eu-expense#LUMEN",
+   "LUMEN",
+   "32120.00",
+   "https://example.org/eu-expense#GRAPHIA",
+   "GRAPHIA",
+   "12420.00",
+   "https://example.org/eu-expense#OPENSCIENCE",
+   "OPENSCIENCE",
+   "9210.00"
+  ]
+ },
+ {
+  "q_id": 2,
+  "query": "q02-project-expense-breakdown",
+  "params": {
+   "acronym": "LUMEN"
+  },
+  "rows": 5,
+  "expected": [
+   "LUMEN",
+   "Personnel",
+   "15800.00",
+   "LUMEN",
+   "Subcontracting",
+   "12500.00",
+   "LUMEN",
+   "Equipment",
+   "2900.00",
+   "LUMEN",
+   "Travel",
+   "680.00",
+   "LUMEN",
+   "Other goods and services",
+   "240.00"
+  ]
+ },
+ {
+  "q_id": 3,
+  "query": "q03-travel-expenses-by-project",
+  "params": {},
+  "rows": 3,
+  "expected": [
+   "GRAPHIA",
+   "920.00",
+   "LUMEN",
+   "680.00",
+   "OPENSCIENCE",
+   "410.00"
+  ]
+ },
+ {
+  "q_id": 4,
+  "query": "q04-expenses-by-work-package",
+  "params": {},
+  "rows": 5,
+  "expected": [
+   "https://example.org/eu-expense#LUMEN-WP2",
+   "Semantic services",
+   "23840.00",
+   "https://example.org/eu-expense#OPENSCIENCE-WP2",
+   "Service integration",
+   "9210.00",
+   "https://example.org/eu-expense#GRAPHIA-WP3",
+   "Graph analytics",
+   "8820.00",
+   "https://example.org/eu-expense#LUMEN-WP4",
+   "Integration and validation",
+   "8280.00",
+   "https://example.org/eu-expense#GRAPHIA-WP1",
+   "Data ingestion",
+   "3600.00"
+  ]
+ },
+ {
+  "q_id": 5,
+  "query": "q05-budget-vs-spent",
+  "params": {},
+  "rows": 3,
+  "expected": [
+   "https://example.org/eu-expense#GRAPHIA",
+   "GRAPHIA",
+   "300000.00",
+   "12420.00",
+   "287580.00",
+   "https://example.org/eu-expense#LUMEN",
+   "LUMEN",
+   "420000.00",
+   "32120.00",
+   "387880.00",
+   "https://example.org/eu-expense#OPENSCIENCE",
+   "OPENSCIENCE",
+   "180000.00",
+   "9210.00",
+   "170790.00"
+  ]
+ },
+ {
+  "q_id": 6,
+  "query": "q06-ineligible-expenses",
+  "params": {},
+  "rows": 1,
+  "expected": [
+   "https://example.org/eu-expense#E006",
+   "Team dinner during project meeting",
+   "240.00",
+   "LUMEN"
+  ]
+ },
+ {
+  "q_id": 7,
+  "query": "q07-expenses-by-employee",
+  "params": {},
+  "rows": 3,
+  "expected": [
+   "https://example.org/eu-expense#BobDurand",
+   "Bob Durand",
+   "15610.00",
+   "https://example.org/eu-expense#AliceMartin",
+   "Alice Martin",
+   "11780.00",
+   "https://example.org/eu-expense#ClaireRoux",
+   "Claire Roux",
+   "8820.00"
+  ]
+ },
+ {
+  "q_id": 8,
+  "query": "q08-expenses-by-supplier",
+  "params": {},
+  "rows": 5,
+  "expected": [
+   "https://example.org/eu-expense#SemanticConsulting",
+   "Semantic Consulting GmbH",
+   "12500.00",
+   "https://example.org/eu-expense#CloudHost",
+   "CloudHost Europe",
+   "4800.00",
+   "https://example.org/eu-expense#TechStore",
+   "TechStore SAS",
+   "2900.00",
+   "https://example.org/eu-expense#Eurostar",
+   "Eurostar",
+   "1090.00",
+   "https://example.org/eu-expense#AirFrance",
+   "Air France",
+   "920.00"
+  ]
+ },
+ {
+  "q_id": 9,
+  "query": "q09-monthly-expenses",
+  "params": {},
+  "rows": 6,
+  "expected": [
+   "2026",
+   "1",
+   "15800.00",
+   "2026",
+   "2",
+   "8580.00",
+   "2026",
+   "3",
+   "15640.00",
+   "2026",
+   "4",
+   "4520.00",
+   "2026",
+   "5",
+   "7600.00",
+   "2026",
+   "6",
+   "1610.00"
+  ]
+ },
+ {
+  "q_id": 10,
+  "query": "q10-project-expenses-in-period",
+  "params": {
+   "acronym": "LUMEN",
+   "from": "2026-01-01",
+   "to": "2026-03-31"
+  },
+  "rows": 6,
+  "expected": [
+   "https://example.org/eu-expense#E001",
+   "Alice - January personnel cost",
+   "2026-01-31",
+   "8200.00",
+   "https://example.org/eu-expense#E002",
+   "Bob - January personnel cost",
+   "2026-01-31",
+   "7600.00",
+   "https://example.org/eu-expense#E003",
+   "Trip to Brussels consortium meeting",
+   "2026-02-12",
+   "680.00",
+   "https://example.org/eu-expense#E004",
+   "Semantic architecture consultancy",
+   "2026-03-15",
+   "12500.00",
+   "https://example.org/eu-expense#E005",
+   "Development laptop",
+   "2026-03-20",
+   "2900.00",
+   "https://example.org/eu-expense#E006",
+   "Team dinner during project meeting",
+   "2026-03-21",
+   "240.00"
+  ]
+ }
+]

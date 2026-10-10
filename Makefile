@@ -6,7 +6,7 @@ RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl query-catalog.yaml tests/test-questions.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help install test clean build profile-check abox sparql tags-gen query-tags tags candidates select params ask demo eval eval-direct tags-cache ollaya-check ollaya-smoke-test
+.PHONY: help install test clean build profile-check abox sparql expected tags-gen query-tags tags candidates select params ask demo eval eval-direct tags-cache ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -34,6 +34,9 @@ abox: ## ETL: build $(PROFILE)/abox.ttl from tbox.ttl + csv/*.csv (TBOX IRIs are
 
 sparql: profile-check ## run a catalog query on the ABOX: make sparql Q=q10-project-expenses-in-period ARGS="acronym=GRAPHIA from=2026-01-01 to=2026-06-30"; no ARGS = catalog example params; no Q = all queries, row counts only
 	@$(RUN) sparql "$(Q)" $(ARGS)
+
+expected: profile-check ## run every $(PROFILE)/tests/expected.json case (catalog query + params) on the ABOX, compare the row count and that every expected value is among the returned cells; one line per case, exit 1 on any mismatch; no Ollaya
+	@$(RUN) expected
 
 tags-gen: profile-check ## derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya, instant. See GENERATE-TAGS-FROM-ONTOLOGY.md
 	@$(RUN) tags-gen

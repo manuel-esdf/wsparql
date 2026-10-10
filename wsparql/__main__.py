@@ -120,6 +120,7 @@ def main():
     s = sub.add_parser("sparql", help="run one catalog query; without an id, run all and print row counts")
     s.add_argument("query_id", nargs="?")
     s.add_argument("bindings", nargs="*", help="param=value, e.g. acronym=GRAPHIA from=2026-01-01 to=2026-06-30; none = the catalog examples; with some, a required one not given = its example, an optional one stays unbound")
+    sub.add_parser("expected", help="run every tests/expected.json case (query + params) and compare with the expected row count and values; exit 1 on any mismatch; no Ollaya")
     sub.add_parser("tags-gen", help="derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya")
     sub.add_parser("query-tags", help="Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5")
     sub.add_parser("tags", help="detect tags for a question with Ollaya (one noul question per tag of the dictionary)").add_argument("question", nargs="?", help=default_q)
@@ -141,7 +142,7 @@ def main():
     prof = Profile(args.profile)
     db = ProfileDb(prof.db_path)
     labeled = [q for q in prof.test_questions if "expected_query" in q]
-    qt_run = load_tags(prof, db, args.cmd in NEED_QUERY_TAGS) if args.cmd not in ("sparql", "tags-gen", "eval-direct") else None
+    qt_run = load_tags(prof, db, args.cmd in NEED_QUERY_TAGS) if args.cmd not in ("sparql", "expected", "tags-gen", "eval-direct") else None
 
     takes = lambda q: {**q.get("params", {}), **q.get("optional", {})}  # required + optional, with their example values
     if args.cmd == "sparql":
@@ -161,6 +162,15 @@ def main():
         else:
             for qid in prof.queries:
                 print(f"{qid:<40} {len(prof.run(qid, takes(prof.catalog[qid]))[1]):>3} rows")
+    elif args.cmd == "expected":
+        if not prof.expected:
+            sys.exit(f"{prof.name}: no tests/expected.json")
+        rows = [[str(c["q_id"]), c["query"], " ".join(f"{k}={v}" for k, v in c["params"].items()), f"{n}/{c['rows']}",
+                 "OK" if n == c["rows"] and not missing else "FAIL", ", ".join(missing)] for c, n, missing in prof.check_expected()]
+        print_table(["q_id", "query", "params", "rows", "status", "missing"], rows)
+        ok = sum(r[4] == "OK" for r in rows)
+        print(f"\n{ok}/{len(rows)} cases reproduce the expected values")
+        sys.exit(ok != len(rows))
     elif args.cmd == "tags":
         print_tags(call_ollaya(ollaya.detect_tags, question_or_default(p, prof, args.question), prof.tags))
     elif args.cmd == "candidates":
