@@ -6,7 +6,7 @@ RUN = uv run python -m wsparql
 PROFILE_FILES = VERSION tbox.ttl abox.ttl query-catalog.yaml tests/test-questions.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help install test clean build profile-check abox sparql expected tags-gen query-tags tags candidates select params ask demo eval eval-direct tags-cache ollaya-check ollaya-smoke-test
+.PHONY: help install test clean build profile-check abox sparql expected ontology-tags-gen cq-tag-assessment tags query-ranking query-selection param-extraction answer demo eval eval-direct question-tag-assessment ollaya-check ollaya-smoke-test
 
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' $(firstword $(MAKEFILE_LIST)) | awk -F':.*## ' '{printf "  %-20s %s\n", $$1, $$2}'
@@ -17,11 +17,11 @@ install: ## uv sync (creates .venv with rdflib + pyyaml)
 test: ## offline unit tests (no Ollaya)
 	@uv run python -m unittest discover -s tests
 
-clean: ## drop the derived artefacts: $(PROFILE)/abox.ttl (make abox rebuilds it), profile/profile.db (tags, query tags, tag cache, eval results; make tags-gen query-tags tags-cache rebuild them, minutes on winnow) and __pycache__; keeps .venv
+clean: ## drop the derived artefacts: $(PROFILE)/abox.ttl (make abox rebuilds it), profile/profile.db (tags, query tags, tag cache, eval results; make ontology-tags-gen cq-tag-assessment question-tag-assessment rebuild them, minutes on winnow) and __pycache__; keeps .venv
 	rm -f $(PROFILE)/abox.ttl $(PROFILE)/../profile.db
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +
 
-build: abox tags-gen query-tags tags-cache ## build all derived artefacts in order: abox.ttl (ETL), then profile/profile.db tags (tags-gen), query tags (query-tags, Ollaya) and the question tag cache (tags-cache, Ollaya, minutes on winnow); then make eval
+build: abox ontology-tags-gen cq-tag-assessment question-tag-assessment ## build all derived artefacts in order: abox.ttl (ETL), then profile/profile.db ontology_tags (ontology-tags-gen), query tags (cq-tag-assessment, Ollaya) and the question tag cache (question-tag-assessment, Ollaya, minutes on winnow); then make eval
 
 profile-check: ## mandatory profile files present in $(PROFILE); every catalog query has its .rq
 	@for f in $(PROFILE_FILES); do test -f $(PROFILE)/$$f || { echo "MISSING $(PROFILE)/$$f"; exit 1; }; done
@@ -38,38 +38,38 @@ sparql: profile-check ## run a catalog query on the ABOX: make sparql Q=q10-proj
 expected: profile-check ## run every $(PROFILE)/tests/expected.json case (catalog query + params) on the ABOX, compare the row count and that every expected value is among the returned cells; one line per case, exit 1 on any mismatch; no Ollaya
 	@$(RUN) expected
 
-tags-gen: profile-check ## derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya, instant. See GENERATE-TAGS-FROM-ONTOLOGY.md
-	@$(RUN) tags-gen
+ontology-tags-gen: abox ## derive the tag dictionary from tbox.ttl + abox.ttl (classes, TBOX individuals, datatype properties) plus fixed intent tags, store in profile/profile.db ontology_tags (deterministic: no run_id, rows of the profile version replaced); no Ollaya, instant. See docs/GENERATE-TAGS-FROM-ONTOLOGY.md
+	@$(RUN) ontology-tags-gen
 
-query-tags: profile-check ## Ollaya assesses every tag of the dictionary against each catalog query description (one noul per tag), store {tag: prob} per query in profile/profile.db query_tags (new run_id); a query's tags = those >= 0.5 (seconds per query on winnow)
-	@$(RUN) query-tags
+cq-tag-assessment: ontology-tags-gen ## Ollaya assesses every tag of the dictionary against each catalog query competency question (one noul per tag), store {tag: prob} per query in profile/profile.db cq_tag_assessment (new run_id); a query's tags = those >= 0.5 (seconds per query on winnow)
+	@$(RUN) cq-tag-assessment
 
 tags: profile-check ## detect tags for a question with Ollaya: make tags Q="Which suppliers cost us the most?"; no Q = first tests/test-questions.yaml question
 	@$(RUN) tags "$(Q)"
 
-candidates: profile-check ## rank top 5 queries for Q; question tags from the last tags-cache run when Q is cached, else Ollaya; query tags from the last query-tags run. No Q = first tests/test-questions.yaml question
-	@$(RUN) candidates "$(Q)"
+query-ranking: profile-check ## rank top 5 queries for Q; question tags from the last question-tag-assessment run when Q is cached, else Ollaya; query tags from the last cq-tag-assessment run. No Q = first tests/test-questions.yaml question
+	@$(RUN) query-ranking "$(Q)"
 
-select: profile-check ## rank candidates, then Ollaya picks the best query or none: make select Q="..."; no Q = first tests/test-questions.yaml question
-	@$(RUN) select "$(Q)"
+query-selection: profile-check ## rank candidates, then Ollaya picks the best query or none: make query-selection Q="..."; no Q = first tests/test-questions.yaml question
+	@$(RUN) query-selection "$(Q)"
 
-params: profile-check ## extract the query parameters found in Q (an ABOX value written in the question, else an Ollaya choice over the property's values + none; from/to: a named reporting period's dates, else regex on quarter, month, year): make params Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
-	@$(RUN) params "$(Q)"
+param-extraction: profile-check ## extract the query parameters found in Q (an ABOX value written in the question, else an Ollaya choice over the property's values + none; from/to: a named reporting period's dates, else regex on quarter, month, year): make param-extraction Q="List LUMEN expenses for Q1 2026"; no Q = working examples, every test question whose expected query takes parameters
+	@$(RUN) param-extraction "$(Q)"
 
-ask: profile-check ## answer Q end to end: tags, candidates, selected query (fallback: direct choice over the SPARQL (labels in place of the opaque IRIs) when the tag route says none), parameters, result rows or "no suitable query": make ask Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
-	@$(RUN) ask "$(Q)"
+answer: profile-check ## answer Q end to end: tags, candidates, selected query (fallback: direct choice over the SPARQL (labels in place of the opaque IRIs) when the tag route says none), parameters, result rows or "no suitable query": make answer Q="List LUMEN expenses for Q1 2026"; no Q = first tests/test-questions.yaml question
+	@$(RUN) answer "$(Q)"
 
-demo: profile-check ## make ask on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
+demo: profile-check ## make answer on every tests/test-questions.yaml question that has an expected_query, off-topic ones included (minutes on winnow)
 	@$(RUN) demo
 
-eval: profile-check ## full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest tags-gen / query-tags / tags-cache runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db eval_result; N/M with the direct fallback and for the tag route alone, exit 1 on any mismatch (minutes on winnow)
+eval: profile-check ## full chain on every tests/test-questions.yaml question that has an expected_query, tags from the latest ontology-tags-gen / cq-tag-assessment / question-tag-assessment runs (fails if a question is not cached): expected query selected and returns rows, none answers "no suitable query"; rows stored in profile/profile.db question_eval; N/M with the direct fallback and for the tag route alone, exit 1 on any mismatch (minutes on winnow)
 	@$(RUN) eval
 
 eval-direct: profile-check ## baseline without tags: for each labeled tests/test-questions.yaml question one Ollaya choice over the SPARQL (labels in place of the opaque IRIs) of all catalog queries + none, then parameters and run; N/M, exit 1 on any mismatch (minutes on winnow)
 	@$(RUN) eval-direct
 
-tags-cache: profile-check ## detect tags for every tests/test-questions.yaml question with Ollaya (needs make tags-gen), store in profile/profile.db (new run_id)
-	@$(RUN) tags-cache
+question-tag-assessment: ontology-tags-gen ## detect tags for every tests/test-questions.yaml question with Ollaya, store in profile/profile.db (new run_id)
+	@$(RUN) question-tag-assessment
 
 ollaya-check: ## prerequisites: uv, ollaya binary, server up, model pulled
 	@command -v uv >/dev/null     || { echo "MISSING uv -> https://docs.astral.sh/uv/"; exit 1; }

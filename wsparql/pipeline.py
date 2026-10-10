@@ -5,12 +5,12 @@ import re
 from wsparql import ollaya
 
 
-TAG_THRESHOLD = 0.5  # ponytail: a query's tags = those Ollaya detected at >= 0.5 on its description; the probabilities stay in query_tags
+TAG_THRESHOLD = 0.5  # ponytail: a query's tags = those Ollaya detected at >= 0.5 on its competency question; the probabilities stay in cq_tag_assessment
 
 
 def candidates(tag_probs, catalog, k=5):
     """Rank catalog queries by the mean detected probability of their tags; returns the top k as [(qid, score)]."""
-    # ponytail: plain mean; a query with a wide tag list is diluted: tighten its description (IDF weighting tested offline, no gain)
+    # ponytail: plain mean; a query with a wide tag list is diluted: tighten its competency question (IDF weighting tested offline, no gain)
     # k=5: on the 109-question set the expected query is in the top 3 for 66/73 in-domain questions, in the top 5 for 71/73
     scored = [(qid, sum(tag_probs.get(t, 0.0) for t in q["tags"]) / len(q["tags"])) for qid, q in catalog.items()]
     return sorted(scored, key=lambda x: -x[1])[:k]
@@ -45,8 +45,8 @@ def choose(question, instructions, criteria, ask):
 
 
 def select(question, ranked, catalog, ask=ollaya.decide):
-    """The ranked candidates, described by their catalog description."""
-    return choose(question, SELECT_INSTRUCTIONS, {qid: catalog[qid]["description"] for qid, _ in ranked}, ask)
+    """The ranked candidates, described by their catalog competency question."""
+    return choose(question, SELECT_INSTRUCTIONS, {qid: catalog[qid]["competency-question"] for qid, _ in ranked}, ask)
 
 
 def select_direct(question, prof, ask=ollaya.decide):
@@ -125,7 +125,7 @@ def answer(question, tag_probs, prof, ask=ollaya.decide, direct=False):
     {question, tags, candidates, selected, confidence, probabilities, via, tag_route, params, how, missing, result};
     selected None = no suitable query; missing = required params not found (query not run; an optional one not found
     leaves its variable unbound); result = (cols, rows) or None.
-    via: "tags" (ranked candidates, choice over descriptions), "fallback" (that choice answered none, then select_direct;
+    via: "tags" (ranked candidates, choice over competency questions), "fallback" (that choice answered none, then select_direct;
     tag_route keeps the (confidence, probabilities) of the none answer) or "direct" (select_direct only, the baseline)."""
     via, tag_route = "tags", None
     if direct:

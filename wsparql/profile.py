@@ -37,7 +37,7 @@ class Profile:
         self.graph = Graph()
         self.graph.parse(path / "tbox.ttl")
         self.graph.parse(path / "abox.ttl")
-        self.tags = None  # {tag: description} from profile.db table tags (make tags-gen), set by __main__.load_tags
+        self.tags = None  # {tag: description} from profile.db table ontology_tags (make ontology-tags-gen), set by __main__.load_tags
         catalog = yaml.safe_load((path / "query-catalog.yaml").read_text())
         self.catalog = catalog["queries"]
         # {param: what fills it}: a property label (one of its ABOX values), a list (one of those words) or date (from/to)

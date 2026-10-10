@@ -1,4 +1,4 @@
-"""Tag dictionary derived from the ontology (see GENERATE-TAGS-FROM-ONTOLOGY.md):
+"""Tag dictionary derived from the ontology (see docs/GENERATE-TAGS-FROM-ONTOLOGY.md):
 classes with data, individuals declared in the TBOX, boolean/numeric/date datatype properties, plus fixed intent tags."""
 import re
 from pathlib import Path

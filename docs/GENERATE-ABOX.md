@@ -94,7 +94,7 @@ drift. The queries walk the stored direction with an explicit join, plain graph 
 ```
 
 Written project-first and spelled out rather than as the path `ex:P04/ex:P02`: the query text is what the routing
-fallback reads, and the path form cost it two questions (README, "Fallback"). The committed `.rq` files carry no such
+fallback reads, and the path form cost it two questions. The committed `.rq` files carry no such
 comments: the fallback gets the text with each opaque term replaced by its label in camelCase (`Profile.readable`:
 `?expense a ex:Expense ; ex:chargedToWorkPackage ?workPackage ; ex:amount ?amount`), without its indentation and
 blank lines (one choice over every query has to fit the model's context; the PREFIX lines stay, the model leans on

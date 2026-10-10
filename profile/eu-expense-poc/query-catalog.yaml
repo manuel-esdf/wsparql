@@ -1,3 +1,5 @@
+# competency-question: the question a query answers, one per query. Ollaya reads this text twice: `make cq-tag-assessment`
+# detects the query's tags on it, and `make query-selection` offers it as the choice criterion of a candidate.
 # parameters: what fills each query parameter: a property label = one of its ABOX values (written in the question, else an
 # Ollaya choice over them plus none), date = from/to from the quarter, month or year written in the question. Per query,
 # `params` are required (none found = the query is not run); the values are the examples `make sparql` runs without ARGS.
@@ -7,24 +9,24 @@ parameters:
   to: date
 queries:
   q01-total-expenses-by-project:
-    description: "Compare total expenses across European projects"
+    competency-question: "How do total expenses compare across European projects?"
   q02-project-expense-breakdown:
-    description: "Breakdown of one European project's expenses by expense category"
+    competency-question: "What is the breakdown of one European project's expenses by expense category?"
     params: {acronym: LUMEN}
   q03-travel-expenses-by-project:
-    description: "Compare travel expenses across projects"
+    competency-question: "How do travel expenses compare across projects?"
   q04-expenses-by-work-package:
-    description: "Show total expenses by work package"
+    competency-question: "What are the total expenses by work package?"
   q05-budget-vs-spent:
-    description: "Compare project budget, spent amount and remaining budget"
+    competency-question: "How do project budget, spent amount and remaining budget compare?"
   q06-ineligible-expenses:
-    description: "List expenses marked as ineligible"
+    competency-question: "Which expenses are marked as ineligible?"
   q07-expenses-by-employee:
-    description: "Show total expenses associated with each employee"
+    competency-question: "What are the total expenses associated with each employee?"
   q08-expenses-by-supplier:
-    description: "Show total expenses by supplier"
+    competency-question: "What are the total expenses by supplier?"
   q09-monthly-expenses:
-    description: "Show monthly expense totals"
+    competency-question: "What are the monthly expense totals?"
   q10-project-expenses-in-period:
-    description: "List project expenses within a date range"
+    competency-question: "Which project expenses fall within a date range?"
     params: {acronym: LUMEN, from: "2026-01-01", to: "2026-03-31"}

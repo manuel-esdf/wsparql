@@ -17,9 +17,9 @@ from wsparql.tags import generate, slug
 EU = "profile/eu-expense-poc"
 PROFILES = sorted(p.parent for p in Path("profile").glob("*/csv"))
 CATALOG = {
-    "q01-total-expenses-by-project": {"description": "d", "tags": ["expense", "project", "total", "comparison"]},
-    "q05-budget-vs-spent": {"description": "d", "tags": ["project", "budget", "expense", "remaining", "comparison"]},
-    "q06-ineligible-expenses": {"description": "d", "tags": ["expense", "eligibility", "list"]},
+    "q01-total-expenses-by-project": {"competency-question": "d", "tags": ["expense", "project", "total", "comparison"]},
+    "q05-budget-vs-spent": {"competency-question": "d", "tags": ["project", "budget", "expense", "remaining", "comparison"]},
+    "q06-ineligible-expenses": {"competency-question": "d", "tags": ["expense", "eligibility", "list"]},
 }
 
 
@@ -117,7 +117,7 @@ class AnswerTest(unittest.TestCase):
 
     def test_select_params_run(self):
         prof = Profile(EU)
-        for q in prof.catalog.values():  # query tags come from profile.db query_tags (make query-tags), not the catalog file
+        for q in prof.catalog.values():  # query tags come from profile.db cq_tag_assessment (make cq-tag-assessment), not the catalog file
             q["tags"] = ["expense"]
         prof.catalog[self.Q10]["tags"] = list(self.PROBS)
         out = answer("List LUMEN expenses for Q1 2026", self.PROBS, prof, self.ask(self.Q10))
@@ -132,7 +132,7 @@ class AnswerTest(unittest.TestCase):
         prof = Profile(EU)
         for q in prof.catalog.values():
             q["tags"] = ["expense"]
-        def ask(question, questions):  # none over descriptions, Q10 over the SPARQL text
+        def ask(question, questions):  # none over competency questions, Q10 over the SPARQL text
             if "select" in questions:
                 raw = any(v.startswith("PREFIX") for v in questions["select"]["criteria"].values())
                 return {"select": {"choice": self.Q10 if raw else "none", "confidence": 0.9, "probabilities": {}}}
@@ -158,7 +158,7 @@ class AnswerTest(unittest.TestCase):
         self.assertEqual(([q for q, _ in out["candidates"]], out["selected"], out["via"], len(out["result"][1])), (list(prof.catalog), self.Q10, "direct", 6))
 
 
-class TagsGenTest(unittest.TestCase):
+class OntologyTagsGenTest(unittest.TestCase):
     def test_eu_expense_dictionary(self):
         rows = generate(EU)
         self.assertEqual([t for t, _, _ in rows], [  # each rule in IRI order (opaque IRIs, numbered in declaration order)
@@ -193,15 +193,15 @@ class DbTest(unittest.TestCase):
     def test_tags_replaced_and_ollaya_runs_share_the_counter(self):
         db = ProfileDb(":memory:")
         self.addCleanup(db.conn.close)
-        self.assertIsNone(db.tags("p", "1.0.0"))
-        db.put_tags("p", "1.0.0", "d1", [("a", "A", "intent"), ("c", "C", "intent")])
-        db.put_tags("p", "1.0.0", "d2", [("a", "A2", "intent"), ("b", "B", "class ex:B")])  # deterministic: replaced, no run_id
-        self.assertEqual(db.tags("p", "1.0.0"), {"a": "A2", "b": "B"})
-        self.assertIsNone(db.tags("p", "2.0.0"))
+        self.assertIsNone(db.ontology_tags("p", "1.0.0"))
+        db.put_ontology_tags("p", "1.0.0", "d1", [("a", "A", "intent"), ("c", "C", "intent")])
+        db.put_ontology_tags("p", "1.0.0", "d2", [("a", "A2", "intent"), ("b", "B", "class ex:B")])  # deterministic: replaced, no run_id
+        self.assertEqual(db.ontology_tags("p", "1.0.0"), {"a": "A2", "b": "B"})
+        self.assertIsNone(db.ontology_tags("p", "2.0.0"))
         db.put("p", 1, "q?", {"a": 0.1}, "winnow", "1.0.0", "d1", db.next_run_id())
-        db.put_query_tags("p", "winnow", "1.0.0", "d3", db.next_run_id(), [(1, "q01", "desc", {"a": 0.9})])
-        self.assertEqual(db.query_tags("p", "winnow", "1.0.0"), ({"q01": {"a": 0.9}}, 2))  # one counter over query_tags + tag_cache
-        self.assertIsNone(db.query_tags("p", "other", "1.0.0"))
+        db.put_cq_tag_assessment("p", "winnow", "1.0.0", "d3", db.next_run_id(), [(1, "q01", "desc", {"a": 0.9})])
+        self.assertEqual(db.cq_tag_assessment("p", "winnow", "1.0.0"), ({"q01": {"a": 0.9}}, 2))  # one counter over cq_tag_assessment + question_tag_assessment
+        self.assertIsNone(db.cq_tag_assessment("p", "other", "1.0.0"))
 
     def test_tag_runs_and_eval_rows(self):
         db = ProfileDb(":memory:")
@@ -218,7 +218,7 @@ class DbTest(unittest.TestCase):
         db.put_evals([row, ("p", 2, "w?", "none", "none", 1.0, "{}", "", None, 1, "winnow", "1.0.0", 2, "e1")])
         self.assertEqual(db.prev_eval(*self.KEY, 2), ("e1", {1: ("q01", 0.99, 3, 1), 2: ("none", 1.0, None, 1)}))
         db.put_evals([row[:-1] + ("e2",)])  # same (profile, q_id, run_id): replaced, not added
-        self.assertEqual(db.conn.execute("SELECT COUNT(*), MAX(date) FROM eval_result").fetchone(), (2, "e2"))
+        self.assertEqual(db.conn.execute("SELECT COUNT(*), MAX(date) FROM question_eval").fetchone(), (2, "e2"))
 
 
 class EtlTest(unittest.TestCase):

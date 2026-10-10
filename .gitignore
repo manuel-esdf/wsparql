@@ -4,5 +4,6 @@ profile/profile.db
 .env
 .claude
 .agents
+.archify
 
 

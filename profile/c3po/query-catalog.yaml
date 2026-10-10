@@ -1,3 +1,8 @@
+# competency-question: the question a query answers, as the draft wrote it (the `# CQn:` first line of
+# DRAFT/C3PO/cq/Qn_sparql.txt): one per query, the most generic of the sibling questions a merged query answers; the
+# other siblings (the same query with other parameters) are in tests/test-questions.yaml. Ollaya reads this text twice:
+# `make cq-tag-assessment` detects the query's tags on it, and `make query-selection` offers it as the choice criterion
+# of a candidate.
 # parameters: what fills each query parameter (bound with rdflib initBindings, never templated). A property label = one
 # of its ABOX values, taken when written in the question, else by an Ollaya choice over them plus none; a list = one of
 # those words written in the question; date = from/to, the dates of a reporting period named in the question, else the
@@ -16,39 +21,39 @@ parameters:
   to: date
 queries:
   q01-expenditure-by-reporting-period:
-    description: "Personnel cost, travel invoices and total expenditure of the project per reporting period, or of one reporting period"
+    competency-question: "What is the total project expenditure (personnel + travel invoices) per reporting period?"
     optional: {projectName: FAIR-IMPACT, period: ERP3}
   q02-person-months-by-work-package:
-    description: "Person-months spent per work package, or in one work package, over the whole project or a reporting period"
+    competency-question: "How many person-months have been used in each work package during CRP5 for project FAIR-IMPACT?"
     optional: {projectName: FAIR-IMPACT, wpName: "WP4 - Metadata and ontologies", from: "2022-06-01", to: "2023-05-31"}
   q03-travel-events:
-    description: "Travel events of the project with their dates, destination and total cost: all of them, those of a reporting period, or one event by its purpose"
+    competency-question: "What is the list of travel events for project FAIR-IMPACT?"
     optional: {projectName: FAIR-IMPACT, purpose: "Dagstuhl Workshop 2023", from: "2023-06-01", to: "2024-05-31"}
   q04-hourly-rate-by-employee-and-year:
-    description: "Hourly rate of each employee per year, or of one employee in one year"
+    competency-question: "What is the hourly rate for each employee?"
     optional: {empName: Employe2, from: "2022-01-01", to: "2022-12-31"}
   q05-employees-on-project:
-    description: "Employees who worked on the project, over its whole duration or in a reporting period"
+    competency-question: "Who is working on project FAIR-IMPACT?"
     optional: {projectName: FAIR-IMPACT, from: "2024-06-01", to: "2025-05-31"}
   q06-hours-by-employee:
-    description: "Timesheet entries and total hours logged per employee, or by one employee, over the whole project, a month, a year or a reporting period"
+    competency-question: "How many timesheet entries and total hours has Employee1 logged on FAIR-IMPACT?"
     optional: {projectName: FAIR-IMPACT, empName: Employe1, from: "2025-05-01", to: "2025-05-31"}
   q07-personnel-cost-of-employee-by-year:
-    description: "Gross salary, employer social contribution and annual personnel cost of an employee per year"
+    competency-question: "What is the annual personnel cost of Employee 1 in 2025?"
     optional: {empName: Employe1, from: "2025-01-01", to: "2025-12-31"}
   q08-productive-hours-of-employee:
-    description: "Annual and monthly productive hours of an employee"
+    competency-question: "What are the annual productive hours of Employee 3?"
     optional: {empName: Employe3}
   q09-reporting-periods-of-project:
-    description: "Reporting periods of the project with their start and end dates: all of them, the european (ERP) or coordinator (CRP) ones, or one period"
+    competency-question: "List all reporting periods of project FAIR-IMPACT."
     optional: {projectName: FAIR-IMPACT, period: ERP1, kind: ERP}
   q10-work-packages-of-project:
-    description: "Work packages of the project with their allocated person-months"
+    competency-question: "What is the list of work packages on project FAIR-IMPACT?"
     optional: {projectName: FAIR-IMPACT}
   q11-all-employees:
-    description: "List all employees of the company"
+    competency-question: "List all employees working for the company."
   q12-all-projects:
-    description: "List the European projects"
+    competency-question: "What is the list of projects?"
   q13-person-months-of-task:
-    description: "Person-months spent on a task, over the whole project or a reporting period"
+    competency-question: "How many person-months were spent in Task 1.1 during ERP1 for FAIR-IMPACT?"
     optional: {projectName: FAIR-IMPACT, taskName: "1.1", from: "2022-06-01", to: "2023-05-31"}
