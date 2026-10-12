@@ -36,9 +36,9 @@ Each profile contains `tbox.ttl`, source `csv/*.csv`, derived `abox.ttl`, `query
 
 This is the former direct-fallback path, now the only routing mode. The ontology provides the ETL schema, readable query labels and property values for parameter extraction.
 
-## Confidence threshold
+## Query and parameter cutoffs
 
-Set the top-level `min-confidence` in each profile's `query-catalog.yaml`:
+Set the query and parameter cutoffs independently in each profile's `query-catalog.yaml`:
 
 ```yaml
 min-confidence: 0.4             # Query selection
@@ -51,7 +51,7 @@ queries:
 
 Both values must be numbers between 0 and 1. `min-confidence` defaults to 0.4; omitted `parameter-min-confidence` inherits the query cutoff. Confidence equal to the applicable threshold is accepted. Explicitly named values and parsed dates do not require model confidence; a `none` choice is always rejected.
 
-After changing it, run `make PROFILE=profile/c3po eval`. No rebuild is needed. New evaluation rows store the threshold and compare with previous runs at the same pair of cutoffs.
+After changing either setting, run `make PROFILE=profile/c3po eval`. No rebuild is needed. New evaluation rows store both cutoffs and compare with previous runs at the same pair of cutoffs.
 
 To compare cutoffs using identical model responses, from the repository root:
 
@@ -62,7 +62,9 @@ set +a
 uv run python scripts/confidence-sweep.py --profile profile/c3po --profile profile/eu-expense-poc
 ```
 
-The script uses `OLLAYA_MODEL` from the environment. Add `--thresholds 0.2 0.4 0.6 0.8` to choose values. It runs the complete selection/parameter/execution path at each cutoff, reusing each identical model request within the experiment. Results, model responses and a summary are written to `results/confidence-sweep/`; profile files and the normal evaluation database are not changed. See the [Decider confidence experiment](results/confidence-sweep/REPORT.md) for measured results.
+The script uses `OLLAYA_MODEL` from the environment. Add `--thresholds 0.2 0.4 0.6 0.8` to choose values. It runs the complete selection/parameter/execution path at each cutoff, reusing each identical model request within the experiment. Results, model responses and a summary are written to `results/confidence-sweep/`; profile files and the normal evaluation database are not changed. These outputs are not committed.
+
+Measured with Decider on 2026-10-10 (shared cutoff): C3PO scores 26/29 at every cutoff from 0 to 0.5 and drops from 0.6 upwards; eu-expense-poc peaks at 74/87 at 0.3 against 73/87 at 0.4. The one-question gain is on the existing test set, not held-out data, so both profiles stay at 0.4.
 
 To run the independent query/parameter grid on saved responses:
 
@@ -72,7 +74,9 @@ uv run python scripts/confidence-sweep.py --profile profile/eu-expense-poc \
   --replay results/confidence-sweep --output results/confidence-grid
 ```
 
-Use the same model as the saved responses (`OLLAYA_MODEL=decider` for the recorded experiment). Replay makes no model calls and fails if an exact request is missing. Omit `--replay` for fresh model responses. Without `--parameter-thresholds`, the script tests matching query/parameter cutoffs as in the original sweep. See the [grid results](results/confidence-grid/REPORT.md).
+Use the same model as the saved responses (`OLLAYA_MODEL=decider` for the recorded experiment). Replay makes no model calls and fails if an exact request is missing. Omit `--replay` for fresh model responses. Without `--parameter-thresholds`, the script tests matching query/parameter cutoffs as in the original sweep.
+
+The eu-expense-poc grid (query 0.25–0.40 × parameter 0.40–0.60) scored 74/87 for query cutoffs 0.25–0.35 and 73/87 at 0.40, identical across parameter cutoffs: the saved responses contain only one model-based parameter choice, so parameter cutoffs need questions with implicit parameters before they can be compared.
 
 ## Commands
 

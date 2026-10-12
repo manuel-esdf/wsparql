@@ -9,8 +9,8 @@
 # `optional` ones leave their variable free when not found (no filter, the whole set); the values are the examples that
 # `make sparql` runs without ARGS.
 # Confidence cutoffs (0..1, inclusive): query selection, then model-based parameter choices.
-min-confidence: 0.4
-parameter-min-confidence: 0.4
+min-confidence: 0.4             # Query cutoff
+parameter-min-confidence: 0.4   # Parameter cutoff (model-based choices)
 parameters:
   projectName: project display name
   period: reporting period display name
